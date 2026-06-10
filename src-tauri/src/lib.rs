@@ -2,6 +2,7 @@
 // HashMeterAi — Rust library entry point
 // ==============================================================
 
+mod achievements;
 mod aggregate;
 mod model;
 mod persona;
@@ -53,6 +54,25 @@ fn get_persona(app: tauri::AppHandle) -> persona::Persona {
     persona::from_snapshot(&snap, &profile.name)
 }
 
+#[tauri::command]
+fn get_achievements(app: tauri::AppHandle) -> Vec<achievements::Achievement> {
+    let snap = scan::run();
+    let profile = get_profile(app.clone());
+    let list = achievements::compute(&snap, &profile.achievements);
+    // Persist newly unlocked achievements.
+    if let Ok(store) = app.store("profile.json") {
+        let mut p = profile;
+        for a in &list {
+            if a.unlocked {
+                p.achievements.insert(a.id.clone());
+            }
+        }
+        store.set("profile", serde_json::to_value(&p).unwrap_or_default());
+        let _ = store.save();
+    }
+    list
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -63,7 +83,8 @@ pub fn run() {
             scan_usage,
             get_profile,
             set_name,
-            get_persona
+            get_persona,
+            get_achievements
         ])
         .run(tauri::generate_context!())
         .expect("error while running HashMeterAi");

@@ -60,6 +60,7 @@ function hideAllViews() {
   g("persona-view").classList.add("hidden");
   g("achievements-view").classList.add("hidden");
   g("settings-view").classList.add("hidden");
+  g("share-view").classList.add("hidden");
 }
 
 function showModels() {

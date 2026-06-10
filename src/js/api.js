@@ -30,3 +30,10 @@ async function getPersona() {
     confidence: "low",
   };
 }
+
+async function getAchievements() {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    return await window.__TAURI__.core.invoke("get_achievements");
+  }
+  return [];
+}
