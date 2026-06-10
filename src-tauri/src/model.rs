@@ -28,6 +28,7 @@ pub struct UsageEvent {
 pub struct DayRecord {
     pub date: String,
     pub messages: u64,
+    #[serde(rename = "newIn")]
     pub new_in: u64,
     pub write: u64,
     pub read: u64,
