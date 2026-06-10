@@ -12,6 +12,8 @@ mod sources;
 mod store;
 
 use model::Snapshot;
+use tauri::Manager;
+use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_store::StoreExt;
 
 #[tauri::command]
@@ -73,6 +75,28 @@ fn get_achievements(app: tauri::AppHandle) -> Vec<achievements::Achievement> {
     list
 }
 
+#[tauri::command]
+fn set_pref(key: String, value: serde_json::Value, app: tauri::AppHandle) {
+    if let Ok(store) = app.store("profile.json") {
+        let mut p: store::Profile = store
+            .get("profile")
+            .and_then(|v| serde_json::from_value(v).ok())
+            .unwrap_or_default();
+        if key.as_str() == "reduced_motion" {
+            p.prefs.reduced_motion = value.as_bool().unwrap_or(false);
+        }
+        store.set("profile", serde_json::to_value(&p).unwrap_or_default());
+        let _ = store.save();
+    }
+}
+
+#[tauri::command]
+fn open_data_folder(app: tauri::AppHandle) {
+    if let Ok(path) = app.path().app_data_dir() {
+        let _ = app.opener().open_path(path.to_string_lossy().to_string(), None::<&str>);
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -84,7 +108,9 @@ pub fn run() {
             get_profile,
             set_name,
             get_persona,
-            get_achievements
+            get_achievements,
+            set_pref,
+            open_data_folder
         ])
         .run(tauri::generate_context!())
         .expect("error while running HashMeterAi");

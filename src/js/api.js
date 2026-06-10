@@ -37,3 +37,15 @@ async function getAchievements() {
   }
   return [];
 }
+
+async function setPref(key, value) {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    await window.__TAURI__.core.invoke("set_pref", { key, value });
+  }
+}
+
+async function openDataFolder() {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    await window.__TAURI__.core.invoke("open_data_folder");
+  }
+}

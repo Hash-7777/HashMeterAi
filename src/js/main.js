@@ -3,6 +3,7 @@ let CURRENT_SCREEN = "loading";
 async function boot() {
   try {
     const profile = await getProfile();
+    window.REDUCED_MOTION = profile.prefs && profile.prefs.reduced_motion;
     if (!profile.name) {
       CURRENT_SCREEN = "onboarding";
       initOnboarding();

@@ -149,6 +149,11 @@ function animate(el, to, fmt) {
     el.textContent = fmt(to);
     return;
   }
+  if (window.REDUCED_MOTION) {
+    el.textContent = fmt(to);
+    el.dataset.v = to;
+    return;
+  }
   const t0 = performance.now();
   requestAnimationFrame(function step(t) {
     const k = Math.min(1, (t - t0) / 650);
@@ -171,6 +176,29 @@ function srcCost(name) {
 function render() {
   if (!RAW) return;
   const days = selDays();
+
+  // Empty state
+  if (!days.length) {
+    g("h-processed").textContent = "0";
+    g("h-processed-sub").textContent = "No usage yet";
+    g("h-focus").textContent = "0m";
+    g("h-focus-sub").textContent = "Start coding with AI";
+    g("h-cost").textContent = "$0.00";
+    g("t-sessions").textContent = "0";
+    g("t-messages").textContent = "0";
+    g("t-tokens").textContent = "0";
+    g("t-days").textContent = "0";
+    g("t-cur").textContent = "0d";
+    g("t-long").textContent = "0d";
+    g("t-peak").textContent = "\u2014";
+    g("t-fav").textContent = "\u2014";
+    g("foot").innerHTML = '<span style="color:var(--mut)">No usage yet \u2014 start coding with any AI tool and check back.</span>';
+    g("srcrow").innerHTML = "";
+    g("heat").innerHTML = "";
+    g("mlist").innerHTML = "";
+    return;
+  }
+
   const a = agg(days);
   const st = streaks(days);
 

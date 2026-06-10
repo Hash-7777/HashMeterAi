@@ -2,6 +2,7 @@ async function loadSettings() {
   try {
     const p = await getProfile();
     g("set-name").value = p.name || "";
+    g("set-reduced").checked = p.prefs && p.prefs.reduced_motion;
   } catch (e) {
     console.error("settings load error", e);
   }
@@ -11,6 +12,16 @@ g("set-save-name").onclick = async function () {
   const name = g("set-name").value.trim();
   if (name.length < 1 || name.length > 40) return;
   await setName(name);
+  g("set-save-name").textContent = "Saved";
+  setTimeout(() => g("set-save-name").textContent = "Save name", 1500);
+};
+
+g("set-reduced").onchange = async function () {
+  await setPref("reduced_motion", this.checked);
+};
+
+g("set-open-data").onclick = async function () {
+  await openDataFolder();
 };
 
 g("set-back").onclick = function () {
