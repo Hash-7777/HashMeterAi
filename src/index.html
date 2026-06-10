@@ -25,9 +25,9 @@
 
 <!-- DASHBOARD -->
 <div class="wrap hidden" id="dashboard">
-  <div class="head">
-    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer"></div>
+  <div class="head" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer" data-tauri-drag-region></div>
     <button id="btn-share" style="font:inherit;font-size:12px;font-weight:700;color:var(--pk);background:rgba(253,128,46,.13);border:1px solid var(--line-pk);border-radius:9px;padding:8px 16px;cursor:pointer">Share</button>
     <span class="dot"></span>
     <div class="sync" id="sync">syncing...</div>
@@ -107,9 +107,9 @@
 
 <!-- CALENDAR VIEW -->
 <div class="wrap hidden" id="calendar-view">
-  <div class="head">
-    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer"></div>
+  <div class="head" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer" data-tauri-drag-region></div>
     <button class="seg ghost" id="cal-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
   </div>
   <div class="card" style="margin-top:12px"><h3 id="cal-month">Activity Calendar</h3>
@@ -124,9 +124,9 @@
 
 <!-- PERSONA VIEW -->
 <div class="wrap hidden" id="persona-view">
-  <div class="head">
-    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer"></div>
+  <div class="head" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer" data-tauri-drag-region></div>
     <button class="seg ghost" id="persona-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
   </div>
   <div class="card" style="margin-top:12px;text-align:center;padding:36px 28px">
@@ -140,9 +140,9 @@
 
 <!-- ACHIEVEMENTS VIEW -->
 <div class="wrap hidden" id="achievements-view">
-  <div class="head">
-    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer"></div>
+  <div class="head" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer" data-tauri-drag-region></div>
     <button class="seg ghost" id="ach-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
   </div>
   <div class="card" style="margin-top:12px"><h3 id="ach-header">Achievements</h3>
@@ -152,9 +152,9 @@
 
 <!-- SETTINGS VIEW -->
 <div class="wrap hidden" id="settings-view">
-  <div class="head">
-    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer"></div>
+  <div class="head" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer" data-tauri-drag-region></div>
     <button class="seg ghost" id="set-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
   </div>
   <div class="card" style="margin-top:12px">
@@ -181,9 +181,9 @@
 
 <!-- SHARE PREVIEW -->
 <div class="wrap hidden" id="share-view">
-  <div class="head">
-    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer"></div>
+  <div class="head" data-tauri-drag-region>
+    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer" data-tauri-drag-region></div>
     <button class="seg ghost" id="share-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
   </div>
   <div class="card" style="margin-top:12px;text-align:center">
@@ -199,6 +199,7 @@
 
 <div class="tip" id="tip"></div>
 
+<script src="js/window-state.js"></script>
 <script src="js/format.js"></script>
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
