@@ -1,0 +1,11 @@
+{
+  "name": "hashmeterai",
+  "version": "0.1.0",
+  "description": "HashMeterAi — local-first AI coding token meter",
+  "scripts": {
+    "tauri": "tauri"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2"
+  }
+}
