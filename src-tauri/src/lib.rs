@@ -32,8 +32,14 @@ fn get_profile(app: tauri::AppHandle) -> store::Profile {
 #[tauri::command]
 fn set_name(name: String, app: tauri::AppHandle) {
     if let Ok(store) = app.store("profile.json") {
-        let mut p = get_profile(app);
+        let mut p: store::Profile = store
+            .get("profile")
+            .and_then(|v| serde_json::from_value(v).ok())
+            .unwrap_or_default();
         p.name = name;
+        if p.created_at.is_none() {
+            p.created_at = Some(chrono::Local::now().to_rfc3339());
+        }
         store.set("profile", serde_json::to_value(&p).unwrap_or_default());
         let _ = store.save();
     }

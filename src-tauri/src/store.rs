@@ -2,20 +2,38 @@
 // HashMeterAi — Persistent store (tauri-plugin-store)
 //
 // Holds: name, prefs, unlocked achievements.
-// Minimal stub for Phase 0; expanded in Phase 1+.
 // ==============================================================
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Profile {
     pub name: String,
     pub created_at: Option<String>,
     pub prefs: Prefs,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+impl Default for Profile {
+    fn default() -> Self {
+        Self {
+            name: String::new(),
+            created_at: None,
+            prefs: Prefs::default(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Prefs {
     pub reduced_motion: bool,
     pub default_range: String,
+}
+
+impl Default for Prefs {
+    fn default() -> Self {
+        Self {
+            reduced_motion: false,
+            default_range: "all".to_string(),
+        }
+    }
 }
