@@ -80,6 +80,7 @@ function mergedDays(names) {
       m.read += r.read;
       m.out += r.out;
       m.cost += r.cost || 0;
+      m.focus_sec = (m.focus_sec || 0) + (r.focus_sec || 0);
       r.sessions.forEach(s => m.sessions.add(n + ":" + s));
       for (let h = 0; h < 24; h++) m.hours[h] += r.hours[h];
       for (const [k, v] of Object.entries(r.models)) m.models[k] = (m.models[k] || 0) + v;
@@ -105,6 +106,7 @@ function agg(days) {
     read: 0,
     out: 0,
     cost: 0,
+    focus_sec: 0,
     sessions: new Set(),
     hours: Array(24).fill(0),
     models: {},
@@ -116,6 +118,7 @@ function agg(days) {
     a.read += r.read;
     a.out += r.out;
     a.cost += r.cost || 0;
+    a.focus_sec += r.focus_sec || 0;
     r.sessions.forEach(s => a.sessions.add(s));
     for (let h = 0; h < 24; h++) a.hours[h] += r.hours[h];
     for (const [k, v] of Object.entries(r.models)) a.models[k] = (a.models[k] || 0) + v;
@@ -170,6 +173,18 @@ function render() {
   const days = selDays();
   const a = agg(days);
   const st = streaks(days);
+
+  // Hero stats
+  const processed = a.newIn + a.write + a.out;
+  animate(g("h-processed"), processed, human);
+  g("h-processed-sub").textContent = days.length ? days[0].date + " \u2192 " + days[days.length - 1].date : "";
+
+  const fh = Math.floor(a.focus_sec / 3600);
+  const fm = Math.floor((a.focus_sec % 3600) / 60);
+  g("h-focus").textContent = fh > 0 ? fh + "h " + fm + "m" : fm + "m";
+  g("h-focus-sub").textContent = a.focus_sec > 0 ? "focused work time" : "no focus data";
+
+  animate(g("h-cost"), Math.round(a.cost * 100), function (v) { return "$" + (v / 100).toFixed(2); });
 
   animate(g("t-sessions"), a.sessions.size, commas);
   animate(g("t-messages"), a.messages, commas);
@@ -365,35 +380,7 @@ setInterval(function () {
   g("sync").textContent = "\u25cf live \u00b7 synced " + s + "s ago";
 }, 1000);
 
-g("src").onclick = function (e) {
-  const b = e.target.closest("button");
-  if (!b) return;
-  SOURCE = b.dataset.s;
-  syncSrcButtons();
-  render();
-};
-
-g("tab").onclick = function (e) {
-  const b = e.target.closest("button");
-  if (!b) return;
-  TAB = b.dataset.t;
-  for (const x of e.currentTarget.children) x.classList.toggle("on", x === b);
-  g("overview").classList.toggle("hidden", TAB !== "overview");
-  g("models").classList.toggle("hidden", TAB !== "models");
-};
-
-g("range").onclick = function (e) {
-  const b = e.target.closest("button");
-  if (!b) return;
-  RANGE = b.dataset.r;
-  for (const x of e.currentTarget.children) x.classList.toggle("on", x === b);
-  render();
-};
-
 g("tile-tokens").onclick = function () {
   TOKMODE = TOKMODE === "billed" ? "real" : TOKMODE === "real" ? "processed" : "billed";
   render();
 };
-
-load();
-setInterval(load, 12000);
