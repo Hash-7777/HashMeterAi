@@ -36,6 +36,6 @@ async function submitName() {
   setTimeout(function () {
     host.classList.add("hidden");
     host.style.opacity = "";
-    showDashboard();
+    showApp();
   }, 350);
 }

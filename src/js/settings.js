@@ -30,11 +30,3 @@ g("set-reset").onclick = async function () {
   await resetProfile();
   window.location.reload();
 };
-
-g("set-back").onclick = function () {
-  g("settings-view").classList.add("hidden");
-  g("dashboard").classList.remove("hidden");
-  CURRENT_SCREEN = "dashboard";
-  TAB = "overview";
-  updateTabButtons();
-};

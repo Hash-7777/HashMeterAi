@@ -23,179 +23,155 @@
   </div>
 </div>
 
-<!-- DASHBOARD -->
-<div class="wrap hidden" id="dashboard">
-  <div class="head" data-tauri-drag-region>
-    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer" data-tauri-drag-region></div>
-    <button id="btn-share" style="font:inherit;font-size:12px;font-weight:700;color:var(--pk);background:rgba(253,128,46,.13);border:1px solid var(--line-pk);border-radius:9px;padding:8px 16px;cursor:pointer">Share</button>
-    <button id="btn-sync" style="font:inherit;font-size:12px;font-weight:600;color:var(--mut);background:none;border:1px solid var(--line);border-radius:9px;padding:8px 14px;cursor:pointer;margin-left:4px">Sync now</button>
-    <span class="dot"></span>
-    <div class="sync" id="sync">syncing...</div>
-  </div>
-
-  <div class="bars">
-    <div class="seg" id="src">
-      <button data-s="all" class="on">All tools</button>
-      <button data-s="claude">Claude</button>
-      <button data-s="codex">Codex</button>
-      <button data-s="kimi">Kimi</button>
-      <button data-s="continue">Continue</button>
-      <button data-s="cline">Cline</button>
+<!-- APP SHELL -->
+<div class="wrap hidden" id="app">
+  <!-- Toolbar -->
+  <div class="toolbar" data-tauri-drag-region>
+    <div class="toolbar-left" data-tauri-drag-region>
+      <img src="assets/logo.png" class="toolbar-logo" alt="">
+      <span class="toolbar-title" data-tauri-drag-region>HashMeter<b>Ai</b></span>
     </div>
-    <div class="spacer"></div>
-    <div class="seg ghost" id="tab">
-      <button data-t="overview" class="on">Overview</button>
-      <button data-t="models">Models</button>
-      <button data-t="calendar">Calendar</button>
-      <button data-t="persona">Persona</button>
-      <button data-t="achievements">Badges</button>
-      <button data-t="settings">Settings</button>
+    <div class="toolbar-center" data-tauri-drag-region>
+      <button class="nav-tab on" data-view="dashboard">Dashboard</button>
+      <button class="nav-tab" data-view="persona">Persona</button>
+      <button class="nav-tab" data-view="achievements">Achievements</button>
+      <button class="nav-tab" data-view="settings">Settings</button>
     </div>
-    <div class="seg ghost" id="range">
-      <button data-r="all" class="on">All</button>
-      <button data-r="30">30d</button>
-      <button data-r="7">7d</button>
+    <div class="toolbar-right">
+      <button id="btn-sync" class="toolbar-btn">Sync</button>
+      <button id="btn-share" class="toolbar-btn primary">Share</button>
+      <span class="sync-status" id="sync">syncing...</span>
     </div>
   </div>
 
-  <div id="overview">
-    <!-- Hero stats row -->
-    <div class="hero-row">
-      <div class="hero-tile">
-        <div class="hero-val" id="h-processed">--</div>
-        <div class="hero-lab">Tokens processed</div>
-        <div class="hero-sub" id="h-processed-sub"></div>
+  <!-- Content -->
+  <div class="content" id="content">
+
+    <!-- DASHBOARD VIEW -->
+    <div id="view-dashboard">
+      <div class="bars">
+        <div class="seg" id="tab">
+          <button data-t="overview" class="on">Overview</button>
+          <button data-t="models">Models</button>
+        </div>
+        <div class="seg" id="src">
+          <button data-s="all" class="on">All tools</button>
+          <button data-s="claude">Claude</button>
+          <button data-s="codex">Codex</button>
+          <button data-s="kimi">Kimi</button>
+          <button data-s="hashcortx">HashCortX</button>
+          <button data-s="cline">Cline</button>
+        </div>
+        <div class="spacer"></div>
+        <div class="seg ghost" id="range">
+          <button data-r="all" class="on">All</button>
+          <button data-r="30">30d</button>
+          <button data-r="7">7d</button>
+        </div>
       </div>
-      <div class="hero-tile">
-        <div class="hero-val" id="h-focus">--</div>
-        <div class="hero-lab">Focus time</div>
-        <div class="hero-sub" id="h-focus-sub"></div>
+
+      <div id="overview">
+        <div class="hero-row">
+          <div class="hero-tile">
+            <div class="hero-val" id="h-processed">--</div>
+            <div class="hero-lab">Tokens processed</div>
+            <div class="hero-sub" id="h-processed-sub"></div>
+          </div>
+          <div class="hero-tile">
+            <div class="hero-val" id="h-focus">--</div>
+            <div class="hero-lab">Total AI use time</div>
+            <div class="hero-sub" id="h-focus-sub"></div>
+          </div>
+          <div class="hero-tile">
+            <div class="hero-val" id="h-cost">--</div>
+            <div class="hero-lab">Est. cost</div>
+            <div class="hero-sub">all time</div>
+          </div>
+        </div>
+
+        <div class="grid">
+          <div class="tile"><div class="lab">Sessions</div><div class="val" id="t-sessions">--</div><div class="sub"></div></div>
+          <div class="tile"><div class="lab">Messages</div><div class="val" id="t-messages">--</div><div class="sub" id="s-messages"></div></div>
+          <div class="tile"><div class="lab">Active days</div><div class="val" id="t-days">--</div><div class="sub" id="s-days"></div></div>
+          <div class="tile"><div class="lab">Current streak</div><div class="val" id="t-cur">--</div><div class="sub"></div></div>
+          <div class="tile"><div class="lab">Longest streak</div><div class="val" id="t-long">--</div><div class="sub"></div></div>
+          <div class="tile"><div class="lab">Peak hour</div><div class="val" id="t-peak">--</div><div class="sub" id="s-peak"></div></div>
+          <div class="tile"><div class="lab">Favorite model</div><div class="val" id="t-fav" style="font-size:21px;margin-top:13px">--</div><div class="sub" id="s-fav"></div></div>
+        </div>
+
+        <div class="srcrow" id="srcrow"></div>
+
+        <div class="card"><h3>Activity Calendar</h3>
+          <div class="cal-grid" id="cal-grid"></div>
+          <div class="legend"><span>None</span>
+            <i style="background:rgba(255,255,255,.06)"></i><i style="background:#5c3a22"></i>
+            <i style="background:#b15d23"></i><i style="background:#fd802e"></i>
+            <i style="background:#ffb27a;box-shadow:0 0 8px var(--pk)"></i><span>Peak</span>
+            <span style="margin-left:auto" id="cal-month"></span>
+          </div>
+        </div>
+
+        <div class="foot" id="foot"></div>
       </div>
-      <div class="hero-tile">
-        <div class="hero-val" id="h-cost">--</div>
-        <div class="hero-lab">Est. cost</div>
-        <div class="hero-sub">all time</div>
+
+      <div class="card hidden" id="models-card"><h3>Token share by model - billed</h3><div id="mlist"></div></div>
+    </div>
+
+    <!-- PERSONA VIEW -->
+    <div id="view-persona" class="hidden">
+      <div class="persona-wrap">
+        <div class="persona-title" id="p-title">--</div>
+        <div class="persona-subtitle" id="p-subtitle">--</div>
+        <div class="persona-confidence" id="p-confidence">--</div>
+        <p class="persona-desc" id="p-desc">--</p>
+        <div class="persona-traits" id="p-traits"></div>
       </div>
     </div>
 
-    <div class="grid">
-      <div class="tile"><div class="lab">Sessions</div><div class="val" id="t-sessions">--</div><div class="sub"></div></div>
-      <div class="tile"><div class="lab">Messages</div><div class="val" id="t-messages">--</div><div class="sub" id="s-messages"></div></div>
-      <div class="tile click" id="tile-tokens"><div class="lab" id="l-tokens">Tokens processed</div><div class="val" id="t-tokens">--</div><div class="sub" id="s-tokens">new - no re-reads</div></div>
-      <div class="tile"><div class="lab">Active days</div><div class="val" id="t-days">--</div><div class="sub" id="s-days"></div></div>
-      <div class="tile"><div class="lab">Current streak</div><div class="val" id="t-cur">--</div><div class="sub"></div></div>
-      <div class="tile"><div class="lab">Longest streak</div><div class="val" id="t-long">--</div><div class="sub"></div></div>
-      <div class="tile"><div class="lab">Peak hour</div><div class="val" id="t-peak">--</div><div class="sub" id="s-peak"></div></div>
-      <div class="tile"><div class="lab">Favorite model</div><div class="val" id="t-fav" style="font-size:21px;margin-top:13px">--</div><div class="sub" id="s-fav"></div></div>
+    <!-- ACHIEVEMENTS VIEW -->
+    <div id="view-achievements" class="hidden">
+      <div class="ach-header" id="ach-header">Achievements</div>
+      <div class="ach-grid" id="ach-grid"></div>
     </div>
 
-    <div class="srcrow" id="srcrow"></div>
-
-    <div class="card"><h3>Activity - daily processed tokens</h3>
-      <div id="heat"></div>
-      <div class="legend"><span>Less</span>
-        <i style="background:rgba(255,255,255,.06)"></i><i style="background:#5c3a22"></i>
-        <i style="background:#b15d23"></i><i style="background:#fd802e"></i>
-        <i style="background:#ffb27a;box-shadow:0 0 8px var(--pk)"></i><span>More</span>
-        <span style="margin-left:auto" id="heat-range"></span></div>
-    </div>
-    <div class="foot" id="foot"></div>
-  </div>
-
-  <div id="models" class="card hidden"><h3>Token share by model - billed</h3><div id="mlist"></div></div>
-</div>
-
-<!-- CALENDAR VIEW -->
-<div class="wrap hidden" id="calendar-view">
-  <div class="head" data-tauri-drag-region>
-    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer" data-tauri-drag-region></div>
-    <button class="seg ghost" id="cal-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
-  </div>
-  <div class="card" style="margin-top:12px"><h3 id="cal-month">Activity Calendar</h3>
-    <div class="cal-grid" id="cal-grid"></div>
-    <div class="legend" style="margin-top:12px"><span>None</span>
-      <i style="background:rgba(255,255,255,.06)"></i><i style="background:#5c3a22"></i>
-      <i style="background:#b15d23"></i><i style="background:#fd802e"></i>
-      <i style="background:#ffb27a;box-shadow:0 0 8px var(--pk)"></i><span>Peak</span>
-    </div>
-  </div>
-</div>
-
-<!-- PERSONA VIEW -->
-<div class="wrap hidden" id="persona-view">
-  <div class="head" data-tauri-drag-region>
-    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer" data-tauri-drag-region></div>
-    <button class="seg ghost" id="persona-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
-  </div>
-  <div class="card" style="margin-top:12px;text-align:center;padding:36px 28px">
-    <div id="p-title" style="font-size:32px;font-weight:700;color:var(--pk);line-height:1.2">--</div>
-    <div id="p-subtitle" style="font-size:13px;color:var(--pk2);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:10px">--</div>
-    <div id="p-confidence" style="font-size:11px;color:var(--mut);margin-top:8px;font-family:var(--mono)">--</div>
-    <p id="p-desc" style="font-size:14px;color:var(--txt);margin-top:22px;line-height:1.7;max-width:640px;margin-left:auto;margin-right:auto">--</p>
-    <div id="p-traits" style="margin-top:28px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto"></div>
-  </div>
-</div>
-
-<!-- ACHIEVEMENTS VIEW -->
-<div class="wrap hidden" id="achievements-view">
-  <div class="head" data-tauri-drag-region>
-    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer" data-tauri-drag-region></div>
-    <button class="seg ghost" id="ach-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
-  </div>
-  <div class="card" style="margin-top:12px"><h3 id="ach-header">Achievements</h3>
-    <div id="ach-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px"></div>
-  </div>
-</div>
-
-<!-- SETTINGS VIEW -->
-<div class="wrap hidden" id="settings-view">
-  <div class="head" data-tauri-drag-region>
-    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer" data-tauri-drag-region></div>
-    <button class="seg ghost" id="set-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
-  </div>
-  <div class="card" style="margin-top:12px">
-    <h3>Settings</h3>
-    <div style="margin-top:16px;display:flex;flex-direction:column;gap:18px;max-width:480px">
-      <div>
-        <div class="lab" style="margin-bottom:6px">Display name</div>
-        <input type="text" id="set-name" maxlength="40" style="width:100%;padding:10px 12px;font:inherit;font-size:14px;color:var(--txt);background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:10px;outline:none">
-        <button class="onboarding-btn" id="set-save-name" style="margin-top:8px;width:auto;padding:8px 18px;font-size:12px">Save name</button>
+    <!-- SETTINGS VIEW -->
+    <div id="view-settings" class="hidden">
+      <div class="settings-wrap">
+        <h3>Settings</h3>
+        <div class="settings-group">
+          <div class="lab">Display name</div>
+          <input type="text" id="set-name" maxlength="40" class="settings-input" placeholder="Your name">
+          <button class="onboarding-btn" id="set-save-name" style="margin-top:8px;width:auto;padding:8px 18px;font-size:12px">Save name</button>
+        </div>
+        <div class="settings-group" style="display:flex;align-items:center;gap:10px">
+          <input type="checkbox" id="set-reduced" style="accent-color:var(--pk)">
+          <label for="set-reduced" style="font-size:13px;color:var(--mut)">Reduced motion</label>
+        </div>
+        <div class="settings-group" style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="seg ghost" id="set-open-data">Open data folder</button>
+          <button class="seg ghost" id="set-reset" style="color:var(--warn)">Reset app</button>
+        </div>
+        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-top:8px">
+          <b style="color:var(--txt)">Security</b><br>
+          HashMeterAi reads only local usage metadata. No network. No telemetry. No message content. Data stays on this device.
+        </div>
+        <div style="font-size:11px;color:var(--mut);font-family:var(--mono);margin-top:8px">Version 0.1.0</div>
       </div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <input type="checkbox" id="set-reduced" style="accent-color:var(--pk)">
-        <label for="set-reduced" style="font-size:13px;color:var(--mut)">Reduced motion</label>
-      </div>
-      <button class="seg ghost" id="set-open-data" style="padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:12px;color:var(--pk)">Open data folder</button>
-      <button class="seg ghost" id="set-reset" style="padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:12px;color:var(--warn)">Reset app</button>
-      <div style="font-size:13px;color:var(--mut);line-height:1.6">
-        <b style="color:var(--txt)">Security</b><br>
-        HashMeterAi reads only local usage metadata. No network. No telemetry. No message content. Data stays on this device.
-      </div>
-      <div style="font-size:11px;color:var(--mut);font-family:var(--mono)">Version 0.1.0</div>
     </div>
-  </div>
-</div>
 
-<!-- SHARE PREVIEW -->
-<div class="wrap hidden" id="share-view">
-  <div class="head" data-tauri-drag-region>
-    <div class="brand" data-tauri-drag-region><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
-    <div class="spacer" data-tauri-drag-region></div>
-    <button class="seg ghost" id="share-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
-  </div>
-  <div class="card" style="margin-top:12px;text-align:center">
-    <h3>Share your AI usage</h3>
-    <canvas id="share-canvas" width="1200" height="630" style="max-width:100%;height:auto;border-radius:12px;margin-top:16px;border:1px solid var(--line)"></canvas>
-    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center">
-      <button class="onboarding-btn" id="share-copy" style="width:auto;padding:10px 22px;font-size:13px">Copy image</button>
-      <button class="onboarding-btn" id="share-save" style="width:auto;padding:10px 22px;font-size:13px;background:var(--ch);box-shadow:none">Save PNG</button>
+    <!-- SHARE VIEW -->
+    <div id="view-share" class="hidden">
+      <div class="share-wrap">
+        <h3>Share your AI usage</h3>
+        <canvas id="share-canvas" width="1200" height="630" style="max-width:100%;height:auto;border-radius:12px;margin-top:16px;border:1px solid var(--line)"></canvas>
+        <div style="margin-top:16px;display:flex;gap:10px;justify-content:center">
+          <button class="onboarding-btn" id="share-copy" style="width:auto;padding:10px 22px;font-size:13px">Copy image</button>
+          <button class="onboarding-btn" id="share-save" style="width:auto;padding:10px 22px;font-size:13px;background:var(--ch);box-shadow:none">Save PNG</button>
+        </div>
+        <p style="font-size:11px;color:var(--mut);margin-top:10px">What is shown: name, persona title, estimated cost, processed tokens, streak, total use time, tool count, and top badge.</p>
+      </div>
     </div>
-    <p style="font-size:11px;color:var(--mut);margin-top:10px">What is shown: name, persona title, estimated cost, processed tokens, streak, focus time, tool count, and top badge.</p>
+
   </div>
 </div>
 

@@ -49,7 +49,6 @@ async function renderShareCard() {
     console.error("share data error", e);
   }
 
-  const name = (persona && persona.title !== "Just getting started") ? persona.title.split(" \u00b7 ")[0] : "You";
   const ptitle = persona ? persona.title : "AI Explorer";
 
   // Headline
@@ -70,13 +69,13 @@ async function renderShareCard() {
       if (!tool.present) continue;
       tools++;
       for (const d of tool.days) {
-        processed += d.new_in + d.write + d.out;
+        processed += d.newIn + d.write + d.out;
         cost += d.cost || 0;
         sessions += d.sessions.length;
         focus += d.focus_sec || 0;
         days++;
         if (!allDays[d.date]) allDays[d.date] = 0;
-        allDays[d.date] += d.new_in + d.write + d.out;
+        allDays[d.date] += d.newIn + d.write + d.out;
       }
     }
     // streak
@@ -101,7 +100,7 @@ async function renderShareCard() {
     [money(cost), "Est. cost"],
     [human(processed), "Processed"],
     [streak + "d", "Best streak"],
-    [focusStr, "Avg focus/day"],
+    [focusStr, "Avg use/day"],
   ];
 
   let sx = 48;
@@ -141,20 +140,8 @@ async function renderShareCard() {
   ctx.fillText("Made with HashMeterAi  \u00b7  local & private", 48, 610);
 }
 
-async function showShare() {
-  hideAllViews();
-  g("share-view").classList.remove("hidden");
-  await renderShareCard();
-}
-
-g("btn-share").onclick = showShare;
-
-g("share-back").onclick = function () {
-  g("share-view").classList.add("hidden");
-  g("dashboard").classList.remove("hidden");
-  CURRENT_SCREEN = "dashboard";
-  TAB = "overview";
-  updateTabButtons();
+g("btn-share").onclick = function () {
+  showView("share");
 };
 
 g("share-copy").onclick = async function () {

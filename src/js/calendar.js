@@ -59,9 +59,11 @@ function renderCalendar() {
   const dim = daysInMonth(y, m);
   const fws = firstWeekday(y, m);
 
-  g("cal-month").textContent = monthName(m) + " " + y;
+  const monthEl = g("cal-month");
+  if (monthEl) monthEl.textContent = monthName(m) + " " + y;
 
   const grid = g("cal-grid");
+  if (!grid) return;
   grid.innerHTML = "";
 
   const dow = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -89,17 +91,8 @@ function renderCalendar() {
     if (lvl === 4) el.style.boxShadow = "0 0 8px var(--pk)";
     el.innerHTML = "<div>" + d + "</div>" + (tok > 0 ? '<div class="cal-val">' + human(tok) + "</div>" : "");
     if (rec) {
-      el.title = ds + " \u00b7 " + human(tok) + " tok \u00b7 " + duration(rec.focus_sec || 0) + " focus";
+      el.title = ds + " \u00b7 " + human(tok) + " tok \u00b7 " + duration(rec.focus_sec || 0) + " use time";
     }
     grid.appendChild(el);
   }
 }
-
-// Back button
-g("cal-back").onclick = function () {
-  g("calendar-view").classList.add("hidden");
-  g("dashboard").classList.remove("hidden");
-  CURRENT_SCREEN = "dashboard";
-  TAB = "overview";
-  updateTabButtons();
-};
