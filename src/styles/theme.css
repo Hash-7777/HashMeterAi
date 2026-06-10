@@ -1,0 +1,20 @@
+:root {
+  --pk:    #FD802E;
+  --pk2:   #ff9d57;
+  --pk-dim:#c2611f;
+  --ch:    #1b323f;
+  --ch-d:  #0e1a22;
+  --bg:    #05090d;
+  --panel: #142730;
+  --panel2:#0f2028;
+  --line:  rgba(255,255,255,.07);
+  --line-pk:rgba(253,128,46,.30);
+  --txt:   #eef4f7;
+  --mut:   #86a0ad;
+  --ok:    #54ffc4;
+  --warn:  #ffd27a;
+  --font:  -apple-system,BlinkMacSystemFont,'Inter','Segoe UI',sans-serif;
+  --mono:  'SF Mono',ui-monospace,'JetBrains Mono',Menlo,monospace;
+  --r:     14px;
+  --r-lg:  18px;
+}

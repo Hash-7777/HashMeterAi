@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HashMeterAi</title>
+<link rel="stylesheet" href="styles/theme.css">
+<link rel="stylesheet" href="styles/layout.css">
+<link rel="stylesheet" href="styles/components.css">
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer"></div>
+    <span class="dot"></span>
+    <div class="sync" id="sync">syncing...</div>
+  </div>
+
+  <div class="bars">
+    <div class="seg" id="src">
+      <button data-s="all" class="on">All tools</button>
+      <button data-s="claude">Claude</button>
+      <button data-s="codex">Codex</button>
+      <button data-s="kimi">Kimi</button>
+      <button data-s="continue">Continue</button>
+      <button data-s="cline">Cline</button>
+    </div>
+    <div class="spacer"></div>
+    <div class="seg ghost" id="tab"><button data-t="overview" class="on">Overview</button><button data-t="models">Models</button></div>
+    <div class="seg ghost" id="range"><button data-r="all" class="on">All</button><button data-r="30">30d</button><button data-r="7">7d</button></div>
+  </div>
+
+  <div id="overview">
+    <div class="grid">
+      <div class="tile"><div class="lab">Sessions</div><div class="val" id="t-sessions">--</div><div class="sub"></div></div>
+      <div class="tile"><div class="lab">Messages</div><div class="val" id="t-messages">--</div><div class="sub" id="s-messages"></div></div>
+      <div class="tile click" id="tile-tokens"><div class="lab" id="l-tokens">Tokens processed</div><div class="val" id="t-tokens">--</div><div class="sub" id="s-tokens">new - no re-reads</div></div>
+      <div class="tile"><div class="lab">Active days</div><div class="val" id="t-days">--</div><div class="sub" id="s-days"></div></div>
+      <div class="tile"><div class="lab">Current streak</div><div class="val" id="t-cur">--</div><div class="sub"></div></div>
+      <div class="tile"><div class="lab">Longest streak</div><div class="val" id="t-long">--</div><div class="sub"></div></div>
+      <div class="tile"><div class="lab">Peak hour</div><div class="val" id="t-peak">--</div><div class="sub" id="s-peak"></div></div>
+      <div class="tile"><div class="lab">Favorite model</div><div class="val" id="t-fav" style="font-size:21px;margin-top:13px">--</div><div class="sub" id="s-fav"></div></div>
+    </div>
+
+    <div class="srcrow" id="srcrow"></div>
+
+    <div class="card"><h3>Activity - daily processed tokens</h3>
+      <div id="heat"></div>
+      <div class="legend"><span>Less</span>
+        <i style="background:rgba(255,255,255,.06)"></i><i style="background:#5c3a22"></i>
+        <i style="background:#b15d23"></i><i style="background:#fd802e"></i>
+        <i style="background:#ffb27a;box-shadow:0 0 8px var(--pk)"></i><span>More</span>
+        <span style="margin-left:auto" id="heat-range"></span></div>
+    </div>
+    <div class="foot" id="foot"></div>
+  </div>
+
+  <div id="models" class="card hidden"><h3>Token share by model - billed</h3><div id="mlist"></div></div>
+</div>
+<div class="tip" id="tip"></div>
+
+<script src="js/format.js"></script>
+<script src="js/api.js"></script>
+<script src="js/dashboard.js"></script>
+</body>
+</html>
