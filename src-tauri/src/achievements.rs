@@ -262,11 +262,6 @@ fn compute_stats(snap: &Snapshot) -> Stats {
             s.billed += d.new_in + d.write + d.read + d.out;
             s.cache_read += d.read;
             s.cost += d.cost;
-            s.active_days += 1;
-
-            if proc > s.max_day_processed {
-                s.max_day_processed = proc;
-            }
 
             let agg = all_days.entry(d.date.clone()).or_default();
             agg.processed += proc;
@@ -292,6 +287,9 @@ fn compute_stats(snap: &Snapshot) -> Stats {
         s.peak_hour = h as u8;
         s.peak_events = *v;
     }
+
+    s.active_days = all_days.len() as u64;
+    s.max_day_processed = all_days.values().map(|d| d.processed).max().unwrap_or(0);
 
     let (long, cur) = streaks(&all_days);
     s.longest_streak = long;

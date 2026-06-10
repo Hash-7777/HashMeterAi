@@ -131,12 +131,8 @@ fn compute_stats(snap: &Snapshot) -> Stats {
             s.cost += d.cost;
             s.events += d.messages;
             s.sessions.extend(d.sessions.iter().cloned());
-            s.active_days += 1;
 
             let day_proc = d.new_in + d.write + d.out;
-            if day_proc > s.max_day_processed {
-                s.max_day_processed = day_proc;
-            }
 
             let agg = all_days.entry(d.date.clone()).or_default();
             agg.processed += day_proc;
@@ -161,6 +157,9 @@ fn compute_stats(snap: &Snapshot) -> Stats {
         .max_by_key(|(_, v)| *v)
         .map(|(i, _)| i as u8)
         .unwrap_or(0);
+
+    s.active_days = all_days.len() as u64;
+    s.max_day_processed = all_days.values().map(|d| d.processed).max().unwrap_or(0);
 
     let (long, cur) = streaks(&all_days);
     s.longest_streak = long;
