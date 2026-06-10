@@ -97,6 +97,14 @@ fn open_data_folder(app: tauri::AppHandle) {
     }
 }
 
+#[tauri::command]
+fn reset_profile(app: tauri::AppHandle) {
+    if let Ok(store) = app.store("profile.json") {
+        store.set("profile", serde_json::to_value(store::Profile::default()).unwrap_or_default());
+        let _ = store.save();
+    }
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -110,7 +118,8 @@ pub fn run() {
             get_persona,
             get_achievements,
             set_pref,
-            open_data_folder
+            open_data_folder,
+            reset_profile
         ])
         .run(tauri::generate_context!())
         .expect("error while running HashMeterAi");

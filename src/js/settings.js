@@ -24,6 +24,13 @@ g("set-open-data").onclick = async function () {
   await openDataFolder();
 };
 
+g("set-reset").onclick = async function () {
+  const ok = confirm("Reset all app data? This clears your name, preferences, and unlocked badges.");
+  if (!ok) return;
+  await resetProfile();
+  window.location.reload();
+};
+
 g("set-back").onclick = function () {
   g("settings-view").classList.add("hidden");
   g("dashboard").classList.remove("hidden");

@@ -49,3 +49,9 @@ async function openDataFolder() {
     await window.__TAURI__.core.invoke("open_data_folder");
   }
 }
+
+async function resetProfile() {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    await window.__TAURI__.core.invoke("reset_profile");
+  }
+}

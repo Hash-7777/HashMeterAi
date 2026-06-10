@@ -39,7 +39,7 @@ body::after{
 .spacer{flex:1}
 .sync{font-size:11px;color:var(--mut);letter-spacing:.09em;font-family:var(--mono)}
 .bars{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
-.hidden{display:none}
+.hidden{display:none !important}
 .tip{
   position:fixed;
   pointer-events:none;

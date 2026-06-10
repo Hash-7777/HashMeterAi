@@ -27,7 +27,7 @@ function showDashboard() {
   g("dashboard").classList.remove("hidden");
   load();
   if (!window._poll) {
-    window._poll = setInterval(load, 12000);
+    window._poll = setInterval(load, 30000);
   }
 }
 
@@ -114,6 +114,10 @@ g("src").onclick = function (e) {
   SOURCE = b.dataset.s;
   syncSrcButtons();
   render();
+};
+
+g("btn-sync").onclick = function () {
+  load();
 };
 
 boot();
