@@ -1,0 +1,105 @@
+let CAL_YEAR = new Date().getFullYear();
+let CAL_MONTH = new Date().getMonth();
+
+const CAL_COLORS = [
+  "rgba(255,255,255,.06)",
+  "#5c3a22",
+  "#b15d23",
+  "#fd802e",
+  "#ffb27a",
+];
+
+function calIntensity(val, max) {
+  if (val === 0 || max === 0) return 0;
+  const r = val / max;
+  if (r > 0.6) return 4;
+  if (r > 0.35) return 3;
+  if (r > 0.15) return 2;
+  return 1;
+}
+
+function getDayMap(days) {
+  const m = {};
+  for (const d of days) {
+    m[d.date] = d;
+  }
+  return m;
+}
+
+function daysInMonth(y, m) {
+  return new Date(y, m + 1, 0).getDate();
+}
+
+function firstWeekday(y, m) {
+  return new Date(y, m, 1).getDay();
+}
+
+function monthName(m) {
+  return [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
+  ][m];
+}
+
+function renderCalendar() {
+  if (!RAW) return;
+  const active = ALL_SRCS.filter(s => RAW.tools[s] && RAW.tools[s].present);
+  const names = SOURCE === "all" ? active : [SOURCE];
+  const days = mergedDays(names);
+
+  const dayMap = getDayMap(days);
+  let maxTok = 0;
+  for (const d of days) {
+    const t = d.newIn + d.write + d.out;
+    if (t > maxTok) maxTok = t;
+  }
+
+  const y = CAL_YEAR;
+  const m = CAL_MONTH;
+  const dim = daysInMonth(y, m);
+  const fws = firstWeekday(y, m);
+
+  g("cal-month").textContent = monthName(m) + " " + y;
+
+  const grid = g("cal-grid");
+  grid.innerHTML = "";
+
+  const dow = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  for (const d of dow) {
+    const el = document.createElement("div");
+    el.className = "cal-cell empty";
+    el.innerHTML = '<span class="cal-dow">' + d + "</span>";
+    grid.appendChild(el);
+  }
+
+  for (let i = 0; i < fws; i++) {
+    const el = document.createElement("div");
+    el.className = "cal-cell empty";
+    grid.appendChild(el);
+  }
+
+  for (let d = 1; d <= dim; d++) {
+    const ds = y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+    const rec = dayMap[ds];
+    const tok = rec ? rec.newIn + rec.write + rec.out : 0;
+    const lvl = calIntensity(tok, maxTok);
+    const el = document.createElement("div");
+    el.className = "cal-cell";
+    el.style.background = CAL_COLORS[lvl];
+    if (lvl === 4) el.style.boxShadow = "0 0 8px var(--pk)";
+    el.innerHTML = "<div>" + d + "</div>" + (tok > 0 ? '<div class="cal-val">' + human(tok) + "</div>" : "");
+    if (rec) {
+      el.title = ds + " \u00b7 " + human(tok) + " tok \u00b7 " + duration(rec.focus_sec || 0) + " focus";
+    }
+    grid.appendChild(el);
+  }
+}
+
+// Back button
+g("cal-back").onclick = function () {
+  g("calendar-view").classList.add("hidden");
+  g("dashboard").classList.remove("hidden");
+  CURRENT_SCREEN = "dashboard";
+  TAB = "overview";
+  updateTabButtons();
+};

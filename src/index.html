@@ -9,7 +9,22 @@
 <link rel="stylesheet" href="styles/components.css">
 </head>
 <body>
-<div class="wrap">
+
+<!-- ONBOARDING -->
+<div class="onboarding-wrap" id="onboarding">
+  <div class="onboarding-card">
+    <img src="assets/logo.png" class="onboarding-logo" alt="">
+    <h1>Welcome to HashMeter<b>Ai</b></h1>
+    <p class="onboarding-desc">Track AI usage across Claude, Codex, Kimi, and more.</p>
+    <p class="onboarding-label">What should we call you?</p>
+    <input type="text" id="onb-name" maxlength="40" placeholder="Your name" autocomplete="off">
+    <div class="onboarding-err" id="onb-err"></div>
+    <button class="onboarding-btn" id="onb-go">Get Started</button>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="wrap hidden" id="dashboard">
   <div class="head">
     <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
     <div class="spacer"></div>
@@ -27,11 +42,38 @@
       <button data-s="cline">Cline</button>
     </div>
     <div class="spacer"></div>
-    <div class="seg ghost" id="tab"><button data-t="overview" class="on">Overview</button><button data-t="models">Models</button></div>
-    <div class="seg ghost" id="range"><button data-r="all" class="on">All</button><button data-r="30">30d</button><button data-r="7">7d</button></div>
+    <div class="seg ghost" id="tab">
+      <button data-t="overview" class="on">Overview</button>
+      <button data-t="models">Models</button>
+      <button data-t="calendar">Calendar</button>
+    </div>
+    <div class="seg ghost" id="range">
+      <button data-r="all" class="on">All</button>
+      <button data-r="30">30d</button>
+      <button data-r="7">7d</button>
+    </div>
   </div>
 
   <div id="overview">
+    <!-- Hero stats row -->
+    <div class="hero-row">
+      <div class="hero-tile">
+        <div class="hero-val" id="h-processed">--</div>
+        <div class="hero-lab">Tokens processed</div>
+        <div class="hero-sub" id="h-processed-sub"></div>
+      </div>
+      <div class="hero-tile">
+        <div class="hero-val" id="h-focus">--</div>
+        <div class="hero-lab">Focus time</div>
+        <div class="hero-sub" id="h-focus-sub"></div>
+      </div>
+      <div class="hero-tile">
+        <div class="hero-val" id="h-cost">--</div>
+        <div class="hero-lab">Est. cost</div>
+        <div class="hero-sub">all time</div>
+      </div>
+    </div>
+
     <div class="grid">
       <div class="tile"><div class="lab">Sessions</div><div class="val" id="t-sessions">--</div><div class="sub"></div></div>
       <div class="tile"><div class="lab">Messages</div><div class="val" id="t-messages">--</div><div class="sub" id="s-messages"></div></div>
@@ -58,10 +100,31 @@
 
   <div id="models" class="card hidden"><h3>Token share by model - billed</h3><div id="mlist"></div></div>
 </div>
+
+<!-- CALENDAR VIEW -->
+<div class="wrap hidden" id="calendar-view">
+  <div class="head">
+    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer"></div>
+    <button class="seg ghost" id="cal-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
+  </div>
+  <div class="card" style="margin-top:12px"><h3 id="cal-month">Activity Calendar</h3>
+    <div class="cal-grid" id="cal-grid"></div>
+    <div class="legend" style="margin-top:12px"><span>None</span>
+      <i style="background:rgba(255,255,255,.06)"></i><i style="background:#5c3a22"></i>
+      <i style="background:#b15d23"></i><i style="background:#fd802e"></i>
+      <i style="background:#ffb27a;box-shadow:0 0 8px var(--pk)"></i><span>Peak</span>
+    </div>
+  </div>
+</div>
+
 <div class="tip" id="tip"></div>
 
 <script src="js/format.js"></script>
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
+<script src="js/calendar.js"></script>
+<script src="js/onboarding.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
