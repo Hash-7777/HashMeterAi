@@ -19,19 +19,50 @@ async function boot() {
 
 function showDashboard() {
   g("onboarding").classList.add("hidden");
+  g("persona-view").classList.add("hidden");
+  g("achievements-view").classList.add("hidden");
+  g("settings-view").classList.add("hidden");
+  g("calendar-view").classList.add("hidden");
   g("dashboard").classList.remove("hidden");
   load();
-  setInterval(load, 12000);
+  if (!window._poll) {
+    window._poll = setInterval(load, 12000);
+  }
 }
 
 function showCalendar() {
-  g("dashboard").classList.add("hidden");
+  hideAllViews();
   g("calendar-view").classList.remove("hidden");
   renderCalendar();
 }
 
+function showPersona() {
+  hideAllViews();
+  g("persona-view").classList.remove("hidden");
+  loadPersona();
+}
+
+function showAchievements() {
+  hideAllViews();
+  g("achievements-view").classList.remove("hidden");
+  loadAchievements();
+}
+
+function showSettings() {
+  hideAllViews();
+  g("settings-view").classList.remove("hidden");
+  loadSettings();
+}
+
+function hideAllViews() {
+  g("dashboard").classList.add("hidden");
+  g("calendar-view").classList.add("hidden");
+  g("persona-view").classList.add("hidden");
+  g("achievements-view").classList.add("hidden");
+  g("settings-view").classList.add("hidden");
+}
+
 function showModels() {
-  // models tab is inline inside dashboard
   TAB = "models";
   g("overview").classList.add("hidden");
   g("models").classList.remove("hidden");
@@ -58,9 +89,12 @@ g("tab").onclick = function (e) {
   const b = e.target.closest("button");
   if (!b) return;
   const t = b.dataset.t;
-  if (t === "overview") showOverview();
-  else if (t === "models") showModels();
+  if (t === "overview") { showDashboard(); showOverview(); }
+  else if (t === "models") { showDashboard(); showModels(); }
   else if (t === "calendar") showCalendar();
+  else if (t === "persona") showPersona();
+  else if (t === "achievements") showAchievements();
+  else if (t === "settings") showSettings();
   updateTabButtons();
 };
 
@@ -69,7 +103,7 @@ g("range").onclick = function (e) {
   if (!b) return;
   RANGE = b.dataset.r;
   for (const x of e.currentTarget.children) x.classList.toggle("on", x === b);
-  renderDashboard();
+  render();
 };
 
 g("src").onclick = function (e) {
@@ -77,7 +111,7 @@ g("src").onclick = function (e) {
   if (!b) return;
   SOURCE = b.dataset.s;
   syncSrcButtons();
-  renderDashboard();
+  render();
 };
 
 boot();

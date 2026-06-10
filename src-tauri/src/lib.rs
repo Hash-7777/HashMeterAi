@@ -4,6 +4,7 @@
 
 mod aggregate;
 mod model;
+mod persona;
 mod rates;
 mod scan;
 mod sources;
@@ -45,13 +46,25 @@ fn set_name(name: String, app: tauri::AppHandle) {
     }
 }
 
+#[tauri::command]
+fn get_persona(app: tauri::AppHandle) -> persona::Persona {
+    let snap = scan::run();
+    let profile = get_profile(app);
+    persona::from_snapshot(&snap, &profile.name)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![scan_usage, get_profile, set_name])
+        .invoke_handler(tauri::generate_handler![
+            scan_usage,
+            get_profile,
+            set_name,
+            get_persona
+        ])
         .run(tauri::generate_context!())
         .expect("error while running HashMeterAi");
 }

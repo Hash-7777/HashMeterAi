@@ -46,6 +46,9 @@
       <button data-t="overview" class="on">Overview</button>
       <button data-t="models">Models</button>
       <button data-t="calendar">Calendar</button>
+      <button data-t="persona">Persona</button>
+      <button data-t="achievements">Badges</button>
+      <button data-t="settings">Settings</button>
     </div>
     <div class="seg ghost" id="range">
       <button data-r="all" class="on">All</button>
@@ -118,12 +121,71 @@
   </div>
 </div>
 
+<!-- PERSONA VIEW -->
+<div class="wrap hidden" id="persona-view">
+  <div class="head">
+    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer"></div>
+    <button class="seg ghost" id="persona-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
+  </div>
+  <div class="card" style="margin-top:12px;text-align:center;padding:36px 28px">
+    <div id="p-title" style="font-size:32px;font-weight:700;color:var(--pk);line-height:1.2">--</div>
+    <div id="p-subtitle" style="font-size:13px;color:var(--pk2);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:10px">--</div>
+    <div id="p-confidence" style="font-size:11px;color:var(--mut);margin-top:8px;font-family:var(--mono)">--</div>
+    <p id="p-desc" style="font-size:14px;color:var(--txt);margin-top:22px;line-height:1.7;max-width:640px;margin-left:auto;margin-right:auto">--</p>
+    <div id="p-traits" style="margin-top:28px;text-align:left;max-width:520px;margin-left:auto;margin-right:auto"></div>
+  </div>
+</div>
+
+<!-- ACHIEVEMENTS VIEW -->
+<div class="wrap hidden" id="achievements-view">
+  <div class="head">
+    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer"></div>
+    <button class="seg ghost" id="ach-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
+  </div>
+  <div class="card" style="margin-top:12px"><h3 id="ach-header">Achievements</h3>
+    <div id="ach-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px"></div>
+  </div>
+</div>
+
+<!-- SETTINGS VIEW -->
+<div class="wrap hidden" id="settings-view">
+  <div class="head">
+    <div class="brand"><img src="assets/logo.png" class="logo" alt=""><span>HashMeter<b>Ai</b></span></div>
+    <div class="spacer"></div>
+    <button class="seg ghost" id="set-back" style="padding:6px 14px;border-radius:8px;cursor:pointer">Back to dashboard</button>
+  </div>
+  <div class="card" style="margin-top:12px">
+    <h3>Settings</h3>
+    <div style="margin-top:16px;display:flex;flex-direction:column;gap:18px;max-width:480px">
+      <div>
+        <div class="lab" style="margin-bottom:6px">Display name</div>
+        <input type="text" id="set-name" maxlength="40" style="width:100%;padding:10px 12px;font:inherit;font-size:14px;color:var(--txt);background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:10px;outline:none">
+        <button class="onboarding-btn" id="set-save-name" style="margin-top:8px;width:auto;padding:8px 18px;font-size:12px">Save name</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <input type="checkbox" id="set-reduced" style="accent-color:var(--pk)">
+        <label for="set-reduced" style="font-size:13px;color:var(--mut)">Reduced motion</label>
+      </div>
+      <div style="font-size:13px;color:var(--mut);line-height:1.6">
+        <b style="color:var(--txt)">Security</b><br>
+        HashMeterAi reads only local usage metadata. No network. No telemetry. No message content. Data stays on this device.
+      </div>
+      <div style="font-size:11px;color:var(--mut);font-family:var(--mono)">Version 0.1.0</div>
+    </div>
+  </div>
+</div>
+
 <div class="tip" id="tip"></div>
 
 <script src="js/format.js"></script>
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/calendar.js"></script>
+<script src="js/persona.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/settings.js"></script>
 <script src="js/onboarding.js"></script>
 <script src="js/main.js"></script>
 </body>

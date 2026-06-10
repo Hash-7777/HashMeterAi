@@ -17,3 +17,16 @@ async function setName(name) {
     await window.__TAURI__.core.invoke("set_name", { name });
   }
 }
+
+async function getPersona() {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    return await window.__TAURI__.core.invoke("get_persona");
+  }
+  return {
+    title: "Just getting started",
+    subtitle: "Dabbler",
+    description: "Not enough data yet.",
+    traits: [],
+    confidence: "low",
+  };
+}
