@@ -180,13 +180,56 @@ function srcTokens(name) {
   return f.reduce((s, r) => s + (r.newIn || 0) + (r.write || 0) + (r.out || 0), 0);
 }
 
-function greet() {
-  const h = new Date().getHours();
-  if (h < 5) return "Still up";
-  if (h < 12) return "Good morning";
-  if (h < 17) return "Good afternoon";
-  if (h < 22) return "Good evening";
-  return "Good night";
+// Catchy greetings by time of day. "{n}" is the optional name slot — it expands
+// to ", Seif" when a name is set, or to nothing when it isn't, so every line
+// reads cleanly either way.
+const GREETINGS = {
+  latenight: [  // 0–4
+    "Still up{n}?", "Burning the midnight oil{n}", "Whoa, it's late{n}",
+    "The 2 AM grind hits different", "Who needs sleep{n}?", "Night owl mode{n}",
+  ],
+  early: [      // 5–8
+    "Wow, that's early{n}!", "Rise and grind{n}", "Up with the sun{n}",
+    "Good morning{n}", "Early bird mode{n}", "Dawn patrol{n}",
+  ],
+  morning: [    // 9–11
+    "Good morning{n}", "Morning{n}", "Let's build something{n}",
+    "Fresh start{n}", "Coffee's brewing{n}?", "Ready to ship{n}?",
+  ],
+  afternoon: [  // 12–16
+    "Good afternoon{n}", "Afternoon{n}", "Cruising along{n}",
+    "Back at it{n}", "Deep in it{n}?", "Hey{n}, let's roll",
+  ],
+  evening: [    // 17–21
+    "Good evening{n}", "Evening{n}", "Golden hour{n}",
+    "Winding down{n}?", "Still in the zone{n}?", "Evening shift{n}",
+  ],
+  night: [      // 22–23
+    "Good night{n}", "Still shipping{n}?", "One more commit{n}?",
+    "Late-night build{n}", "Burning it down{n}", "The night is young{n}",
+  ],
+};
+
+function greetBucket(h) {
+  if (h < 5) return "latenight";
+  if (h < 9) return "early";
+  if (h < 12) return "morning";
+  if (h < 17) return "afternoon";
+  if (h < 22) return "evening";
+  return "night";
+}
+
+// Cache the picked template per time-bucket so the greeting stays stable across
+// the frequent re-syncs (only re-rolls when the time-of-day bucket changes), but
+// re-fill the name each time so a name edit shows up immediately.
+let GREET_PICK = null;
+function greet(name) {
+  const bucket = greetBucket(new Date().getHours());
+  if (!GREET_PICK || GREET_PICK.bucket !== bucket) {
+    const list = GREETINGS[bucket];
+    GREET_PICK = { bucket, tpl: list[Math.floor(Math.random() * list.length)] };
+  }
+  return GREET_PICK.tpl.replace("{n}", name ? ", " + name : "");
 }
 
 function updateGreeting(a, days) {
@@ -194,7 +237,7 @@ function updateGreeting(a, days) {
   const hi = g("greeting-hi");
   const sub = g("greeting-sub");
   if (!hi) return;
-  hi.textContent = name ? greet() + ", " + name : greet();
+  hi.textContent = greet(name);
   if (!sub) return;
   if (!a || !days || !days.length) {
     sub.textContent = "No usage yet — start coding with any AI tool.";
