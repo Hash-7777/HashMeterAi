@@ -112,20 +112,20 @@ async function renderShareCard() {
     ctx.lineWidth = 1;
     ctx.strokeStyle = "rgba(255,255,255,0.08)";
     ctx.stroke();
+    ctx.textAlign = "center";
     ctx.fillStyle = "#eef4f7";
     ctx.font = "bold 30px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(val, x + 16, y + 36);
+    ctx.fillText(val, x + w / 2, y + 36);
     ctx.fillStyle = "#86a0ad";
     ctx.font = "600 11px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(lab, x + 16, y + 54);
+    ctx.fillText(lab, x + w / 2, y + 54);
     ctx.restore();
   }
 
   function fitTitle(text, maxWidth, maxLines) {
-    let fontSize = 46;
-    while (fontSize >= 26) {
+    for (let fontSize = 42; fontSize >= 22; fontSize -= 4) {
       ctx.font = "bold " + fontSize + "px -apple-system, BlinkMacSystemFont, sans-serif";
-      const words = text.split(/(\s+)/).filter(Boolean);
+      const words = text.split(/(\s+|·|-)/).filter(Boolean);
       const lines = [];
       let line = "";
       for (const word of words) {
@@ -138,15 +138,15 @@ async function renderShareCard() {
         }
       }
       if (line.trim()) lines.push(line.trim());
-      if (lines.length <= maxLines) return { fontSize, lines };
-      fontSize -= 4;
+      const allFit = lines.every(l => ctx.measureText(l).width <= maxWidth);
+      if (lines.length <= maxLines && allFit) return { fontSize, lines };
     }
-    ctx.font = "bold 26px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
     let truncated = text;
     while (ctx.measureText(truncated + "...").width > maxWidth && truncated.length > 3) {
       truncated = truncated.slice(0, -1);
     }
-    return { fontSize: 26, lines: [truncated + "..."] };
+    return { fontSize: 22, lines: [truncated + "..."] };
   }
 
   const tierColor = {
@@ -155,6 +155,8 @@ async function renderShareCard() {
     epic: "#b79bff",
     legendary: "#ffcf6b",
   };
+
+  const CX = W / 2;
 
   // Accent header bar
   const hdr = ctx.createLinearGradient(0, 0, W, 0);
@@ -173,55 +175,60 @@ async function renderShareCard() {
   ctx.stroke();
 
   // Logo
+  ctx.textAlign = "left";
   ctx.fillStyle = "#eef4f7";
   ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.fillText("HashMeter", 48, 36);
   ctx.fillStyle = ACCENT;
   ctx.fillText("Ai", 48 + ctx.measureText("HashMeter").width + 2, 36);
 
-  // Persona title (wrapped + sized to fit)
+  // Persona title (centered, wrapped + sized to fit)
+  ctx.textAlign = "center";
   ctx.fillStyle = ACCENT;
-  const titleFit = fitTitle(ptitle, W - 96, 2);
-  let ty = 88;
+  const titleFit = fitTitle(ptitle, W - 160, 2);
+  let ty = 90;
   for (const line of titleFit.lines) {
     ctx.font = "bold " + titleFit.fontSize + "px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(line, 48, ty);
+    ctx.fillText(line, CX, ty);
     ty += titleFit.fontSize + 10;
   }
 
-  // Name line
+  // Name line (centered)
   ctx.fillStyle = "rgba(238,244,247,0.85)";
   ctx.font = "18px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText(uname ? uname + "'s AI usage" : "My AI usage", 48, ty + 4);
+  ctx.fillText(uname ? uname + "'s AI usage" : "My AI usage", CX, ty + 4);
 
-  // Stats row
+  // Stats row (centered group)
+  ctx.textAlign = "left";
   const stats = [
     [money(cost), "Est. cost"],
     [human(processed), "Processed tokens"],
     [streak + "d", "Best streak"],
     [focusStr, "Avg use/day"],
   ];
-  const statW = 258, statGap = 16;
-  let sx = 48;
-  const statsY = ty + 40;
+  const statW = 240, statGap = 16;
+  const statsTotalW = stats.length * statW + (stats.length - 1) * statGap;
+  let sx = (W - statsTotalW) / 2;
+  const statsY = ty + 42;
   for (const [val, lab] of stats) {
     drawStat(sx, statsY, statW, val, lab);
     sx += statW + statGap;
   }
 
-  // LOTR yardstick
+  // LOTR yardstick (centered)
   const ratio = processed / LOTR;
   const lotrText = ratio >= 100 ? Math.round(ratio) + "x" : ratio.toFixed(1) + "x";
+  ctx.textAlign = "center";
   ctx.fillStyle = "#86a0ad";
   ctx.font = "14px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("\u2248 " + lotrText + " the length of The Lord of the Rings  \u00b7  " + tools + " tools", 48, statsY + 84);
+  ctx.fillText("\u2248 " + lotrText + " the length of The Lord of the Rings  \u00b7  " + tools + " tools", CX, statsY + 84);
 
   // Tokens-by-tool bar chart
   const toolOrder = ["claude", "codex", "kimi", "hashcortx", "cline"];
   const toolLabel = { claude: "Claude", codex: "Codex", kimi: "Kimi", hashcortx: "HashCortx", cline: "Cline" };
   const toolColors = [ACCENT, "#6fb4ff", "#b79bff", "#54ffc4", "#ffcf6b"];
-  const chartY = statsY + 102;
-  const chartW = W - 200;
+  const chartY = statsY + 100;
+  const chartW = W - 168;
   const presentTools = toolOrder.filter(t => toolTokens[t] > 0);
   if (presentTools.length > 0) {
     const maxTok = Math.max(...presentTools.map(t => toolTokens[t]));
@@ -232,7 +239,8 @@ async function renderShareCard() {
       const pct = v / maxTok;
       const bw = Math.max(6, chartW * pct);
       const bh = 20;
-      if (by + bh > H - 180) break;
+      if (by + bh > H - 160) break;
+      ctx.textAlign = "left";
       ctx.fillStyle = "rgba(134,160,173,0.7)";
       ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
       ctx.fillText(toolLabel[t], 48, by + 14);
@@ -255,47 +263,63 @@ async function renderShareCard() {
     }
   }
 
-  // Top unlocked badges
+  // Top unlocked badges (centered row)
   const unlocked = achievements.filter(a => a.unlocked).sort((a, b) => b.progress - a.progress);
   const topBadges = unlocked.slice(0, 3);
-  let badgesY = chartY + (presentTools.length * 26) + 20;
-  if (badgesY < statsY + 102) badgesY = statsY + 102;
+  let badgesY = chartY + (presentTools.length * 26) + 16;
+  if (badgesY < statsY + 100) badgesY = statsY + 100;
   if (topBadges.length > 0) {
+    ctx.textAlign = "left";
     ctx.fillStyle = "rgba(134,160,173,0.7)";
     ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText("Top badges", 48, badgesY);
-    let bx = 48;
+
+    let badgeTotalW = 0;
+    const badgeWidths = [];
     for (const b of topBadges) {
-      const color = tierColor[b.tier] || ACCENT;
       const w = ctx.measureText(b.name).width + 24;
+      badgeWidths.push(w);
+      badgeTotalW += w;
+    }
+    badgeTotalW += (topBadges.length - 1) * 10;
+    let bx = (W - badgeTotalW) / 2;
+
+    for (let i = 0; i < topBadges.length; i++) {
+      const b = topBadges[i];
+      const color = tierColor[b.tier] || ACCENT;
+      const w = badgeWidths[i];
       roundRect(bx, badgesY + 12, w, 28, 7);
       ctx.fillStyle = hexToRgba(color, 0.14);
       ctx.fill();
       ctx.lineWidth = 1;
       ctx.strokeStyle = hexToRgba(color, 0.45);
       ctx.stroke();
+      ctx.textAlign = "center";
       ctx.fillStyle = color;
       ctx.font = "bold 12px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText(b.name, bx + 12, badgesY + 31);
+      ctx.fillText(b.name, bx + w / 2, badgesY + 31);
+      ctx.textAlign = "left";
       bx += w + 10;
     }
-    badgesY += 56;
+    badgesY += 52;
   }
 
-  // Caveat + estimated note
+  // Caveat + estimated note (centered)
+  ctx.textAlign = "center";
   ctx.fillStyle = "rgba(134,160,173,0.65)";
   ctx.font = "12px ui-monospace, monospace";
-  let noteY = Math.min(badgesY + 16, H - 58);
-  ctx.fillText("Cost is estimated at public API list prices. Actual billing may differ.", 48, noteY);
+  let noteY = Math.min(badgesY + 12, H - 56);
+  ctx.fillText("Cost is estimated at public API list prices. Actual billing may differ.", CX, noteY);
   if (hashcortxEstimated) {
-    noteY += 16;
-    ctx.fillText("HashCortx token counts are estimated from message length.", 48, noteY);
+    noteY += 14;
+    ctx.fillText("HashCortx token counts are estimated from message length.", CX, noteY);
   }
 
-  // Footer
+  // Footer (centered)
   ctx.fillStyle = "rgba(134,160,173,0.55)";
   ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("Made with HashMeterAi  \u00b7  local & private", 48, H - 20);
+  ctx.fillText("Made with HashMeterAi  \u00b7  local & private", CX, H - 22);
+  ctx.textAlign = "left";
 }
 
 g("btn-share").onclick = function () {
