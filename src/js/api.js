@@ -46,8 +46,9 @@ async function setPref(key, value) {
 
 async function openDataFolder() {
   if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
-    await window.__TAURI__.core.invoke("open_data_folder");
+    return await window.__TAURI__.core.invoke("open_data_folder");
   }
+  return Promise.reject(new Error("Tauri runtime not available"));
 }
 
 async function resetProfile() {

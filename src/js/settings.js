@@ -123,7 +123,12 @@ g("set-range").onchange = async function () {
 };
 
 g("set-open-data").onclick = async function () {
-  await openDataFolder();
+  try {
+    await openDataFolder();
+  } catch (e) {
+    const msg = e && e.message ? e.message : String(e);
+    alert("Could not open data folder: " + msg);
+  }
 };
 
 g("set-reset").onclick = async function () {

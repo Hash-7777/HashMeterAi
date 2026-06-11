@@ -12,6 +12,7 @@ mod sources;
 mod store;
 
 use model::Snapshot;
+use std::fs;
 use tauri::Manager;
 use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_store::StoreExt;
@@ -135,10 +136,22 @@ fn is_hex_color(s: &str) -> bool {
 }
 
 #[tauri::command]
-fn open_data_folder(app: tauri::AppHandle) {
-    if let Ok(path) = app.path().app_data_dir() {
-        let _ = app.opener().open_path(path.to_string_lossy().to_string(), None::<&str>);
+fn open_data_folder(app: tauri::AppHandle) -> Result<(), String> {
+    let path = app
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("failed to resolve app data dir: {e}"))?;
+
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("failed to create app data dir parent: {e}"))?;
     }
+    fs::create_dir_all(&path).map_err(|e| format!("failed to create app data dir: {e}"))?;
+
+    app.opener()
+        .open_path(path.to_string_lossy().to_string(), None::<&str>)
+        .map_err(|e| format!("failed to open data folder: {e}"))?;
+    Ok(())
 }
 
 #[tauri::command]
