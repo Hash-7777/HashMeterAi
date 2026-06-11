@@ -11,7 +11,7 @@ Claude Code, Codex, Kimi, HashCortx — unified into one clean dashboard.
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Windows%20|%20Linux-1b323f)](#install)
 [![Built with](https://img.shields.io/badge/built%20with-Tauri%20|%20Rust-1b323f)](#tech)
 [![Network](https://img.shields.io/badge/network-zero%20calls-54ffc4)](SECURITY.md)
-[![Status](https://img.shields.io/badge/status-in%20active%20development-FD802E)](#roadmap)
+[![Status](https://img.shields.io/badge/status-in%20active%20development-FD802E)](#install)
 
 </div>
 
@@ -25,7 +25,8 @@ Claude Code, Codex, Kimi, HashCortx — unified into one clean dashboard.
 - **Processed tokens.** The truest measure of work the model actually did (not inflated by cached re-reads), with the "approximately N times The Lord of the Rings" yardstick.
 - **Average focus time.** Honest active-time-with-AI per day.
 - **Your AI persona.** For example, "Prompt Architect, Night-Shift Shipper" — generated from your real patterns, and **every claim shows the number behind it.** No vanity, no lies.
-- **Achievements.** Million-Token Club, streaks, Night Owl, Polyglot, and more — unlocked at real thresholds.
+- **Where you stand.** An honest "top X% of AI developers" read, computed against a documented, fully offline usage benchmark modeled from public 2025–26 figures — always shown with the number behind it, never a made-up rank.
+- **Achievements.** Sixteen ranked trophies — from First Contact to Billionaire, Night Owl to The Whale — each a real threshold with its *true* earn date and a tier-shaped medallion. The single hardest one you've earned headlines your Share card.
 - **Calendar of activity.** Your daily usage as a real calendar.
 - **One-click Share card.** A clean branded image of your stats and persona to post. Brag, honestly.
 
@@ -78,15 +79,6 @@ Requires Rust (stable) and Node 18+.
 
 **Tauri v2 + Rust + vanilla JavaScript** — no Electron, no bundler. One small native binary (target under 15 MB). All parsing and aggregation in Rust (parallel and incremental, so refresh is instant). The UI is plain HTML, CSS, and JS.
 
-## <a id="roadmap"></a>Roadmap
-
-- [x] Unified scan: Claude, Codex, Kimi, HashCortx
-- [ ] Onboarding, dollar and Processed heroes, calendar
-- [ ] Broader adapter framework
-- [ ] Persona engine
-- [ ] Achievements and Share card
-- [ ] Packaged releases (macOS, Windows, Linux)
-
 ## Contributing
 
 Issues and PRs welcome — especially new source adapters. Keep it honest, local, and light.
@@ -97,4 +89,4 @@ Issues and PRs welcome — especially new source adapters. Keep it honest, local
 
 ---
 
-<div align="center"><sub>The dollar figure is the value of compute at public API list prices — on a subscription you don't pay per token. Honest by design.</sub></div>
+<div align="center"><sub>The dollar figure is the value of compute at public API list prices — on a subscription you don't pay per token. The "top X%" standing is a percentile against a static benchmark curve modeled from public 2025–26 AI-coding usage data (≈$6/dev-day on Claude Code, agentic tasks of 1–3.5M tokens, power users at millions/day) — computed entirely on your machine, shown with its underlying number, and labeled as a modeled benchmark, not a live ranking. Honest by design.</sub></div>
