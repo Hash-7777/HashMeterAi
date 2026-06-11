@@ -274,27 +274,6 @@ function render() {
   g("t-fav").textContent = fav ? prettyModel(fav[0]) : "\u2014";
   g("s-fav").textContent = fav ? human(fav[1]) + " tok" : "";
 
-  const ratio = processed / LOTR;
-  const lotrText = ratio >= 100 ? commas(Math.round(ratio)) : ratio.toFixed(1);
-
-  const srcCosts = ALL_SRCS.map(s => [s, srcCost(s)]).filter(([, c]) => c > 0);
-  const costParts = srcCosts.map(([s, c]) => SRC_LABEL[s] + " " + money(c)).join(" \u00b7 ");
-
-  // Estimated-token note when an estimated source contributes to the view.
-  const estIncluded = (SOURCE === "all"
-    ? [...ESTIMATED_SRCS].some(s => RAW.tools[s] && RAW.tools[s].present && srcTokens(s) > 0)
-    : ESTIMATED_SRCS.has(SOURCE) && processed > 0);
-  const estNote = estIncluded
-    ? "<br><span class='foot-est'>HashCortx tokens are estimated from message length; its usage is free-tier and not billed.</span>"
-    : "";
-
-  g("foot").innerHTML =
-    "<b>" + SRC_LABEL[SOURCE] + "</b> \u00b7 \u2248<span class='pk'><b>" + lotrText +
-    "\u00d7</b></span> the tokens in <b>The Lord of the Rings</b> across <b>" +
-    a.sessions.size + "</b> sessions / <b>" + days.length + "</b> days.<br>" +
-    "Est. API cost at public list rates: <b class='pk'>" + money(a.cost) + "</b>" +
-    (costParts ? " \u2014 " + costParts : "") + "." + estNote;
-
   srcRow();
   renderCalendar();
   renderMiniCalendar();
