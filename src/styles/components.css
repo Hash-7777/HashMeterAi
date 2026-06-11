@@ -502,12 +502,17 @@
 
 /* Settings */
 .settings-wrap{
-  max-width:480px;
+  max-width:1120px;
   margin:0 auto;
-  display:flex;
-  flex-direction:column;
-  gap:18px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:16px;
+  align-items:start;
 }
+.settings-wrap .settings-hero{grid-column:1 / -1}
+.settings-wrap .set-version{grid-column:1 / -1}
+@media (max-width:900px){.settings-wrap{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:600px){.settings-wrap{grid-template-columns:1fr}}
 .settings-group{display:flex;flex-direction:column;gap:6px}
 .settings-input{
   width:100%;
