@@ -5,7 +5,7 @@
 ### See how much AI you really use.
 
 **The honest, local-first usage meter for AI coding tools.**
-Claude Code, Codex, Kimi, Continue — unified into one clean dashboard.
+Claude Code, Codex, Kimi, HashCortx — unified into one clean dashboard.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-FD802E)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Windows%20|%20Linux-1b323f)](#install)
@@ -50,7 +50,7 @@ The only thing that ever leaves is a brag-card image that **you** choose to expo
 | Claude Code | Supported |
 | Codex (OpenAI) | Supported |
 | Kimi | Supported |
-| Continue.dev | Supported |
+| HashCortx | Supported (tokens estimated from message length) |
 | Cline / Roo | Adapter-ready |
 | Cursor, Copilot, Windsurf | Not supported (usage is server-side; no local data to read) |
 
@@ -80,9 +80,9 @@ Requires Rust (stable) and Node 18+.
 
 ## <a id="roadmap"></a>Roadmap
 
-- [x] Unified scan: Claude, Codex, Kimi
+- [x] Unified scan: Claude, Codex, Kimi, HashCortx
 - [ ] Onboarding, dollar and Processed heroes, calendar
-- [ ] Continue.dev plus adapter framework
+- [ ] Broader adapter framework
 - [ ] Persona engine
 - [ ] Achievements and Share card
 - [ ] Packaged releases (macOS, Windows, Linux)
