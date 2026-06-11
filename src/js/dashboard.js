@@ -7,12 +7,31 @@ const SRC_LABEL = {
   claude: "Claude",
   codex: "Codex",
   kimi: "Kimi",
-  hashcortx: "HashCortX",
+  continue: "Continue",
   cline: "Cline",
   all: "All tools",
 };
 
-const ALL_SRCS = ["claude", "codex", "kimi", "hashcortx", "cline"];
+const ALL_SRCS = ["claude", "codex", "kimi", "continue", "cline"];
+
+// Clean display names for model ids. Never show a raw hyphenated id.
+const MODEL_NAMES = {
+  "claude-opus-4-8": "Opus 4.8",
+  "claude-opus-4-7": "Opus 4.7",
+  "claude-sonnet-4-6": "Sonnet 4.6",
+  "claude-haiku-4-5-20251001": "Haiku 4.5",
+  "claude-haiku-4-5": "Haiku 4.5",
+  "gpt-5.5": "GPT-5.5",
+  "gpt-5": "GPT-5",
+  "kimi-code/kimi-for-coding": "Kimi for Coding",
+  "<synthetic>": "Synthetic",
+};
+
+function prettyModel(id) {
+  if (MODEL_NAMES[id]) return MODEL_NAMES[id];
+  return id.replace(/^claude-/, "").split(/[-_/]/).filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
 
 function sdays(name) {
   if (!RAW || !RAW.tools[name]) return [];
@@ -188,7 +207,7 @@ function render() {
   const fh = Math.floor(a.focus_sec / 3600);
   const fm = Math.floor((a.focus_sec % 3600) / 60);
   g("h-focus").textContent = fh > 0 ? fh + "h " + fm + "m" : fm + "m";
-  g("h-focus-sub").textContent = a.focus_sec > 0 ? "Total AI use time" : "no use time data";
+  g("h-focus-sub").textContent = a.focus_sec > 0 ? "focused, gaps under 5 min" : "no use time data";
 
   animate(g("h-cost"), Math.round(a.cost * 100), function (v) { return "$" + (v / 100).toFixed(2); });
 
@@ -208,7 +227,7 @@ function render() {
   g("s-peak").textContent = commas(a.hours[ph]) + " msgs";
 
   const fav = Object.entries(a.models).sort((x, y) => y[1] - x[1])[0];
-  g("t-fav").textContent = fav ? pretty(fav[0]) : "\u2014";
+  g("t-fav").textContent = fav ? prettyModel(fav[0]) : "\u2014";
   g("s-fav").textContent = fav ? human(fav[1]) + " tok" : "";
 
   const ratio = processed / LOTR;
@@ -285,7 +304,7 @@ function models(a) {
     const row = document.createElement("div");
     row.className = "mrow";
     row.innerHTML =
-      '<div class="mname">' + pretty(m) + '</div>' +
+      '<div class="mname">' + prettyModel(m) + '</div>' +
       '<div class="mbar"><div class="mfill" style="width:' + (100 * t / max) + '%"></div></div>' +
       '<div class="mval">' + human(t) + ' \u00b7 ' + (100 * t / tot).toFixed(1) + '%</div>';
     host.appendChild(row);

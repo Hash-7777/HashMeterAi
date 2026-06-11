@@ -30,7 +30,8 @@ async function submitName() {
   }
   g("onb-err").textContent = "";
 
-  await setName(name);
+  const display = name.charAt(0).toUpperCase() + name.slice(1);
+  await setName(display);
   const host = g("onboarding");
   host.style.opacity = "0";
   setTimeout(function () {

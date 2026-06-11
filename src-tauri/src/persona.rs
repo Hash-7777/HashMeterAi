@@ -34,7 +34,7 @@ pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
             subtitle: "Dabbler".to_string(),
             description: format!(
                 "{}, you've processed {} tokens so far. Not enough usage yet to read your style — keep going and check back.",
-                name, human(stats.processed)
+                cap(name), human(stats.processed)
             ),
             traits: vec![Trait {
                 label: "Building data".to_string(),
@@ -265,16 +265,16 @@ fn pick_subtitle(processed: u64) -> String {
 fn base_why(stats: &Stats, base: &str) -> String {
     match base {
         "Generator" => format!(
-            "out {:.1}\u{00d7} input ({:.0} out / {:.0} in)",
+            "out {:.1}\u{00d7} input ({} out / {} in)",
             stats.out as f64 / (stats.new_in + stats.write).max(1) as f64,
-            stats.out,
-            stats.new_in + stats.write
+            human(stats.out),
+            human(stats.new_in + stats.write)
         ),
         "Context Maximalist" => format!(
-            "input {:.1}\u{00d7} output ({:.0} in / {:.0} out)",
+            "input {:.1}\u{00d7} output ({} in / {} out)",
             (stats.new_in + stats.write) as f64 / stats.out.max(1) as f64,
-            stats.new_in + stats.write,
-            stats.out
+            human(stats.new_in + stats.write),
+            human(stats.out)
         ),
         "Polyglot Operator" => format!("{} tools with usage", stats.tools_used),
         "Deep Thinker" => "Opus >= 55% of processed".to_string(),
@@ -329,10 +329,10 @@ fn build_description(
 
     format!(
         "{}, you've processed {} tokens across {} tools — mostly {} around {}. You average {} of focused work a day and your best day hit {}. That reads as a {} who {}. Volume tier: {}.",
-        name,
+        cap(name),
         human(stats.processed),
         stats.tools_used,
-        fav,
+        pretty_model(&fav),
         peak_label,
         duration(avg_focus),
         human(stats.max_day_processed),
@@ -340,6 +340,37 @@ fn build_description(
         modifier_explain,
         subtitle
     )
+}
+
+// Display a model id as a clean name. Never show raw hyphenated ids to the user.
+fn pretty_model(id: &str) -> String {
+    match id {
+        "claude-opus-4-8" => "Opus 4.8".to_string(),
+        "claude-opus-4-7" => "Opus 4.7".to_string(),
+        "claude-sonnet-4-6" => "Sonnet 4.6".to_string(),
+        "claude-haiku-4-5-20251001" | "claude-haiku-4-5" => "Haiku 4.5".to_string(),
+        "gpt-5.5" => "GPT-5.5".to_string(),
+        "gpt-5" => "GPT-5".to_string(),
+        "kimi-code/kimi-for-coding" => "Kimi for Coding".to_string(),
+        "<synthetic>" => "Synthetic".to_string(),
+        other => other
+            .strip_prefix("claude-")
+            .unwrap_or(other)
+            .split(['-', '_', '/'])
+            .filter(|w| !w.is_empty())
+            .map(cap)
+            .collect::<Vec<_>>()
+            .join(" "),
+    }
+}
+
+// Capitalize the first character (for display names and words).
+fn cap(s: &str) -> String {
+    let mut ch = s.chars();
+    match ch.next() {
+        Some(f) => f.to_uppercase().collect::<String>() + ch.as_str(),
+        None => String::new(),
+    }
 }
 
 fn human(n: u64) -> String {
