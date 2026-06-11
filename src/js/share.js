@@ -5,7 +5,15 @@ async function renderShareCard() {
   const ctx = canvas.getContext("2d");
   const W = 1200;
   const H = 630;
+  const dpr = window.devicePixelRatio || 1;
   const ACCENT = (window.PREFS && window.PREFS.accent) || "#FD802E";
+
+  // Render at device-pixel ratio for crisp PNGs on retina displays.
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  canvas.style.maxWidth = "100%";
+  canvas.style.height = "auto";
+  ctx.scale(dpr, dpr);
 
   // Background
   const grad = ctx.createLinearGradient(0, 0, W, H);
