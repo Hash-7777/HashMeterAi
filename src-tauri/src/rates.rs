@@ -94,10 +94,11 @@ pub fn default_rate(source: &str) -> Rate {
             cache_write: 0.60,
             cache_read: 0.15,
         },
-        // Continue.dev: cost depends on the provider. Local providers (Ollama,
-        // llama.cpp) are free; for those the rate is zero. Hosted providers fall
-        // through to the small-model default below if the model id is unknown.
-        "continue" => Rate {
+        // HashCortx: token counts are estimated from message text (the app does
+        // not record real usage), and it runs on free-tier providers (Groq,
+        // Cerebras, SambaNova, ...). We therefore do not invent a dollar cost —
+        // its rate is zero and the UI labels its tokens as estimated.
+        "hashcortx" => Rate {
             input: 0.0,
             output: 0.0,
             cache_write: 0.0,
@@ -147,8 +148,10 @@ mod tests {
     }
 
     #[test]
-    fn event_cost_local_provider_is_zero() {
-        let c = event_cost("llama3.1:8b", "continue", 1_000_000, 0, 0, 1_000_000);
+    fn event_cost_hashcortx_is_zero() {
+        // HashCortx runs on free-tier providers and its tokens are estimated,
+        // so it must never produce a dollar cost.
+        let c = event_cost("gpt-oss-120b", "hashcortx", 1_000_000, 0, 0, 1_000_000);
         assert_eq!(c, 0.0);
     }
 

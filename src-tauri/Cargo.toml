@@ -46,3 +46,7 @@ rayon = "1"
 
 # Walking source directories
 walkdir = "2"
+
+# Reading HashCortx's WebKit localStorage (SQLite). Bundled so there is no
+# system libsqlite dependency at build or run time.
+rusqlite = { version = "0.31", features = ["bundled"] }
