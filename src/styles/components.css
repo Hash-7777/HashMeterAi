@@ -371,6 +371,23 @@
   margin-top:8px;
   font-family:var(--mono);
 }
+.persona-standing{
+  margin:18px auto 0;
+  max-width:440px;
+  background:linear-gradient(180deg,rgba(253,128,46,.11),rgba(253,128,46,.03));
+  border:1px solid var(--line-pk);
+  border-radius:14px;
+  padding:14px 18px;
+}
+.ps-top{
+  font-size:21px;
+  font-weight:800;
+  color:var(--pk);
+  letter-spacing:.01em;
+}
+.ps-star{color:var(--mut);font-weight:600;font-size:12px;vertical-align:super;margin-left:1px}
+.ps-basis{font-size:12px;color:var(--txt);margin-top:5px;font-family:var(--mono)}
+.ps-note{font-size:10px;color:var(--mut);margin-top:7px;line-height:1.4}
 .persona-desc{
   font-size:15px;
   color:var(--txt);
@@ -677,13 +694,26 @@ body.compact .stat.stat-lead .val{font-size:20px}
 .tier-epic .ach-tier-tag{color:#b79bff}
 .tier-legendary .ach-tier-tag{color:#ffcf6b}
 
-.ach-icon svg{width:19px;height:19px;display:block}
+.ach-icon{width:42px;height:42px}
+.ach-icon svg{width:21px;height:21px;display:block}
 .ach-badge .ach-icon{color:#10202a}
-.ach-badge.locked .ach-icon{background:var(--ch);box-shadow:none;color:var(--mut)}
+.ach-badge.locked .ach-icon{background:var(--ch);box-shadow:none;filter:none;color:var(--mut)}
 .ach-badge.tier-common.unlocked .ach-icon{background:linear-gradient(135deg,var(--pk-dim),var(--pk))}
-.ach-badge.tier-rare.unlocked .ach-icon{background:linear-gradient(135deg,#3a6fb0,#6fb4ff);box-shadow:0 0 14px rgba(111,180,255,.35)}
-.ach-badge.tier-epic.unlocked .ach-icon{background:linear-gradient(135deg,#6b4fd0,#b79bff);box-shadow:0 0 14px rgba(150,120,255,.4)}
-.ach-badge.tier-legendary.unlocked .ach-icon{background:linear-gradient(135deg,#c9962e,#ffcf6b);box-shadow:0 0 16px rgba(255,200,90,.45)}
+.ach-badge.tier-rare.unlocked .ach-icon{background:linear-gradient(135deg,#3a6fb0,#6fb4ff)}
+.ach-badge.tier-epic.unlocked .ach-icon{background:linear-gradient(135deg,#6b4fd0,#b79bff)}
+.ach-badge.tier-legendary.unlocked .ach-icon{background:linear-gradient(135deg,#c9962e,#ffcf6b)}
+
+/* Tier-shaped medallions: each rarity gets its own silhouette. clip-path drops
+   the box-shadow, so unlocked glow is re-applied as a drop-shadow filter that
+   follows the clipped shape. */
+.ach-badge.tier-common .ach-icon{border-radius:50%}                 /* circle */
+.ach-badge.tier-rare .ach-icon{border-radius:11px;clip-path:none}   /* rounded square */
+.ach-badge.tier-epic .ach-icon{border-radius:0;clip-path:polygon(50% 0,100% 0,100% 56%,50% 100%,0 56%,0 0)}       /* shield */
+.ach-badge.tier-legendary .ach-icon{border-radius:0;clip-path:polygon(50% 1%,93% 25%,93% 75%,50% 99%,7% 75%,7% 25%)} /* hexagon */
+.ach-badge.tier-common.unlocked .ach-icon{box-shadow:0 0 14px rgba(253,128,46,.35)}
+.ach-badge.tier-rare.unlocked .ach-icon{box-shadow:0 0 14px rgba(111,180,255,.38)}
+.ach-badge.tier-epic.unlocked .ach-icon{filter:drop-shadow(0 0 9px rgba(150,120,255,.5))}
+.ach-badge.tier-legendary.unlocked .ach-icon{filter:drop-shadow(0 0 11px rgba(255,200,90,.55))}
 
 /* ===== Settings ===== */
 .settings-hero{display:flex;align-items:center;gap:14px;margin-bottom:2px}
