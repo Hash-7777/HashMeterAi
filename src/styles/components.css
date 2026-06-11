@@ -523,18 +523,18 @@
 }
 
 /* Settings */
+/* Two hand-balanced columns so the cards (very different heights) pack tidily
+   with no ragged bottom gaps. Hero and version are full width above/below. */
 .settings-wrap{
-  max-width:1120px;
+  max-width:920px;
   margin:0 auto;
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
+  display:flex;
+  flex-direction:column;
   gap:16px;
-  align-items:start;
 }
-.settings-wrap .settings-hero{grid-column:1 / -1}
-.settings-wrap .set-version{grid-column:1 / -1}
-@media (max-width:900px){.settings-wrap{grid-template-columns:repeat(2,1fr)}}
-@media (max-width:600px){.settings-wrap{grid-template-columns:1fr}}
+.settings-cols{display:flex;gap:16px;align-items:flex-start}
+.settings-col{flex:1;min-width:0;display:flex;flex-direction:column;gap:16px}
+@media (max-width:680px){.settings-cols{flex-direction:column}}
 .settings-group{display:flex;flex-direction:column;gap:6px}
 .settings-input{
   width:100%;
