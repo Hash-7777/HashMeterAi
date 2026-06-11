@@ -21,12 +21,19 @@ pub const RARE: &str = "rare";
 pub const EPIC: &str = "epic";
 pub const LEGENDARY: &str = "legendary";
 
+// Display categories — each becomes one horizontally-scrolling row in the UI.
+pub const VOLUME: &str = "volume"; // cumulative tokens + spend
+pub const INTENSITY: &str = "intensity"; // single-day bursts, streaks, focus, cadence
+pub const MASTERY: &str = "mastery"; // breadth of tools/models, cache, milestones
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Achievement {
     pub id: String,
     pub name: String,
     pub description: String,
     pub tier: String,
+    /// Display category (volume / intensity / mastery) — one scroll row each.
+    pub category: String,
     /// Global difficulty rank (1 = easiest). Drives "hardest first" ordering in
     /// the grid and which single trophy the Share card features. Tier still
     /// drives color/shape; rank gives a precise total order across tiers.
@@ -76,6 +83,7 @@ pub fn compute_with_dates(
             name: d.name,
             description: d.description,
             tier: d.tier.to_string(),
+            category: d.category.to_string(),
             rank: d.rank,
             progress: prog.clamp(0.0, 1.0),
             unlocked: now_unlocked,
@@ -126,16 +134,26 @@ struct Def {
     name: String,
     description: String,
     tier: &'static str,
+    category: &'static str,
     rank: u32,
     rule: RuleFn,
 }
 
-fn def(id: &str, name: &str, description: &str, tier: &'static str, rank: u32, rule: RuleFn) -> Def {
+fn def(
+    id: &str,
+    name: &str,
+    description: &str,
+    tier: &'static str,
+    category: &'static str,
+    rank: u32,
+    rule: RuleFn,
+) -> Def {
     Def {
         id: id.to_string(),
         name: name.to_string(),
         description: description.to_string(),
         tier,
+        category,
         rank,
         rule,
     }
@@ -153,54 +171,68 @@ fn best_streak(s: &Stats) -> u64 {
     s.longest_streak.max(s.current_streak)
 }
 
-// The curated trophy roster: 16 badges, each a real milestone, ranked 1..16 by
-// difficulty. Ids are stable (they key stored unlock state) — only the names,
-// tiers and ranks are curated. Rules are deliberately reused so the day-by-day
-// replay in `first_earned_dates` can date every badge from the same logic.
+// The curated trophy roster: 24 badges across three categories (Volume,
+// Intensity, Mastery), ranked 1..24 by difficulty. Ids are stable (they key
+// stored unlock state). Rules are deliberately reused so the day-by-day replay
+// in `first_earned_dates` can date every badge from the same logic.
 fn definitions() -> Vec<Def> {
     vec![
-        // ---- Common: the on-ramp ----
-        def("earlybird", "First Contact", "Record your first AI activity", COMMON, 1,
-            Box::new(|s| (if s.active_days > 0 { 1.0 } else { 0.0 }, s.active_days > 0))),
-        def("streak7", "Hooked", "Hold a 7-day activity streak", COMMON, 2,
-            Box::new(|s| (best_streak(s) as f64 / 7.0, best_streak(s) >= 7))),
-
-        // ---- Rare: you're a regular now ----
-        def("tens", "The Stack", "Process 10,000,000 tokens", RARE, 3,
+        // ===== Volume: cumulative tokens + spend =====
+        def("tens", "The Stack", "Process 10,000,000 tokens", RARE, VOLUME, 3,
             Box::new(|s| (s.processed as f64 / 10_000_000.0, s.processed >= 10_000_000))),
-        def("polyglot3", "Polyglot", "Run 3 different AI tools", RARE, 4,
-            Box::new(|s| (s.tools_used as f64 / 3.0, s.tools_used >= 3))),
-        def("nightowl", "Night Owl", "Peak activity before 4 AM (50+ events)", RARE, 5,
+        def("hundred", "The Vault", "Process 100,000,000 tokens", EPIC, VOLUME, 9,
+            Box::new(|s| (s.processed as f64 / 100_000_000.0, s.processed >= 100_000_000))),
+        def("spend1k", "Big Spender", "Reach $1,000 of estimated compute", EPIC, VOLUME, 11,
+            Box::new(|s| (s.cost / 1000.0, s.cost >= 1000.0))),
+        def("archive", "The Archive", "Process 500,000,000 tokens", EPIC, VOLUME, 14,
+            Box::new(|s| (s.processed as f64 / 500_000_000.0, s.processed >= 500_000_000))),
+        def("high_roller", "High Roller", "Reach $2,500 of estimated compute", EPIC, VOLUME, 16,
+            Box::new(|s| (s.cost / 2500.0, s.cost >= 2500.0))),
+        def("billion", "Billionaire", "Process 1,000,000,000 tokens", LEGENDARY, VOLUME, 19,
+            Box::new(|s| (s.processed as f64 / 1_000_000_000.0, s.processed >= 1_000_000_000))),
+        def("spend5k", "The Whale", "Reach $5,000 of estimated compute", LEGENDARY, VOLUME, 22,
+            Box::new(|s| (s.cost / 5000.0, s.cost >= 5000.0))),
+        def("five_billion", "Ten-Figure Mind", "Process 5,000,000,000 tokens", LEGENDARY, VOLUME, 23,
+            Box::new(|s| (s.processed as f64 / 5_000_000_000.0, s.processed >= 5_000_000_000))),
+
+        // ===== Intensity: single-day bursts, streaks, focus, cadence =====
+        def("streak7", "Hooked", "Hold a 7-day activity streak", COMMON, INTENSITY, 2,
+            Box::new(|s| (best_streak(s) as f64 / 7.0, best_streak(s) >= 7))),
+        def("nightowl", "Night Owl", "Peak activity before 4 AM (50+ events)", RARE, INTENSITY, 5,
             Box::new(|s| {
                 let p = if s.peak_hour < 4 { (s.peak_events as f64 / 50.0).min(1.0) } else { 0.0 };
                 (p, s.peak_hour < 4 && s.peak_events >= 50)
             })),
-        def("marathon", "Marathoner", "Process 1,000,000 tokens in a single day", RARE, 6,
+        def("marathon", "Marathoner", "Process 1,000,000 tokens in a single day", RARE, INTENSITY, 6,
             Box::new(|s| (s.max_day_processed as f64 / 1_000_000.0, s.max_day_processed >= 1_000_000))),
-        def("deep_work", "Deep Diver", "6h+ of focused work in a single day", RARE, 7,
+        def("deep_work", "Deep Diver", "6h+ of focused work in a single day", RARE, INTENSITY, 7,
             Box::new(|s| (s.max_day_focus_sec as f64 / (6.0 * 3600.0), s.max_day_focus_sec >= 6 * 3600))),
-
-        // ---- Epic: serious operator ----
-        def("hundred", "The Vault", "Process 100,000,000 tokens", EPIC, 8,
-            Box::new(|s| (s.processed as f64 / 100_000_000.0, s.processed >= 100_000_000))),
-        def("polymath", "Mind Palace", "Use 8 distinct models", EPIC, 9,
-            Box::new(|s| (s.models_used as f64 / 8.0, s.models_used >= 8))),
-        def("ultra_day", "Heavy Lifter", "Process 10,000,000 tokens in a single day", EPIC, 10,
+        def("ultra_day", "Heavy Lifter", "Process 10,000,000 tokens in a single day", EPIC, INTENSITY, 12,
             Box::new(|s| (s.max_day_processed as f64 / 10_000_000.0, s.max_day_processed >= 10_000_000))),
-        def("around_clock", "Around the Clock", "Be active in 20+ different hours of the day", EPIC, 11,
-            Box::new(|s| (s.active_hours as f64 / 20.0, s.active_hours >= 20))),
-        def("cache_master", "Cache Sorcerer", "Cache reads are 95%+ of billed tokens", EPIC, 12,
-            Box::new(|s| (cache_ratio(s) / 0.95, cache_ratio(s) >= 0.95))),
-        def("spend1k", "Big Spender", "Reach $1,000 of estimated compute", EPIC, 13,
-            Box::new(|s| (s.cost / 1000.0, s.cost >= 1000.0))),
-
-        // ---- Legendary: the rarefied air ----
-        def("billion", "Billionaire", "Process 1,000,000,000 tokens", LEGENDARY, 14,
-            Box::new(|s| (s.processed as f64 / 1_000_000_000.0, s.processed >= 1_000_000_000))),
-        def("streak100", "Unbroken", "Hold a 100-day activity streak", LEGENDARY, 15,
+        def("streak30", "Ironclad", "Hold a 30-day activity streak", EPIC, INTENSITY, 13,
+            Box::new(|s| (best_streak(s) as f64 / 30.0, best_streak(s) >= 30))),
+        def("colossus", "Colossus", "Process 25,000,000 tokens in a single day", LEGENDARY, INTENSITY, 20,
+            Box::new(|s| (s.max_day_processed as f64 / 25_000_000.0, s.max_day_processed >= 25_000_000))),
+        def("streak100", "Unbroken", "Hold a 100-day activity streak", LEGENDARY, INTENSITY, 21,
             Box::new(|s| (best_streak(s) as f64 / 100.0, best_streak(s) >= 100))),
-        def("spend5k", "The Whale", "Reach $5,000 of estimated compute", LEGENDARY, 16,
-            Box::new(|s| (s.cost / 5000.0, s.cost >= 5000.0))),
+
+        // ===== Mastery: breadth, cache, milestones =====
+        def("earlybird", "First Contact", "Record your first AI activity", COMMON, MASTERY, 1,
+            Box::new(|s| (if s.active_days > 0 { 1.0 } else { 0.0 }, s.active_days > 0))),
+        def("polyglot3", "Polyglot", "Run 3 different AI tools", RARE, MASTERY, 4,
+            Box::new(|s| (s.tools_used as f64 / 3.0, s.tools_used >= 3))),
+        def("polymath", "Mind Palace", "Use 8 distinct models", EPIC, MASTERY, 8,
+            Box::new(|s| (s.models_used as f64 / 8.0, s.models_used >= 8))),
+        def("polyglot5", "Full Stack", "Run 5 different AI tools", EPIC, MASTERY, 10,
+            Box::new(|s| (s.tools_used as f64 / 5.0, s.tools_used >= 5))),
+        def("cache_master", "Cache Sorcerer", "Cache reads are 95%+ of billed tokens", EPIC, MASTERY, 15,
+            Box::new(|s| (cache_ratio(s) / 0.95, cache_ratio(s) >= 0.95))),
+        def("omnivore", "Omnivore", "Use 12 distinct models", LEGENDARY, MASTERY, 17,
+            Box::new(|s| (s.models_used as f64 / 12.0, s.models_used >= 12))),
+        def("around_clock", "Around the Clock", "Be active in 20+ different hours of the day", EPIC, MASTERY, 18,
+            Box::new(|s| (s.active_hours as f64 / 20.0, s.active_hours >= 20))),
+        def("veteran", "Veteran", "Reach 100 active days", LEGENDARY, MASTERY, 24,
+            Box::new(|s| (s.active_days as f64 / 100.0, s.active_days >= 100))),
     ]
 }
 
@@ -471,18 +503,36 @@ mod tests {
     }
 
     #[test]
-    fn roster_is_sixteen_with_unique_ordered_ranks() {
+    fn roster_has_unique_ordered_ranks() {
         let snap = snap_with(vec![day(100)], true);
         let list = compute(&snap, &HashSet::new());
-        assert_eq!(list.len(), 16);
+        assert_eq!(list.len(), 24);
         let mut ranks: Vec<u32> = list.iter().map(|a| a.rank).collect();
         ranks.sort_unstable();
-        assert_eq!(ranks, (1..=16).collect::<Vec<u32>>());
+        assert_eq!(ranks, (1..=24).collect::<Vec<u32>>());
         // The hardest-ranked badge is legendary; the easiest is common.
         let hardest = list.iter().max_by_key(|a| a.rank).unwrap();
         let easiest = list.iter().min_by_key(|a| a.rank).unwrap();
         assert_eq!(hardest.tier, LEGENDARY);
         assert_eq!(easiest.tier, COMMON);
+    }
+
+    #[test]
+    fn every_badge_has_a_known_category() {
+        let snap = snap_with(vec![day(100)], true);
+        let list = compute(&snap, &HashSet::new());
+        for a in &list {
+            assert!(
+                matches!(a.category.as_str(), VOLUME | INTENSITY | MASTERY),
+                "{} has unknown category {}",
+                a.id,
+                a.category
+            );
+        }
+        // All three categories are populated.
+        for cat in [VOLUME, INTENSITY, MASTERY] {
+            assert!(list.iter().any(|a| a.category == cat), "no badges in {cat}");
+        }
     }
 
     #[test]
