@@ -398,6 +398,28 @@
   grid-template-columns:repeat(auto-fill,minmax(155px,1fr));
   gap:12px;
 }
+
+/* Category rows — three stacked sections, each scrolling horizontally so the
+   whole Achievements view fits on one page. */
+.ach-cats{display:flex;flex-direction:column;gap:16px}
+.ach-cat{display:flex;flex-direction:column;gap:9px}
+.ach-cat-head{display:flex;align-items:baseline;gap:10px}
+.ach-cat-label{font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--txt)}
+.ach-cat-count{font-size:11px;color:var(--mut);font-family:var(--mono)}
+.ach-cat-row{
+  display:flex;
+  gap:12px;
+  overflow-x:auto;
+  overflow-y:hidden;
+  padding:2px 2px 8px;
+  scroll-snap-type:x proximity;
+  scrollbar-width:thin;
+}
+.ach-cat-row > .ach-badge{flex:0 0 192px;scroll-snap-align:start}
+.ach-cat-row::-webkit-scrollbar{height:8px}
+.ach-cat-row::-webkit-scrollbar-thumb{background:rgba(255,255,255,.10);border-radius:8px;border:2px solid transparent;background-clip:content-box}
+.ach-cat-row::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.2);background-clip:content-box}
+.ach-cat-row::-webkit-scrollbar-track{background:transparent}
 .ach-badge{
   position:relative;
   background:linear-gradient(180deg,var(--panel),var(--panel2));

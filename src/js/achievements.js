@@ -18,6 +18,14 @@ const ACH_GLYPHS = {
   infinity: '<path d="M12 12c1.5-2 3-3 4.5-3a3 3 0 0 1 0 6c-1.5 0-3-1-4.5-3z"/><path d="M12 12c-1.5 2-3 3-4.5 3a3 3 0 0 1 0-6c1.5 0 3 1 4.5 3z"/>',
   weight: '<path d="M6 9v6M18 9v6M3 10.5v3M21 10.5v3M6 12h12"/>',
   whale: '<path d="M3 13c1.5 2.6 4.5 4 8 4 4.5 0 8-2.5 8-6 0-1-.3-1.8-.3-1.8M5 13c0-2.2 2-4 5-4 2 0 3.5.8 4.5 2"/><path d="M19 9c.7-.3 1.5-1 1.8-2-.2 1.2.3 2 .2 2"/><path d="M9 12h.01"/>',
+  box: '<rect x="3.5" y="7" width="17" height="13" rx="1.5"/><path d="M3.5 7l2-3h13l2 3M9 11h6"/>',
+  dice: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.1"/><circle cx="15" cy="9" r="1.1"/><circle cx="9" cy="15" r="1.1"/><circle cx="15" cy="15" r="1.1"/>',
+  crown: '<path d="M4 18h16M5 18 4 8l4.5 3L12 5l3.5 6L20 8l-1 10z"/>',
+  flame: '<path d="M12 2c2 4 5 5.5 5 9a5 5 0 0 1-10 0c0-2 .8-3.2 2-4.2 0 1.8 1 2.7 1.8 2.7.7 0 1.2-.6 1.2-1.5 0-2-1-3-1-6z"/>',
+  mountain: '<path d="M3 20h18L13.5 6l-3.5 6-2-3z"/><path d="M11.5 9l2-2.6"/>',
+  boxes: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2"/>',
+  atom: '<circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/>',
+  medal: '<circle cx="12" cy="15" r="6"/><path d="M9 9.6 6.5 3M15 9.6 17.5 3M12 12.6l.85 1.7 1.9.28-1.37 1.34.32 1.88L12 16.6l-1.7.9.32-1.88L9.25 14.26l1.9-.28z"/>',
   star: '<path d="m12 3 2.6 5.6L21 9.3l-4.5 4.3 1.1 6.2L12 17l-5.6 2.8 1.1-6.2L3 9.3l6.4-.7z"/>',
 };
 
@@ -39,7 +47,22 @@ const ACH_ICON_FOR = {
   billion: "gem",         // Billionaire
   streak100: "infinity",  // Unbroken
   spend5k: "whale",       // The Whale
+  archive: "box",         // The Archive
+  high_roller: "dice",    // High Roller
+  five_billion: "crown",  // Ten-Figure Mind
+  streak30: "flame",      // Ironclad
+  colossus: "mountain",   // Colossus
+  polyglot5: "boxes",     // Full Stack
+  omnivore: "atom",       // Omnivore
+  veteran: "medal",       // Veteran
 };
+
+// Display categories — one horizontally-scrolling row each, in this order.
+const ACH_CATS = [
+  { id: "volume", label: "Volume & Spend" },
+  { id: "intensity", label: "Intensity & Streaks" },
+  { id: "mastery", label: "Breadth & Mastery" },
+];
 
 function achIcon(id) {
   const inner = ACH_GLYPHS[ACH_ICON_FOR[id]] || ACH_GLYPHS.star;
@@ -69,39 +92,59 @@ async function loadAchievements() {
       (list.length ? Math.round(100 * unlocked / list.length) : 0) + '%"></div></div>' +
       '<div class="ach-head-chips">' + chips + "</div>";
 
-    const grid = g("ach-grid");
-    grid.innerHTML = "";
+    const host = g("ach-grid");
+    host.innerHTML = "";
 
-    // Unlocked first, hardest (highest rank) shown off first; then locked badges
-    // ordered by how close they are to earning.
+    // Within a category: unlocked first (hardest by rank), then locked by how
+    // close they are to earning.
     const sorted = list.slice().sort((a, b) => {
       if (a.unlocked !== b.unlocked) return a.unlocked ? -1 : 1;
       if (a.unlocked) return b.rank - a.rank;
       return b.progress - a.progress;
     });
 
-    for (const a of sorted) {
-      const el = document.createElement("div");
-      el.className = "ach-badge tier-" + a.tier + (a.unlocked ? " unlocked" : " locked");
+    // One horizontally-scrolling row per category.
+    for (const cat of ACH_CATS) {
+      const items = sorted.filter(a => a.category === cat.id);
+      if (!items.length) continue;
+      const got = items.filter(a => a.unlocked).length;
 
-      const pct = Math.round(a.progress * 100);
-      const date = a.earned_date && a.unlocked
-        ? '<div class="ach-date">earned ' + a.earned_date + "</div>"
-        : "";
-      const progress = a.unlocked
-        ? '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:100%"></div></div>'
-        : '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:' + pct + '%"></div></div><div class="ach-pct">' + pct + "%</div>";
+      const sec = document.createElement("div");
+      sec.className = "ach-cat";
+      sec.innerHTML =
+        '<div class="ach-cat-head"><span class="ach-cat-label">' + cat.label + "</span>" +
+        '<span class="ach-cat-count">' + got + " / " + items.length + "</span></div>";
 
-      el.innerHTML =
-        '<div class="ach-tier-tag">' + a.tier + "</div>" +
-        '<div class="ach-icon">' + achIcon(a.id) + "</div>" +
-        '<div class="ach-name">' + a.name + "</div>" +
-        '<div class="ach-desc">' + a.description + "</div>" +
-        date + progress;
-      grid.appendChild(el);
+      const row = document.createElement("div");
+      row.className = "ach-cat-row";
+      for (const a of items) row.appendChild(buildBadge(a));
+      sec.appendChild(row);
+      host.appendChild(sec);
     }
   } catch (e) {
     console.error("achievements load error", e);
-    g("ach-grid").innerHTML = '<div style="grid-column:1/-1;text-align:center;color:var(--mut)">Load error</div>';
+    g("ach-grid").innerHTML = '<div style="text-align:center;color:var(--mut)">Load error</div>';
   }
+}
+
+// Build one badge card (medallion + name + description + date/progress).
+function buildBadge(a) {
+  const el = document.createElement("div");
+  el.className = "ach-badge tier-" + a.tier + (a.unlocked ? " unlocked" : " locked");
+
+  const pct = Math.round(a.progress * 100);
+  const date = a.earned_date && a.unlocked
+    ? '<div class="ach-date">earned ' + a.earned_date + "</div>"
+    : "";
+  const progress = a.unlocked
+    ? '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:100%"></div></div>'
+    : '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:' + pct + '%"></div></div><div class="ach-pct">' + pct + "%</div>";
+
+  el.innerHTML =
+    '<div class="ach-tier-tag">' + a.tier + "</div>" +
+    '<div class="ach-icon">' + achIcon(a.id) + "</div>" +
+    '<div class="ach-name">' + a.name + "</div>" +
+    '<div class="ach-desc">' + a.description + "</div>" +
+    date + progress;
+  return el;
 }
