@@ -94,7 +94,10 @@ pub fn default_rate(source: &str) -> Rate {
             cache_write: 0.60,
             cache_read: 0.15,
         },
-        "hashcortx" => Rate {
+        // Continue.dev: cost depends on the provider. Local providers (Ollama,
+        // llama.cpp) are free; for those the rate is zero. Hosted providers fall
+        // through to the small-model default below if the model id is unknown.
+        "continue" => Rate {
             input: 0.0,
             output: 0.0,
             cache_write: 0.0,
@@ -145,7 +148,7 @@ mod tests {
 
     #[test]
     fn event_cost_local_provider_is_zero() {
-        let c = event_cost("llama3.1:8b", "hashcortx", 1_000_000, 0, 0, 1_000_000);
+        let c = event_cost("llama3.1:8b", "continue", 1_000_000, 0, 0, 1_000_000);
         assert_eq!(c, 0.0);
     }
 
