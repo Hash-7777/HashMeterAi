@@ -17,6 +17,9 @@ pub struct Persona {
     pub description: String,
     pub traits: Vec<Trait>,
     pub confidence: String,
+    /// Honest "where do you stand" line (top X% vs. the modeled benchmark), or
+    /// `None` below the data floor. See `benchmark.rs`.
+    pub standing: Option<crate::benchmark::Standing>,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -27,6 +30,7 @@ pub struct Trait {
 
 pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
     let stats = compute_stats(snap);
+    let standing = crate::benchmark::standing(snap);
 
     if stats.processed < PROCESSED_FLOOR {
         return Persona {
@@ -41,6 +45,7 @@ pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
                 why: format!("{} processed / {} floor", human(stats.processed), human(PROCESSED_FLOOR)),
             }],
             confidence: "low".to_string(),
+            standing,
         };
     }
 
@@ -86,6 +91,7 @@ pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
         description: desc,
         traits,
         confidence,
+        standing,
     }
 }
 

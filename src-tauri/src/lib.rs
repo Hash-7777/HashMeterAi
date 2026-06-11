@@ -4,6 +4,7 @@
 
 mod achievements;
 mod aggregate;
+mod benchmark;
 mod model;
 mod persona;
 mod rates;
@@ -71,16 +72,18 @@ fn get_achievements(app: tauri::AppHandle) -> Vec<achievements::Achievement> {
         &profile.achievements,
         &profile.achievement_dates,
     );
-    // Persist newly unlocked achievements and stamp their first-seen date.
+    // Persist unlocked achievements and their honest earn date. We OVERWRITE the
+    // stored date with the computed one (which is history-first), so any bogus
+    // "all earned today" stamps written by older builds self-correct to the real
+    // first-cross date once this runs.
     if let Ok(store) = app.store("profile.json") {
         let mut p = profile;
-        let today = chrono::Local::now().date_naive().to_string();
         for a in &list {
             if a.unlocked {
                 p.achievements.insert(a.id.clone());
-                p.achievement_dates
-                    .entry(a.id.clone())
-                    .or_insert_with(|| a.earned_date.clone().unwrap_or_else(|| today.clone()));
+                if let Some(date) = &a.earned_date {
+                    p.achievement_dates.insert(a.id.clone(), date.clone());
+                }
             }
         }
         store.set("profile", serde_json::to_value(&p).unwrap_or_default());
