@@ -7,12 +7,15 @@ const SRC_LABEL = {
   claude: "Claude",
   codex: "Codex",
   kimi: "Kimi",
-  continue: "Continue",
+  hashcortx: "HashCortx",
   cline: "Cline",
   all: "All tools",
 };
 
-const ALL_SRCS = ["claude", "codex", "kimi", "continue", "cline"];
+const ALL_SRCS = ["claude", "codex", "kimi", "hashcortx", "cline"];
+
+// Sources whose token counts are estimated rather than measured.
+const ESTIMATED_SRCS = new Set(["hashcortx"]);
 
 // Clean display names for model ids. Never show a raw hyphenated id.
 const MODEL_NAMES = {
@@ -24,6 +27,11 @@ const MODEL_NAMES = {
   "gpt-5.5": "GPT-5.5",
   "gpt-5": "GPT-5",
   "kimi-code/kimi-for-coding": "Kimi for Coding",
+  "gpt-oss-120b": "GPT-OSS 120B",
+  "gpt-oss-20b": "GPT-OSS 20B",
+  "llama-3.1-8b-instant": "Llama 3.1 8B",
+  "llama-3.3-70b-versatile": "Llama 3.3 70B",
+  "qwen3-32b": "Qwen3 32B",
   "<synthetic>": "Synthetic",
 };
 
@@ -171,12 +179,44 @@ function srcTokens(name) {
   return f.reduce((s, r) => s + (r.newIn || 0) + (r.write || 0) + (r.out || 0), 0);
 }
 
+function greet() {
+  const h = new Date().getHours();
+  if (h < 5) return "Still up";
+  if (h < 12) return "Good morning";
+  if (h < 17) return "Good afternoon";
+  if (h < 22) return "Good evening";
+  return "Good night";
+}
+
+function updateGreeting(a, days) {
+  const name = (window.USER_NAME || "").trim();
+  const hi = g("greeting-hi");
+  const sub = g("greeting-sub");
+  if (!hi) return;
+  hi.textContent = name ? greet() + ", " + name : greet();
+  if (!sub) return;
+  if (!a || !days || !days.length) {
+    sub.textContent = "No usage yet — start coding with any AI tool.";
+    return;
+  }
+  const processed = a.newIn + a.write + a.out;
+  const fh = Math.floor(a.focus_sec / 3600);
+  const where = SOURCE === "all" ? "across your tools" : "on " + SRC_LABEL[SOURCE];
+  sub.textContent =
+    "You've processed " + human(processed) + " tokens " + where +
+    " over " + days.length + " active " + (days.length === 1 ? "day" : "days") +
+    (fh > 0 ? " · " + fh + "h focused" : "") + ".";
+}
+
 function render() {
   if (!RAW) return;
   const days = selDays();
 
   // Empty state
   if (!days.length) {
+    updateGreeting(null, []);
+    if (g("dash-cal-grid")) g("dash-cal-grid").innerHTML = "";
+    if (g("dash-cal-foot")) g("dash-cal-foot").textContent = "";
     g("h-processed").textContent = "0";
     g("h-processed-sub").textContent = "No usage yet";
     g("h-focus").textContent = "0m";
@@ -199,6 +239,8 @@ function render() {
   const a = agg(days);
   const st = streaks(days);
 
+  updateGreeting(a, days);
+
   // Hero stats
   const processed = a.newIn + a.write + a.out;
   animate(g("h-processed"), processed, human);
@@ -210,7 +252,9 @@ function render() {
   g("h-focus-sub").textContent = a.focus_sec > 0 ? "focused, gaps under 5 min" : "no use time data";
 
   animate(g("h-cost"), Math.round(a.cost * 100), function (v) { return "$" + (v / 100).toFixed(2); });
+  g("h-cost-sub").textContent = SOURCE === "hashcortx" ? "free-tier · not billed" : "all time · public list rates";
 
+  g("s-cur").textContent = st[1] > 0 ? "keep it going" : "start a new one";
   animate(g("t-sessions"), a.sessions.size, commas);
   animate(g("t-messages"), a.messages, commas);
   g("s-messages").textContent = SOURCE === "claude" ? "user + assistant" : "model turns";
@@ -236,15 +280,24 @@ function render() {
   const srcCosts = ALL_SRCS.map(s => [s, srcCost(s)]).filter(([, c]) => c > 0);
   const costParts = srcCosts.map(([s, c]) => SRC_LABEL[s] + " " + money(c)).join(" \u00b7 ");
 
+  // Estimated-token note when an estimated source contributes to the view.
+  const estIncluded = (SOURCE === "all"
+    ? [...ESTIMATED_SRCS].some(s => RAW.tools[s] && RAW.tools[s].present && srcTokens(s) > 0)
+    : ESTIMATED_SRCS.has(SOURCE) && processed > 0);
+  const estNote = estIncluded
+    ? "<br><span class='foot-est'>HashCortx tokens are estimated from message length; its usage is free-tier and not billed.</span>"
+    : "";
+
   g("foot").innerHTML =
     "<b>" + SRC_LABEL[SOURCE] + "</b> \u00b7 \u2248<span class='pk'><b>" + lotrText +
     "\u00d7</b></span> the tokens in <b>The Lord of the Rings</b> across <b>" +
     a.sessions.size + "</b> sessions / <b>" + days.length + "</b> days.<br>" +
     "Est. API cost at public list rates: <b class='pk'>" + money(a.cost) + "</b>" +
-    (costParts ? " \u2014 " + costParts : "") + ".";
+    (costParts ? " \u2014 " + costParts : "") + "." + estNote;
 
   srcRow();
   renderCalendar();
+  renderMiniCalendar();
   models(a);
 }
 
@@ -266,8 +319,9 @@ function srcRow() {
     if (present) {
       const max = Math.max(1, ...ALL_SRCS.filter(x => RAW.tools[x] && RAW.tools[x].present).map(x => srcTokens(x)));
       const costStr = srcCost(s) > 0 ? " \u00b7 \u2248" + money(srcCost(s)) : "";
+      const estTag = ESTIMATED_SRCS.has(s) ? '<span class="src-est">est</span>' : "";
       el.innerHTML =
-        '<div class="srcname">' + SRC_LABEL[s] + '</div>' +
+        '<div class="srcname">' + SRC_LABEL[s] + estTag + '</div>' +
         '<div class="srcval">' + human(v) + '</div>' +
         '<div class="srcmeta">' + sess.size + ' sessions \u00b7 ' + arr.length + ' days' + costStr + '</div>' +
         '<div class="srcbar"><div class="srcfill" style="width:' + (100 * v / max) + '%"></div></div>';
@@ -325,6 +379,11 @@ async function load() {
     RAW = await scanUsage();
     LASTSYNC = Date.now();
     render();
+    // Keep the Settings "detected sources" list current if it's open.
+    if (typeof CURRENT_VIEW !== "undefined" && CURRENT_VIEW === "settings" &&
+        typeof renderSourceStatus === "function") {
+      renderSourceStatus();
+    }
     g("sync").textContent = "\u25cf live \u00b7 synced just now";
   } catch (e) {
     g("sync").textContent = "scan error";

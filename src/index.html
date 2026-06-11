@@ -60,7 +60,7 @@
           <button data-s="claude">Claude</button>
           <button data-s="codex">Codex</button>
           <button data-s="kimi">Kimi</button>
-          <button data-s="continue">Continue</button>
+          <button data-s="hashcortx">HashCortx</button>
           <button data-s="cline">Cline</button>
         </div>
         <div class="spacer"></div>
@@ -72,6 +72,11 @@
       </div>
 
       <div id="overview">
+        <div class="greeting">
+          <div class="greeting-hi" id="greeting-hi">--</div>
+          <div class="greeting-sub" id="greeting-sub"></div>
+        </div>
+
         <div class="hero-row">
           <div class="hero-tile">
             <div class="hero-val" id="h-processed">--</div>
@@ -86,18 +91,31 @@
           <div class="hero-tile">
             <div class="hero-val" id="h-cost">--</div>
             <div class="hero-lab">Est. cost</div>
-            <div class="hero-sub">all time</div>
+            <div class="hero-sub" id="h-cost-sub">all time</div>
           </div>
         </div>
 
-        <div class="grid">
-          <div class="tile"><div class="lab">Sessions</div><div class="val" id="t-sessions">--</div><div class="sub"></div></div>
-          <div class="tile"><div class="lab">Messages</div><div class="val" id="t-messages">--</div><div class="sub" id="s-messages"></div></div>
-          <div class="tile"><div class="lab">Active days</div><div class="val" id="t-days">--</div><div class="sub" id="s-days"></div></div>
-          <div class="tile"><div class="lab">Current streak</div><div class="val" id="t-cur">--</div><div class="sub"></div></div>
-          <div class="tile"><div class="lab">Longest streak</div><div class="val" id="t-long">--</div><div class="sub"></div></div>
-          <div class="tile"><div class="lab">Peak hour</div><div class="val" id="t-peak">--</div><div class="sub" id="s-peak"></div></div>
-          <div class="tile"><div class="lab">Favorite model</div><div class="val" id="t-fav" style="font-size:21px;margin-top:13px">--</div><div class="sub" id="s-fav"></div></div>
+        <!-- Calendar panel (1) : stat tiles (2) -->
+        <div class="dash-main">
+          <div class="dash-cal" id="dash-cal">
+            <div class="dash-cal-head">
+              <span class="dash-cal-title" id="dash-cal-title">--</span>
+              <button class="dash-cal-open" id="dash-cal-open" title="Open full calendar">Calendar</button>
+            </div>
+            <div class="dash-cal-grid" id="dash-cal-grid"></div>
+            <div class="dash-cal-foot" id="dash-cal-foot"></div>
+          </div>
+
+          <!-- Secondary stats, ordered by importance; sizes vary by weight -->
+          <div class="dash-tiles">
+            <div class="stat stat-lead span2"><div class="lab">Current streak</div><div class="val" id="t-cur">--</div><div class="sub" id="s-cur"></div></div>
+            <div class="stat"><div class="lab">Active days</div><div class="val" id="t-days">--</div><div class="sub" id="s-days"></div></div>
+            <div class="stat"><div class="lab">Sessions</div><div class="val" id="t-sessions">--</div><div class="sub"></div></div>
+            <div class="stat"><div class="lab">Favorite model</div><div class="val val-sm" id="t-fav">--</div><div class="sub" id="s-fav"></div></div>
+            <div class="stat"><div class="lab">Messages</div><div class="val" id="t-messages">--</div><div class="sub" id="s-messages"></div></div>
+            <div class="stat minor"><div class="lab">Peak hour</div><div class="val" id="t-peak">--</div><div class="sub" id="s-peak"></div></div>
+            <div class="stat minor"><div class="lab">Longest streak</div><div class="val" id="t-long">--</div><div class="sub"></div></div>
+          </div>
         </div>
 
         <div class="srcrow" id="srcrow"></div>
@@ -145,25 +163,87 @@
     <!-- SETTINGS VIEW -->
     <div id="view-settings" class="hidden">
       <div class="settings-wrap">
-        <h3>Settings</h3>
-        <div class="settings-group">
-          <div class="lab">Display name</div>
-          <input type="text" id="set-name" maxlength="40" class="settings-input" placeholder="Your name">
-          <button class="onboarding-btn" id="set-save-name" style="margin-top:8px;width:auto;padding:8px 18px;font-size:12px">Save name</button>
+        <div class="settings-hero">
+          <div class="settings-avatar" id="set-avatar">--</div>
+          <div>
+            <div class="settings-hello" id="set-hello">--</div>
+            <div class="settings-since" id="set-since"></div>
+          </div>
         </div>
-        <div class="settings-group" style="display:flex;align-items:center;gap:10px">
-          <input type="checkbox" id="set-reduced" style="accent-color:var(--pk)">
-          <label for="set-reduced" style="font-size:13px;color:var(--mut)">Reduced motion</label>
-        </div>
-        <div class="settings-group" style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="seg ghost" id="set-open-data">Open data folder</button>
-          <button class="seg ghost" id="set-reset" style="color:var(--warn)">Reset app</button>
-        </div>
-        <div style="font-size:13px;color:var(--mut);line-height:1.6;margin-top:8px">
-          <b style="color:var(--txt)">Security</b><br>
-          HashMeterAi reads only local usage metadata. No network. No telemetry. No message content. Data stays on this device.
-        </div>
-        <div style="font-size:11px;color:var(--mut);font-family:var(--mono);margin-top:8px">Version 0.1.0</div>
+
+        <!-- Profile -->
+        <section class="set-card">
+          <div class="set-card-title">Profile</div>
+          <label class="set-field">
+            <span class="set-label">Display name</span>
+            <div class="set-inline">
+              <input type="text" id="set-name" maxlength="40" class="settings-input" placeholder="Your name">
+              <button class="set-btn" id="set-save-name">Save</button>
+            </div>
+            <span class="set-hint">Personalizes your dashboard, persona, and share card.</span>
+          </label>
+        </section>
+
+        <!-- Appearance -->
+        <section class="set-card">
+          <div class="set-card-title">Appearance</div>
+          <div class="set-field">
+            <span class="set-label">Accent color</span>
+            <div class="set-swatches" id="set-accent"></div>
+          </div>
+          <label class="set-toggle">
+            <input type="checkbox" id="set-reduced">
+            <span><b>Reduced motion</b><small>Disable count-up and transition animations.</small></span>
+          </label>
+          <label class="set-toggle">
+            <input type="checkbox" id="set-compact">
+            <span><b>Compact density</b><small>Tighter spacing — fits more on small screens.</small></span>
+          </label>
+        </section>
+
+        <!-- Data & sync -->
+        <section class="set-card">
+          <div class="set-card-title">Data &amp; sync</div>
+          <div class="set-field set-inline2">
+            <label class="set-sub-field">
+              <span class="set-label">Auto-sync</span>
+              <select id="set-sync" class="settings-input">
+                <option value="30">Every 30 seconds</option>
+                <option value="60">Every minute</option>
+                <option value="300">Every 5 minutes</option>
+                <option value="900">Every 15 minutes</option>
+              </select>
+            </label>
+            <label class="set-sub-field">
+              <span class="set-label">Default range</span>
+              <select id="set-range" class="settings-input">
+                <option value="all">All time</option>
+                <option value="30">Last 30 days</option>
+                <option value="7">Last 7 days</option>
+              </select>
+            </label>
+          </div>
+          <div class="set-field">
+            <span class="set-label">Detected sources</span>
+            <div class="set-sources" id="set-sources"></div>
+          </div>
+          <button class="set-btn ghost" id="set-open-data">Open data folder</button>
+        </section>
+
+        <!-- Privacy -->
+        <section class="set-card">
+          <div class="set-card-title">Privacy</div>
+          <p class="set-note">HashMeterAi reads only local usage metadata. No network, no telemetry, no message content leaves this device. HashCortx token counts are <b>estimated</b> from message length.</p>
+        </section>
+
+        <!-- Danger zone -->
+        <section class="set-card danger">
+          <div class="set-card-title">Reset</div>
+          <p class="set-note">Clears your name, preferences, and unlocked badges. Usage data on disk is untouched.</p>
+          <button class="set-btn danger" id="set-reset">Reset app</button>
+        </section>
+
+        <div class="set-version">HashMeterAi · Version 0.1.0</div>
       </div>
     </div>
 

@@ -41,6 +41,71 @@ function monthName(m) {
   ][m];
 }
 
+function ymd(y, m, d) {
+  return y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
+}
+
+// Compact heatmap of the CURRENT month, embedded in the dashboard.
+function renderMiniCalendar() {
+  if (!RAW) return;
+  const grid = g("dash-cal-grid");
+  if (!grid) return;
+
+  const active = ALL_SRCS.filter(s => RAW.tools[s] && RAW.tools[s].present);
+  const names = SOURCE === "all" ? active : [SOURCE];
+  const dayMap = getDayMap(mergedDays(names));
+
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = now.getMonth();
+  const dim = daysInMonth(y, m);
+  const fws = firstWeekday(y, m);
+
+  let maxTok = 0, activeDays = 0, monthTok = 0;
+  for (let d = 1; d <= dim; d++) {
+    const rec = dayMap[ymd(y, m, d)];
+    if (!rec) continue;
+    const t = rec.newIn + rec.write + rec.out;
+    if (t > maxTok) maxTok = t;
+    if (t > 0) { activeDays++; monthTok += t; }
+  }
+
+  const title = g("dash-cal-title");
+  if (title) title.textContent = monthName(m) + " " + y;
+
+  grid.innerHTML = "";
+  for (const d of ["S", "M", "T", "W", "T", "F", "S"]) {
+    const el = document.createElement("div");
+    el.className = "mini-cell mini-dow";
+    el.textContent = d;
+    grid.appendChild(el);
+  }
+  for (let i = 0; i < fws; i++) {
+    const el = document.createElement("div");
+    el.className = "mini-cell mini-empty";
+    grid.appendChild(el);
+  }
+  const todayStr = ymd(y, m, now.getDate());
+  for (let d = 1; d <= dim; d++) {
+    const ds = ymd(y, m, d);
+    const rec = dayMap[ds];
+    const tok = rec ? rec.newIn + rec.write + rec.out : 0;
+    const lvl = calIntensity(tok, maxTok);
+    const el = document.createElement("div");
+    el.className = "mini-cell" + (ds === todayStr ? " mini-today" : "");
+    el.style.background = CAL_COLORS[lvl];
+    if (lvl === 4) el.style.boxShadow = "0 0 6px var(--pk)";
+    if (rec) el.title = ds + " · " + human(tok) + " tok";
+    grid.appendChild(el);
+  }
+
+  const foot = g("dash-cal-foot");
+  if (foot) {
+    foot.textContent = activeDays + " active " + (activeDays === 1 ? "day" : "days") +
+      " · " + human(monthTok) + " tok this month";
+  }
+}
+
 function renderCalendar() {
   if (!RAW) return;
   const active = ALL_SRCS.filter(s => RAW.tools[s] && RAW.tools[s].present);

@@ -1,23 +1,125 @@
+const ACCENT_PRESETS = [
+  { name: "Pumpkin", hex: "#FD802E" },
+  { name: "Amber", hex: "#FFB02E" },
+  { name: "Teal", hex: "#2EC5A8" },
+  { name: "Sky", hex: "#3B82F6" },
+  { name: "Violet", hex: "#9B8CFF" },
+  { name: "Rose", hex: "#FF5D8F" },
+  { name: "Mint", hex: "#3DDC84" },
+];
+
 async function loadSettings() {
   try {
     const p = await getProfile();
+    window.PREFS = p.prefs || window.PREFS || {};
+    const prefs = window.PREFS;
+
     g("set-name").value = p.name || "";
-    g("set-reduced").checked = p.prefs && p.prefs.reduced_motion;
+    g("set-reduced").checked = !!prefs.reduced_motion;
+    g("set-compact").checked = !!prefs.compact;
+    g("set-sync").value = String(prefs.auto_sync_secs || 60);
+    g("set-range").value = prefs.default_range || "all";
+
+    // Personalized hero.
+    const name = (p.name || "").trim();
+    g("set-hello").textContent = name ? "Hi, " + name : "Welcome";
+    g("set-avatar").textContent = name ? name.charAt(0).toUpperCase() : "?";
+    g("set-since").textContent = p.created_at
+      ? "Using HashMeterAi since " + String(p.created_at).slice(0, 10)
+      : "";
+
+    renderAccentSwatches(prefs.accent || "#FD802E");
+    renderSourceStatus();
   } catch (e) {
     console.error("settings load error", e);
+  }
+}
+
+function renderAccentSwatches(active) {
+  const host = g("set-accent");
+  if (!host) return;
+  host.innerHTML = "";
+  for (const preset of ACCENT_PRESETS) {
+    const el = document.createElement("button");
+    el.className = "swatch" + (sameHex(preset.hex, active) ? " on" : "");
+    el.style.background = preset.hex;
+    el.title = preset.name;
+    el.onclick = async function () {
+      window.PREFS.accent = preset.hex;
+      await setPref("accent", preset.hex);
+      if (typeof applyTheme === "function") applyTheme(window.PREFS);
+      renderAccentSwatches(preset.hex);
+    };
+    host.appendChild(el);
+  }
+}
+
+function renderSourceStatus() {
+  const host = g("set-sources");
+  if (!host) return;
+  host.innerHTML = "";
+  if (typeof RAW === "undefined" || !RAW || !RAW.tools) {
+    host.innerHTML = '<div class="set-src-row muted">Scanning…</div>';
+    return;
+  }
+  for (const s of ALL_SRCS) {
+    const tool = RAW.tools[s];
+    const present = tool && tool.present;
+    const days = present ? tool.days.length : 0;
+    const est = ESTIMATED_SRCS.has(s) ? ' <span class="src-est">est</span>' : "";
+    const el = document.createElement("div");
+    el.className = "set-src-row" + (present ? "" : " muted");
+    el.innerHTML =
+      '<span class="set-src-dot' + (present ? " on" : "") + '"></span>' +
+      '<span class="set-src-name">' + SRC_LABEL[s] + est + "</span>" +
+      '<span class="set-src-meta">' + (present ? days + (days === 1 ? " day" : " days") : "not detected") + "</span>";
+    host.appendChild(el);
   }
 }
 
 g("set-save-name").onclick = async function () {
   const name = g("set-name").value.trim();
   if (name.length < 1 || name.length > 40) return;
-  await setName(name);
+  const display = name.charAt(0).toUpperCase() + name.slice(1);
+  await setName(display);
+  window.USER_NAME = display;
+  g("set-name").value = display;
+  g("set-hello").textContent = "Hi, " + display;
+  g("set-avatar").textContent = display.charAt(0).toUpperCase();
+  if (typeof render === "function") render(); // refresh greeting
   g("set-save-name").textContent = "Saved";
-  setTimeout(() => g("set-save-name").textContent = "Save name", 1500);
+  setTimeout(() => g("set-save-name").textContent = "Save", 1500);
 };
 
 g("set-reduced").onchange = async function () {
+  window.PREFS.reduced_motion = this.checked;
+  window.REDUCED_MOTION = this.checked;
   await setPref("reduced_motion", this.checked);
+  if (typeof applyTheme === "function") applyTheme(window.PREFS);
+};
+
+g("set-compact").onchange = async function () {
+  window.PREFS.compact = this.checked;
+  await setPref("compact", this.checked);
+  if (typeof applyTheme === "function") applyTheme(window.PREFS);
+};
+
+g("set-sync").onchange = async function () {
+  const secs = parseInt(this.value, 10) || 60;
+  window.PREFS.auto_sync_secs = secs;
+  await setPref("auto_sync_secs", secs);
+  if (typeof startPolling === "function") startPolling();
+};
+
+g("set-range").onchange = async function () {
+  const r = this.value;
+  window.PREFS.default_range = r;
+  await setPref("default_range", r);
+  if (typeof RANGE !== "undefined") {
+    RANGE = r;
+    if (typeof syncRangeButtons === "function") syncRangeButtons();
+    if (typeof render === "function") render();
+  }
 };
 
 g("set-open-data").onclick = async function () {
@@ -30,3 +132,7 @@ g("set-reset").onclick = async function () {
   await resetProfile();
   window.location.reload();
 };
+
+function sameHex(a, b) {
+  return (a || "").toLowerCase() === (b || "").toLowerCase();
+}
