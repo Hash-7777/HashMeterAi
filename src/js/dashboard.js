@@ -232,7 +232,6 @@ function render() {
     g("t-peak").textContent = "\u2014";
     g("t-fav").textContent = "\u2014";
     g("foot").innerHTML = '<span style="color:var(--mut)">No usage yet \u2014 start coding with any AI tool and check back.</span>';
-    g("srcrow").innerHTML = "";
     g("cal-grid").innerHTML = "";
     g("mlist").innerHTML = "";
     return;
@@ -284,52 +283,9 @@ function render() {
   g("t-fav").textContent = fav ? prettyModel(fav[0]) : "\u2014";
   g("s-fav").textContent = fav ? human(fav[1]) + " tok" : "";
 
-  srcRow();
   renderCalendar();
   renderMiniCalendar();
   models(a);
-}
-
-function srcRow() {
-  const host = g("srcrow");
-  host.innerHTML = "";
-
-  for (const s of ALL_SRCS) {
-    const tool = RAW.tools[s];
-    const present = tool && tool.present;
-    const v = present ? srcTokens(s) : 0;
-    const sess = new Set();
-    const arr = sdays(s);
-    arr.forEach(r => r.sessions.forEach(x => sess.add(x)));
-
-    const el = document.createElement("div");
-    el.className = "srcchip" + (SOURCE === s ? " on" : "") + (present ? "" : " muted");
-
-    if (present) {
-      const max = Math.max(1, ...ALL_SRCS.filter(x => RAW.tools[x] && RAW.tools[x].present).map(x => srcTokens(x)));
-      const costStr = srcCost(s) > 0 ? " \u00b7 \u2248" + money(srcCost(s)) : "";
-      const estTag = ESTIMATED_SRCS.has(s) ? '<span class="src-est">est</span>' : "";
-      el.innerHTML =
-        '<div class="srcname">' + SRC_LABEL[s] + estTag + '</div>' +
-        '<div class="srcval">' + human(v) + '</div>' +
-        '<div class="srcmeta">' + sess.size + ' sessions \u00b7 ' + arr.length + ' days' + costStr + '</div>' +
-        '<div class="srcbar"><div class="srcfill" style="width:' + (100 * v / max) + '%"></div></div>';
-      el.onclick = function () {
-        SOURCE = SOURCE === s ? "all" : s;
-        syncSrcButtons();
-        render();
-      };
-    } else {
-      el.innerHTML =
-        '<div class="srcname">' + SRC_LABEL[s] + '</div>' +
-        '<div class="srcval" style="color:var(--mut)">not detected</div>' +
-        '<div class="srcmeta">\u2014</div>' +
-        '<div class="srcbar"><div class="srcfill" style="width:0%"></div></div>';
-      el.style.opacity = "0.5";
-      el.style.cursor = "default";
-    }
-    host.appendChild(el);
-  }
 }
 
 function models(a) {

@@ -69,29 +69,8 @@
   margin-bottom:15px;
 }
 
-.srcrow{display:flex;gap:12px;margin-top:16px;flex-wrap:wrap}
-.srcchip{
-  flex:1;
-  min-width:150px;
-  background:linear-gradient(180deg,var(--panel),var(--panel2));
-  border:1px solid var(--line);
-  border-radius:14px;
-  padding:14px 16px;
-  transition:.18s;
-  cursor:pointer;
-}
-.srcchip:hover{border-color:var(--line-pk)}
-.srcchip.on{border-color:var(--pk);box-shadow:0 0 0 1px var(--pk) inset}
-.srcname{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);font-weight:600}
-.srcval{font-size:22px;font-weight:700;margin-top:6px}
+/* .srcmeta is shared with the Models card empty-state. */
 .srcmeta{font-size:11px;color:var(--mut);margin-top:4px;font-family:var(--mono)}
-.srcbar{height:6px;border-radius:4px;background:rgba(0,0,0,.25);margin-top:10px;overflow:hidden}
-.srcfill{
-  height:100%;
-  border-radius:4px;
-  background:linear-gradient(90deg,var(--pk-dim),var(--pk));
-  transition:width .6s cubic-bezier(.2,.8,.2,1);
-}
 
 /* Calendar (own view) */
 .cal-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
@@ -182,6 +161,9 @@
 }
 .foot b{color:var(--txt);font-weight:700}
 .foot .pk{color:var(--pk)}
+/* Collapse the footer entirely when it has no content (normal dashboard state),
+   so it reclaims its top margin and the dashboard fits on one page. */
+.foot:empty{display:none}
 
 /* Hero stats */
 .hero-row{
@@ -634,7 +616,8 @@
 }
 
 /* ===== Secondary stat tiles (importance-ranked, smaller) ===== */
-.dash-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:start}
+/* Tiles fill the column so the stack bottom-aligns with the calendar panel. */
+.dash-tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:stretch}
 .stat{
   position:relative;
   background:linear-gradient(180deg,var(--panel),var(--panel2));
@@ -643,6 +626,9 @@
   padding:10px 12px 9px;
   overflow:hidden;
   transition:.18s;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 .stat:hover{border-color:var(--line-pk);transform:translateY(-1px)}
 .stat::before{
