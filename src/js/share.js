@@ -92,7 +92,8 @@ async function renderShareCard() {
     streak = lng;
   }
 
-  const avgFocus = days > 0 ? Math.round(focus / days) : 0;
+  const distinctDays = Object.keys(allDays).length;
+  const avgFocus = distinctDays > 0 ? Math.round(focus / distinctDays) : 0;
   const fh = Math.floor(avgFocus / 3600);
   const fm = Math.floor((avgFocus % 3600) / 60);
   const focusStr = fh > 0 ? fh + "h " + fm + "m" : fm + "m";
