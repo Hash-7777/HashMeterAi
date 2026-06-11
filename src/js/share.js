@@ -48,6 +48,7 @@ async function renderShareCard() {
   }
 
   const ptitle = persona ? persona.title : "AI Explorer";
+  const psub = persona ? (persona.subtitle || "") : "";
   const standing = persona ? persona.standing : null;
   const uname = (window.USER_NAME || "").trim();
 
@@ -200,12 +201,12 @@ async function renderShareCard() {
   }
 
   // ===== Header =====
-  const hdr = ctx.createLinearGradient(0, 0, W, 0);
-  hdr.addColorStop(0, hexToRgba(ACCENT, 0.28));
-  hdr.addColorStop(0.55, hexToRgba(ACCENT, 0.08));
-  hdr.addColorStop(1, "transparent");
-  ctx.fillStyle = hdr;
-  ctx.fillRect(0, 0, W, 74);
+  // Soft top glow that fades into the background — no hard-edged band.
+  const topGlow = ctx.createLinearGradient(0, 0, 0, 120);
+  topGlow.addColorStop(0, hexToRgba(ACCENT, 0.13));
+  topGlow.addColorStop(1, "transparent");
+  ctx.fillStyle = topGlow;
+  ctx.fillRect(0, 0, W, 120);
 
   ctx.textAlign = "left";
   ctx.fillStyle = "#eef4f7";
@@ -217,8 +218,14 @@ async function renderShareCard() {
   ctx.font = "13px " + SANS;
   ctx.fillText("See how much AI you really use.", 48, 60);
 
-  ctx.strokeStyle = hexToRgba(ACCENT, 0.5);
-  ctx.lineWidth = 2;
+  // A single divider that's an accent gradient (strong under the wordmark,
+  // fading out to the right) rather than a flat rule — reads as a design accent.
+  const lineGrad = ctx.createLinearGradient(48, 0, W - 48, 0);
+  lineGrad.addColorStop(0, hexToRgba(ACCENT, 0.65));
+  lineGrad.addColorStop(0.45, hexToRgba(ACCENT, 0.18));
+  lineGrad.addColorStop(1, "transparent");
+  ctx.strokeStyle = lineGrad;
+  ctx.lineWidth = 1.5;
   ctx.beginPath();
   ctx.moveTo(48, 80);
   ctx.lineTo(W - 48, 80);
@@ -234,16 +241,25 @@ async function renderShareCard() {
     ctx.fillText(line, CX, y);
     y += titleFit.fontSize + 8;
   }
+  const nameLine = uname
+    ? (psub ? uname + "  ·  " + psub : uname + "'s AI usage")
+    : (psub || "My AI usage");
   ctx.fillStyle = "rgba(238,244,247,0.82)";
   ctx.font = "17px " + SANS;
-  ctx.fillText(uname ? uname + "'s AI usage" : "My AI usage", CX, y);
+  ctx.fillText(nameLine, CX, y);
 
   // ===== Hero: estimated dollar value =====
   const heroY = y + 70;
-  ctx.fillStyle = "#eef4f7";
-  ctx.font = "bold 72px " + SANS;
+  // Soft radial glow so the headline number really pops.
+  const heroGlow = ctx.createRadialGradient(CX, heroY - 16, 0, CX, heroY - 16, 250);
+  heroGlow.addColorStop(0, hexToRgba(ACCENT, 0.17));
+  heroGlow.addColorStop(1, "transparent");
+  ctx.fillStyle = heroGlow;
+  ctx.fillRect(CX - 340, heroY - 78, 680, 150);
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 74px " + SANS;
   ctx.fillText(money(cost), CX, heroY);
-  ctx.fillStyle = "#86a0ad";
+  ctx.fillStyle = "#9fb3bd";
   ctx.font = "600 14px " + SANS;
   ctx.fillText("estimated compute value", CX, heroY + 24);
 
@@ -251,19 +267,19 @@ async function renderShareCard() {
   let blockBottom = heroY + 24;
   if (standing) {
     const label = standing.label + "  *";
-    ctx.font = "bold 17px " + SANS;
+    ctx.font = "bold 18px " + SANS;
     const tw = ctx.measureText(label).width;
-    const pw = tw + 36, ph = 36, px = CX - pw / 2, py = heroY + 42;
-    roundRect(px, py, pw, ph, 18);
-    ctx.fillStyle = hexToRgba(ACCENT, 0.15);
+    const pw = tw + 40, ph = 38, px = CX - pw / 2, py = heroY + 42;
+    roundRect(px, py, pw, ph, 19);
+    ctx.fillStyle = hexToRgba(ACCENT, 0.2);
     ctx.fill();
     ctx.lineWidth = 1.5;
-    ctx.strokeStyle = hexToRgba(ACCENT, 0.55);
+    ctx.strokeStyle = hexToRgba(ACCENT, 0.7);
     ctx.stroke();
-    ctx.fillStyle = ACCENT;
+    ctx.fillStyle = lighten(ACCENT, 0.2);
     ctx.textAlign = "center";
-    ctx.font = "bold 17px " + SANS;
-    ctx.fillText(label, CX, py + 24);
+    ctx.font = "bold 18px " + SANS;
+    ctx.fillText(label, CX, py + 25);
     blockBottom = py + ph;
   }
 
