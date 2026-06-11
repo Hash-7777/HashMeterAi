@@ -231,6 +231,8 @@
   letter-spacing:.04em;
   font-family:var(--mono);
 }
+.hero-tile.click{cursor:pointer}
+.hero-tile.click .hero-lab::after{content:" \21BB";opacity:.75}
 
 /* Onboarding */
 .onboarding-wrap{

@@ -2,6 +2,7 @@ let RAW = null;
 let RANGE = "all";
 let SOURCE = "all";
 let LASTSYNC = 0;
+let HERO_TOKEN_VIEW = 1; // 0 = Pure Signal, 1 = Real Work, 2 = Full Footprint
 
 const SRC_LABEL = {
   claude: "Claude",
@@ -218,6 +219,7 @@ function render() {
     if (g("dash-cal-grid")) g("dash-cal-grid").innerHTML = "";
     if (g("dash-cal-foot")) g("dash-cal-foot").textContent = "";
     g("h-processed").textContent = "0";
+    g("h-processed-lab").textContent = "Real Work";
     g("h-processed-sub").textContent = "No usage yet";
     g("h-focus").textContent = "0m";
     g("h-focus-sub").textContent = "Start coding with AI";
@@ -241,10 +243,17 @@ function render() {
 
   updateGreeting(a, days);
 
-  // Hero stats
-  const processed = a.newIn + a.write + a.out;
-  animate(g("h-processed"), processed, human);
-  g("h-processed-sub").textContent = days.length ? days[0].date + " \u2192 " + days[days.length - 1].date : "";
+  // Hero stats \u2014 token tile cycles through three honest definitions
+  const tokenViews = [
+    { name: "Pure Signal", val: a.newIn + a.out, desc: "input + output only" },
+    { name: "Real Work", val: a.newIn + a.write + a.out, desc: "input + cache-write + output" },
+    { name: "Full Footprint", val: a.newIn + a.write + a.read + a.out, desc: "all billed tokens incl. cache-read" },
+  ];
+  const tv = tokenViews[HERO_TOKEN_VIEW];
+  animate(g("h-processed"), tv.val, human);
+  g("h-processed-lab").textContent = tv.name;
+  const dateRange = days.length ? days[0].date + " \u2192 " + days[days.length - 1].date : "";
+  g("h-processed-sub").textContent = tv.desc + (dateRange ? " \u00b7 " + dateRange : "");
 
   const fh = Math.floor(a.focus_sec / 3600);
   const fm = Math.floor((a.focus_sec % 3600) / 60);
@@ -252,7 +261,7 @@ function render() {
   g("h-focus-sub").textContent = a.focus_sec > 0 ? "focused, gaps under 5 min" : "no use time data";
 
   animate(g("h-cost"), Math.round(a.cost * 100), function (v) { return "$" + (v / 100).toFixed(2); });
-  g("h-cost-sub").textContent = SOURCE === "hashcortx" ? "free-tier · not billed" : "all time · public list rates";
+  g("h-cost-sub").textContent = SOURCE === "hashcortx" ? "free-tier \u00b7 not billed" : "all time \u00b7 public list rates";
 
   g("s-cur").textContent = st[1] > 0 ? "keep it going" : "start a new one";
   animate(g("t-sessions"), a.sessions.size, commas);
@@ -267,6 +276,7 @@ function render() {
 
   let ph = 0;
   for (let h = 0; h < 24; h++) if (a.hours[h] > a.hours[ph]) ph = h;
+
   g("t-peak").textContent = hourLabel(ph);
   g("s-peak").textContent = commas(a.hours[ph]) + " msgs";
 
@@ -374,3 +384,8 @@ setInterval(function () {
   const s = Math.max(0, Math.round((Date.now() - LASTSYNC) / 1000));
   g("sync").textContent = "\u25cf live \u00b7 synced " + s + "s ago";
 }, 1000);
+
+g("h-processed-tile").onclick = function () {
+  HERO_TOKEN_VIEW = (HERO_TOKEN_VIEW + 1) % 3;
+  if (typeof render === "function") render();
+};
