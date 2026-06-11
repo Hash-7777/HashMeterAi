@@ -33,6 +33,7 @@
     </div>
     <div class="toolbar-center" data-tauri-drag-region>
       <button class="nav-tab on" data-view="dashboard">Dashboard</button>
+      <button class="nav-tab" data-view="calendar">Calendar</button>
       <button class="nav-tab" data-view="persona">Persona</button>
       <button class="nav-tab" data-view="achievements">Achievements</button>
       <button class="nav-tab" data-view="settings">Settings</button>
@@ -59,7 +60,7 @@
           <button data-s="claude">Claude</button>
           <button data-s="codex">Codex</button>
           <button data-s="kimi">Kimi</button>
-          <button data-s="hashcortx">HashCortX</button>
+          <button data-s="continue">Continue</button>
           <button data-s="cline">Cline</button>
         </div>
         <div class="spacer"></div>
@@ -101,20 +102,27 @@
 
         <div class="srcrow" id="srcrow"></div>
 
-        <div class="card"><h3>Activity Calendar</h3>
-          <div class="cal-grid" id="cal-grid"></div>
-          <div class="legend"><span>None</span>
-            <i style="background:rgba(255,255,255,.06)"></i><i style="background:#5c3a22"></i>
-            <i style="background:#b15d23"></i><i style="background:#fd802e"></i>
-            <i style="background:#ffb27a;box-shadow:0 0 8px var(--pk)"></i><span>Peak</span>
-            <span style="margin-left:auto" id="cal-month"></span>
-          </div>
-        </div>
-
         <div class="foot" id="foot"></div>
       </div>
 
       <div class="card hidden" id="models-card"><h3>Token share by model - billed</h3><div id="mlist"></div></div>
+    </div>
+
+    <!-- CALENDAR VIEW -->
+    <div id="view-calendar" class="hidden">
+      <div class="cal-head">
+        <button class="cal-nav" id="cal-prev">Prev</button>
+        <div class="cal-title" id="cal-month">--</div>
+        <button class="cal-nav" id="cal-next">Next</button>
+        <button class="cal-nav" id="cal-today">Today</button>
+        <div class="spacer"></div>
+        <div class="legend"><span>None</span>
+          <i style="background:rgba(255,255,255,.06)"></i><i style="background:#5c3a22"></i>
+          <i style="background:#b15d23"></i><i style="background:#fd802e"></i>
+          <i style="background:#ffb27a;box-shadow:0 0 8px var(--pk)"></i><span>Peak</span>
+        </div>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
     </div>
 
     <!-- PERSONA VIEW -->
@@ -177,7 +185,6 @@
 
 <div class="tip" id="tip"></div>
 
-<script src="js/window-state.js"></script>
 <script src="js/format.js"></script>
 <script src="js/api.js"></script>
 <script src="js/dashboard.js"></script>

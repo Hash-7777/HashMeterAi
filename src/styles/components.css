@@ -93,14 +93,22 @@
   transition:width .6s cubic-bezier(.2,.8,.2,1);
 }
 
-/* Calendar in dashboard */
+/* Calendar (own view) */
+.cal-head{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.cal-title{font-size:15px;font-weight:700;letter-spacing:.04em;min-width:160px;text-align:center}
+.cal-nav{
+  font:inherit;font-size:12px;font-weight:600;color:var(--mut);
+  background:rgba(0,0,0,.25);border:1px solid var(--line);
+  border-radius:9px;padding:7px 14px;cursor:pointer;transition:.16s;
+}
+.cal-nav:hover{color:var(--txt);border-color:var(--line-pk)}
 .cal-grid{
   display:grid;
   grid-template-columns:repeat(7,1fr);
   gap:6px;
 }
 .cal-cell{
-  aspect-ratio:1;
+  height:clamp(46px,9.2vh,78px);
   border-radius:8px;
   display:flex;
   flex-direction:column;
@@ -367,15 +375,15 @@
 }
 .ach-grid{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:13px;
+  grid-template-columns:repeat(auto-fill,minmax(155px,1fr));
+  gap:12px;
 }
 .ach-badge{
   position:relative;
   background:linear-gradient(180deg,var(--panel),var(--panel2));
   border:1px solid var(--line);
-  border-radius:15px;
-  padding:18px 16px 14px;
+  border-radius:14px;
+  padding:12px 12px 11px;
   text-align:center;
   transition:.2s;
   overflow:hidden;
@@ -395,15 +403,15 @@
 .ach-badge.locked{opacity:.4;filter:grayscale(.6)}
 .ach-badge.locked::before{opacity:.2}
 .ach-icon{
-  width:44px;
-  height:44px;
+  width:34px;
+  height:34px;
   border-radius:50%;
   background:linear-gradient(135deg,var(--pk-dim),var(--pk));
   display:flex;
   align-items:center;
   justify-content:center;
-  margin:0 auto 10px;
-  font-size:18px;
+  margin:0 auto 8px;
+  font-size:15px;
   font-weight:800;
   color:#1a2c36;
   box-shadow:0 0 14px rgba(253,128,46,.35);

@@ -35,10 +35,11 @@ function showView(name) {
   for (const el of document.querySelectorAll(".nav-tab")) {
     el.classList.toggle("on", el.dataset.view === name);
   }
-  for (const id of ["view-dashboard", "view-persona", "view-achievements", "view-settings", "view-share"]) {
+  for (const id of ["view-dashboard", "view-calendar", "view-persona", "view-achievements", "view-settings", "view-share"]) {
     const el = g(id);
     if (el) el.classList.toggle("hidden", id !== "view-" + name);
   }
+  if (name === "calendar") renderCalendar();
   if (name === "persona") loadPersona();
   if (name === "achievements") loadAchievements();
   if (name === "settings") loadSettings();
@@ -105,6 +106,23 @@ g("src").onclick = function (e) {
 
 g("btn-sync").onclick = function () {
   load();
+};
+
+// Calendar month navigation (CAL_MONTH / CAL_YEAR live in calendar.js)
+g("cal-prev").onclick = function () {
+  CAL_MONTH--;
+  if (CAL_MONTH < 0) { CAL_MONTH = 11; CAL_YEAR--; }
+  renderCalendar();
+};
+g("cal-next").onclick = function () {
+  CAL_MONTH++;
+  if (CAL_MONTH > 11) { CAL_MONTH = 0; CAL_YEAR++; }
+  renderCalendar();
+};
+g("cal-today").onclick = function () {
+  CAL_YEAR = new Date().getFullYear();
+  CAL_MONTH = new Date().getMonth();
+  renderCalendar();
 };
 
 boot();
