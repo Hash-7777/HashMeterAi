@@ -18,7 +18,10 @@ use tauri_plugin_store::StoreExt;
 
 #[tauri::command]
 fn scan_usage() -> Snapshot {
-    scan::run()
+    // Explicit sync / poll: refresh unless a scan finished in the last couple
+    // of seconds (coalesces the mount + render burst). The 60s auto-sync is
+    // always older than this, so it always gets fresh data.
+    scan::cached(2)
 }
 
 #[tauri::command]
@@ -51,22 +54,32 @@ fn set_name(name: String, app: tauri::AppHandle) {
 
 #[tauri::command]
 fn get_persona(app: tauri::AppHandle) -> persona::Persona {
-    let snap = scan::run();
+    // Cheap read path: reuse the recent scan so opening Persona never
+    // re-walks the disk.
+    let snap = scan::cached(90);
     let profile = get_profile(app);
     persona::from_snapshot(&snap, &profile.name)
 }
 
 #[tauri::command]
 fn get_achievements(app: tauri::AppHandle) -> Vec<achievements::Achievement> {
-    let snap = scan::run();
+    let snap = scan::cached(90);
     let profile = get_profile(app.clone());
-    let list = achievements::compute(&snap, &profile.achievements);
-    // Persist newly unlocked achievements.
+    let list = achievements::compute_with_dates(
+        &snap,
+        &profile.achievements,
+        &profile.achievement_dates,
+    );
+    // Persist newly unlocked achievements and stamp their first-seen date.
     if let Ok(store) = app.store("profile.json") {
         let mut p = profile;
+        let today = chrono::Local::now().date_naive().to_string();
         for a in &list {
             if a.unlocked {
                 p.achievements.insert(a.id.clone());
+                p.achievement_dates
+                    .entry(a.id.clone())
+                    .or_insert_with(|| a.earned_date.clone().unwrap_or_else(|| today.clone()));
             }
         }
         store.set("profile", serde_json::to_value(&p).unwrap_or_default());
@@ -82,12 +95,43 @@ fn set_pref(key: String, value: serde_json::Value, app: tauri::AppHandle) {
             .get("profile")
             .and_then(|v| serde_json::from_value(v).ok())
             .unwrap_or_default();
-        if key.as_str() == "reduced_motion" {
-            p.prefs.reduced_motion = value.as_bool().unwrap_or(false);
+        match key.as_str() {
+            "reduced_motion" => p.prefs.reduced_motion = value.as_bool().unwrap_or(false),
+            "compact" => p.prefs.compact = value.as_bool().unwrap_or(false),
+            "default_range" => {
+                if let Some(s) = value.as_str() {
+                    if matches!(s, "all" | "30" | "7") {
+                        p.prefs.default_range = s.to_string();
+                    }
+                }
+            }
+            "accent" => {
+                if let Some(s) = value.as_str() {
+                    if is_hex_color(s) {
+                        p.prefs.accent = s.to_string();
+                    }
+                }
+            }
+            "auto_sync_secs" => {
+                if let Some(n) = value.as_u64() {
+                    // Clamp to a sane window: 15s .. 1h.
+                    p.prefs.auto_sync_secs = n.clamp(15, 3600);
+                }
+            }
+            _ => {}
         }
         store.set("profile", serde_json::to_value(&p).unwrap_or_default());
         let _ = store.save();
     }
+}
+
+/// Validate a `#rrggbb` (or `#rgb`) hex color before storing it.
+fn is_hex_color(s: &str) -> bool {
+    let hex = match s.strip_prefix('#') {
+        Some(h) => h,
+        None => return false,
+    };
+    (hex.len() == 3 || hex.len() == 6) && hex.chars().all(|c| c.is_ascii_hexdigit())
 }
 
 #[tauri::command]
