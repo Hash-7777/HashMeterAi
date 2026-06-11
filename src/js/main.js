@@ -4,7 +4,7 @@ let CURRENT_SCREEN = "loading";
 async function boot() {
   try {
     const profile = await getProfile();
-    window.REDUCED_MOTION = profile.prefs && profile.prefs.reduced_motion;
+    applyProfile(profile);
     if (!profile.name) {
       CURRENT_SCREEN = "onboarding";
       initOnboarding();
@@ -21,14 +21,74 @@ async function boot() {
   }
 }
 
+// Apply the stored profile to the UI: name, theme, density, defaults.
+function applyProfile(profile) {
+  const prefs = (profile && profile.prefs) || {};
+  window.USER_NAME = (profile && profile.name) || "";
+  window.PROFILE = profile || {};
+  window.PREFS = prefs;
+  window.REDUCED_MOTION = !!prefs.reduced_motion;
+  applyTheme(prefs);
+  if (prefs.default_range && typeof RANGE !== "undefined") {
+    RANGE = prefs.default_range;
+    syncRangeButtons();
+  }
+}
+
+// Accent color + compact density are pure CSS toggles applied at runtime.
+function applyTheme(prefs) {
+  const accent = (prefs && prefs.accent) || "#FD802E";
+  const root = document.documentElement;
+  root.style.setProperty("--pk", accent);
+  root.style.setProperty("--pk2", lighten(accent, 0.18));
+  root.style.setProperty("--pk-dim", lighten(accent, -0.22));
+  root.style.setProperty("--line-pk", hexToRgba(accent, 0.3));
+  document.body.classList.toggle("compact", !!(prefs && prefs.compact));
+  document.body.classList.toggle("reduced", !!(prefs && prefs.reduced_motion));
+}
+
+function syncRangeButtons() {
+  const host = g("range");
+  if (!host) return;
+  for (const b of host.children) b.classList.toggle("on", b.dataset.r === RANGE);
+}
+
 function showApp() {
   g("onboarding").classList.add("hidden");
   g("app").classList.remove("hidden");
   load();
-  if (!window._poll) {
-    window._poll = setInterval(load, 30000);
+  startPolling();
+}
+
+// --- Energy-aware polling: sync on the configured interval, but pause while
+// the window is hidden or blurred so an idle app does no disk work. ---
+function pollMs() {
+  const s = (window.PREFS && window.PREFS.auto_sync_secs) || 60;
+  return Math.max(15, s) * 1000;
+}
+
+function startPolling() {
+  stopPolling();
+  if (document.hidden) return;
+  window._poll = setInterval(load, pollMs());
+}
+
+function stopPolling() {
+  if (window._poll) {
+    clearInterval(window._poll);
+    window._poll = null;
   }
 }
+
+document.addEventListener("visibilitychange", function () {
+  if (CURRENT_SCREEN !== "app") return;
+  if (document.hidden) {
+    stopPolling();
+  } else {
+    load();
+    startPolling();
+  }
+});
 
 function showView(name) {
   CURRENT_VIEW = name;
@@ -123,6 +183,11 @@ g("cal-today").onclick = function () {
   CAL_YEAR = new Date().getFullYear();
   CAL_MONTH = new Date().getMonth();
   renderCalendar();
+};
+
+// Dashboard calendar panel -> jump to the full Calendar view.
+g("dash-cal-open").onclick = function () {
+  showView("calendar");
 };
 
 boot();

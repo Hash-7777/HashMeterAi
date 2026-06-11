@@ -24,3 +24,27 @@ function duration(sec) {
 function hourLabel(h) {
   return ((h % 12) || 12) + " " + (h < 12 ? "AM" : "PM");
 }
+
+// --- Color helpers (accent theming) ---
+function hexToRgb(hex) {
+  let h = (hex || "").replace("#", "");
+  if (h.length === 3) h = h.split("").map(c => c + c).join("");
+  const n = parseInt(h, 16) || 0;
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+function hexToRgba(hex, a) {
+  const [r, gr, b] = hexToRgb(hex);
+  return "rgba(" + r + "," + gr + "," + b + "," + a + ")";
+}
+
+// amt in [-1, 1]: positive lightens toward white, negative darkens toward black.
+function lighten(hex, amt) {
+  let [r, gr, b] = hexToRgb(hex);
+  const target = amt < 0 ? 0 : 255;
+  const t = Math.abs(amt);
+  r = Math.round(r + (target - r) * t);
+  gr = Math.round(gr + (target - gr) * t);
+  b = Math.round(b + (target - b) * t);
+  return "#" + [r, gr, b].map(x => x.toString(16).padStart(2, "0")).join("");
+}

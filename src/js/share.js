@@ -5,6 +5,7 @@ async function renderShareCard() {
   const ctx = canvas.getContext("2d");
   const W = 1200;
   const H = 630;
+  const ACCENT = (window.PREFS && window.PREFS.accent) || "#FD802E";
 
   // Background
   const grad = ctx.createLinearGradient(0, 0, W, H);
@@ -34,7 +35,7 @@ async function renderShareCard() {
   ctx.fillStyle = "#eef4f7";
   ctx.font = "bold 28px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.fillText("HashMeter", 48, 56);
-  ctx.fillStyle = "#FD802E";
+  ctx.fillStyle = ACCENT;
   ctx.fillText("Ai", 48 + ctx.measureText("HashMeter").width, 56);
 
   // Fetch data
@@ -51,13 +52,14 @@ async function renderShareCard() {
 
   const ptitle = persona ? persona.title : "AI Explorer";
 
-  // Headline
+  // Headline (personalized)
+  const uname = (window.USER_NAME || "").trim();
   ctx.fillStyle = "#eef4f7";
   ctx.font = "bold 42px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("My AI usage", 48, 140);
+  ctx.fillText(uname ? uname + "'s AI usage" : "My AI usage", 48, 140);
 
   // Persona title
-  ctx.fillStyle = "#FD802E";
+  ctx.fillStyle = ACCENT;
   ctx.font = "bold 56px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.fillText(ptitle, 48, 210);
 
@@ -124,7 +126,7 @@ async function renderShareCard() {
   // Top achievement
   const top = achievements.filter(a => a.unlocked).sort((a, b) => (b.progress - a.progress))[0];
   if (top) {
-    ctx.fillStyle = "#FD802E";
+    ctx.fillStyle = ACCENT;
     ctx.font = "bold 18px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText("Top badge: " + top.name, 48, 460);
   }
