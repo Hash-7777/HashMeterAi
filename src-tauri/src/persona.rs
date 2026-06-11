@@ -221,13 +221,17 @@ fn pick_base(stats: &Stats) -> String {
     if stats.tools_used >= 3 {
         return "Polyglot Operator".to_string();
     }
+    // Model affinity is measured against total billed tokens (the same basis
+    // model_share is keyed on), so numerator and denominator share a unit.
+    let billed_total: u64 = stats.model_share.values().sum();
     let opus = stats.model_share.get("claude-opus-4-8").copied().unwrap_or(0)
         + stats.model_share.get("claude-opus-4-7").copied().unwrap_or(0);
-    if stats.processed > 0 && opus as f64 / stats.processed as f64 >= 0.55 {
+    if billed_total > 0 && opus as f64 / billed_total as f64 >= 0.55 {
         return "Deep Thinker".to_string();
     }
-    let haiku = stats.model_share.get("claude-haiku-4-5-20251001").copied().unwrap_or(0);
-    if stats.processed > 0 && haiku as f64 / stats.processed as f64 >= 0.55 {
+    let haiku = stats.model_share.get("claude-haiku-4-5-20251001").copied().unwrap_or(0)
+        + stats.model_share.get("claude-haiku-4-5").copied().unwrap_or(0);
+    if billed_total > 0 && haiku as f64 / billed_total as f64 >= 0.55 {
         return "Speed Runner".to_string();
     }
     "AI Engineer".to_string()
@@ -277,8 +281,8 @@ fn base_why(stats: &Stats, base: &str) -> String {
             human(stats.out)
         ),
         "Polyglot Operator" => format!("{} tools with usage", stats.tools_used),
-        "Deep Thinker" => "Opus >= 55% of processed".to_string(),
-        "Speed Runner" => "Haiku/small >= 55% of processed".to_string(),
+        "Deep Thinker" => "Opus >= 55% of billed tokens".to_string(),
+        "Speed Runner" => "Haiku/small >= 55% of billed tokens".to_string(),
         _ => "Balanced input/output ratio".to_string(),
     }
 }

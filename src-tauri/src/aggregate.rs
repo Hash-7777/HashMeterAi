@@ -122,6 +122,7 @@ mod tests {
     use super::*;
     use chrono::TimeZone;
 
+    #[allow(clippy::too_many_arguments)] // test fixture builder; clarity over arity
     fn make_event(
         source: &'static str,
         date: &str,
