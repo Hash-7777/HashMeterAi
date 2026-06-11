@@ -1,10 +1,12 @@
 const LOTR = 580000;
+const SANS = "-apple-system, BlinkMacSystemFont, sans-serif";
 
 async function renderShareCard() {
   const canvas = g("share-canvas");
   const ctx = canvas.getContext("2d");
   const W = 1200;
   const H = 630;
+  const CX = W / 2;
   const dpr = window.devicePixelRatio || 1;
   const ACCENT = (window.PREFS && window.PREFS.accent) || "#FD802E";
 
@@ -13,7 +15,8 @@ async function renderShareCard() {
   canvas.height = H * dpr;
   canvas.style.maxWidth = "100%";
   canvas.style.height = "auto";
-  ctx.scale(dpr, dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.textBaseline = "alphabetic";
 
   // Background
   const grad = ctx.createLinearGradient(0, 0, W, H);
@@ -45,10 +48,11 @@ async function renderShareCard() {
   }
 
   const ptitle = persona ? persona.title : "AI Explorer";
+  const standing = persona ? persona.standing : null;
   const uname = (window.USER_NAME || "").trim();
 
   // Compute stats
-  let processed = 0, cost = 0, days = 0, sessions = 0, focus = 0, tools = 0, streak = 0;
+  let processed = 0, cost = 0, tools = 0, streak = 0;
   const allDays = {};
   const toolTokens = {};
   let hashcortxEstimated = false;
@@ -61,9 +65,6 @@ async function renderShareCard() {
         const tok = d.newIn + d.write + d.out;
         processed += tok;
         cost += d.cost || 0;
-        sessions += d.sessions.length;
-        focus += d.focus_sec || 0;
-        days++;
         toolTok += tok;
         if (!allDays[d.date]) allDays[d.date] = 0;
         allDays[d.date] += tok;
@@ -74,7 +75,7 @@ async function renderShareCard() {
     const ds = Object.keys(allDays).sort();
     let cur = 1, lng = 1;
     for (let i = 1; i < ds.length; i++) {
-      const a = new Date(ds[i-1] + "T00:00:00");
+      const a = new Date(ds[i - 1] + "T00:00:00");
       const b = new Date(ds[i] + "T00:00:00");
       cur = (b - a) / 864e5 === 1 ? cur + 1 : 1;
       lng = Math.max(lng, cur);
@@ -82,13 +83,7 @@ async function renderShareCard() {
     streak = lng;
   }
 
-  const distinctDays = Object.keys(allDays).length;
-  const avgFocus = distinctDays > 0 ? Math.round(focus / distinctDays) : 0;
-  const fh = Math.floor(avgFocus / 3600);
-  const fm = Math.floor((avgFocus % 3600) / 60);
-  const focusStr = fh > 0 ? fh + "h " + fm + "m" : fm + "m";
-
-  // Helpers
+  // ---- Drawing helpers ----
   function roundRect(x, y, w, h, r) {
     const rr = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
@@ -106,7 +101,7 @@ async function renderShareCard() {
 
   function drawStat(x, y, w, val, lab) {
     ctx.save();
-    roundRect(x, y, w, 64, 10);
+    roundRect(x, y, w, 66, 11);
     ctx.fillStyle = "rgba(255,255,255,0.04)";
     ctx.fill();
     ctx.lineWidth = 1;
@@ -114,17 +109,17 @@ async function renderShareCard() {
     ctx.stroke();
     ctx.textAlign = "center";
     ctx.fillStyle = "#eef4f7";
-    ctx.font = "bold 30px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.font = "bold 28px " + SANS;
     ctx.fillText(val, x + w / 2, y + 36);
     ctx.fillStyle = "#86a0ad";
-    ctx.font = "600 11px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.font = "600 11px " + SANS;
     ctx.fillText(lab, x + w / 2, y + 54);
     ctx.restore();
   }
 
   function fitTitle(text, maxWidth, maxLines) {
-    for (let fontSize = 42; fontSize >= 22; fontSize -= 4) {
-      ctx.font = "bold " + fontSize + "px -apple-system, BlinkMacSystemFont, sans-serif";
+    for (let fontSize = 40; fontSize >= 22; fontSize -= 3) {
+      ctx.font = "bold " + fontSize + "px " + SANS;
       const words = text.split(/(\s+|·|-)/).filter(Boolean);
       const lines = [];
       let line = "";
@@ -141,7 +136,7 @@ async function renderShareCard() {
       const allFit = lines.every(l => ctx.measureText(l).width <= maxWidth);
       if (lines.length <= maxLines && allFit) return { fontSize, lines };
     }
-    ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.font = "bold 22px " + SANS;
     let truncated = text;
     while (ctx.measureText(truncated + "...").width > maxWidth && truncated.length > 3) {
       truncated = truncated.slice(0, -1);
@@ -149,176 +144,239 @@ async function renderShareCard() {
     return { fontSize: 22, lines: [truncated + "..."] };
   }
 
-  const tierColor = {
-    common: ACCENT,
-    rare: "#6fb4ff",
-    epic: "#b79bff",
-    legendary: "#ffcf6b",
+  // A tier-shaped trophy medallion (matches the Achievements grid silhouettes),
+  // filled with the tier gradient and embossed with a small award star.
+  const MEDAL_GRAD = {
+    common: [lighten(ACCENT, -0.22), ACCENT],
+    rare: ["#3a6fb0", "#6fb4ff"],
+    epic: ["#6b4fd0", "#b79bff"],
+    legendary: ["#c9962e", "#ffcf6b"],
   };
+  function medalPath(cx, cy, r, tier) {
+    if (tier === "legendary") {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const a = -Math.PI / 2 + i * Math.PI / 3;
+        const x = cx + r * Math.cos(a), y = cy + r * Math.sin(a);
+        i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.closePath();
+    } else if (tier === "epic") {
+      ctx.beginPath();
+      ctx.moveTo(cx - r, cy - r);
+      ctx.lineTo(cx + r, cy - r);
+      ctx.lineTo(cx + r, cy - r * 0.1);
+      ctx.quadraticCurveTo(cx + r, cy + r * 0.7, cx, cy + r);
+      ctx.quadraticCurveTo(cx - r, cy + r * 0.7, cx - r, cy - r * 0.1);
+      ctx.closePath();
+    } else if (tier === "rare") {
+      roundRect(cx - r, cy - r, 2 * r, 2 * r, r * 0.5);
+    } else {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+    }
+  }
+  function drawStar(cx, cy, r, color) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i++) {
+      const rad = i % 2 ? r * 0.45 : r;
+      const a = -Math.PI / 2 + i * Math.PI / 5;
+      const x = cx + rad * Math.cos(a), y = cy + rad * Math.sin(a);
+      i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+    }
+    ctx.closePath();
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+  function drawMedallion(cx, cy, r, tier) {
+    const [c1, c2] = MEDAL_GRAD[tier] || MEDAL_GRAD.common;
+    const lg = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
+    lg.addColorStop(0, c1);
+    lg.addColorStop(1, c2);
+    medalPath(cx, cy, r, tier);
+    ctx.fillStyle = lg;
+    ctx.fill();
+    drawStar(cx, cy - (tier === "epic" ? 1 : 0), r * 0.42, "rgba(14,26,34,0.78)");
+  }
 
-  const CX = W / 2;
-
-  // Accent header bar
+  // ===== Header =====
   const hdr = ctx.createLinearGradient(0, 0, W, 0);
   hdr.addColorStop(0, hexToRgba(ACCENT, 0.28));
   hdr.addColorStop(0.55, hexToRgba(ACCENT, 0.08));
   hdr.addColorStop(1, "transparent");
   ctx.fillStyle = hdr;
-  ctx.fillRect(0, 0, W, 72);
+  ctx.fillRect(0, 0, W, 74);
 
-  // Header line
-  ctx.strokeStyle = hexToRgba(ACCENT, 0.55);
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(48, 52);
-  ctx.lineTo(W - 48, 52);
-  ctx.stroke();
-
-  // Logo
   ctx.textAlign = "left";
   ctx.fillStyle = "#eef4f7";
-  ctx.font = "bold 22px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("HashMeter", 48, 36);
+  ctx.font = "bold 24px " + SANS;
+  ctx.fillText("HashMeter", 48, 40);
   ctx.fillStyle = ACCENT;
-  ctx.fillText("Ai", 48 + ctx.measureText("HashMeter").width + 2, 36);
+  ctx.fillText("Ai", 48 + ctx.measureText("HashMeter").width + 2, 40);
+  ctx.fillStyle = "#86a0ad";
+  ctx.font = "13px " + SANS;
+  ctx.fillText("See how much AI you really use.", 48, 60);
 
-  // Persona title (centered, wrapped + sized to fit)
+  ctx.strokeStyle = hexToRgba(ACCENT, 0.5);
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(48, 80);
+  ctx.lineTo(W - 48, 80);
+  ctx.stroke();
+
+  // ===== Persona title + name (top cluster, flows down) =====
   ctx.textAlign = "center";
   ctx.fillStyle = ACCENT;
-  const titleFit = fitTitle(ptitle, W - 160, 2);
-  let ty = 90;
+  const titleFit = fitTitle(ptitle, W - 150, 2);
+  let y = 80 + titleFit.fontSize + 2;
   for (const line of titleFit.lines) {
-    ctx.font = "bold " + titleFit.fontSize + "px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText(line, CX, ty);
-    ty += titleFit.fontSize + 10;
+    ctx.font = "bold " + titleFit.fontSize + "px " + SANS;
+    ctx.fillText(line, CX, y);
+    y += titleFit.fontSize + 8;
+  }
+  ctx.fillStyle = "rgba(238,244,247,0.82)";
+  ctx.font = "17px " + SANS;
+  ctx.fillText(uname ? uname + "'s AI usage" : "My AI usage", CX, y);
+
+  // ===== Hero: estimated dollar value =====
+  const heroY = y + 70;
+  ctx.fillStyle = "#eef4f7";
+  ctx.font = "bold 72px " + SANS;
+  ctx.fillText(money(cost), CX, heroY);
+  ctx.fillStyle = "#86a0ad";
+  ctx.font = "600 14px " + SANS;
+  ctx.fillText("estimated compute value", CX, heroY + 24);
+
+  // ===== Top X% pill (honest, from the benchmark) =====
+  let blockBottom = heroY + 24;
+  if (standing) {
+    const label = standing.label + "  *";
+    ctx.font = "bold 17px " + SANS;
+    const tw = ctx.measureText(label).width;
+    const pw = tw + 36, ph = 36, px = CX - pw / 2, py = heroY + 42;
+    roundRect(px, py, pw, ph, 18);
+    ctx.fillStyle = hexToRgba(ACCENT, 0.15);
+    ctx.fill();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = hexToRgba(ACCENT, 0.55);
+    ctx.stroke();
+    ctx.fillStyle = ACCENT;
+    ctx.textAlign = "center";
+    ctx.font = "bold 17px " + SANS;
+    ctx.fillText(label, CX, py + 24);
+    blockBottom = py + ph;
   }
 
-  // Name line (centered)
-  ctx.fillStyle = "rgba(238,244,247,0.85)";
-  ctx.font = "18px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText(uname ? uname + "'s AI usage" : "My AI usage", CX, ty + 4);
-
-  // Stats row (centered group)
-  ctx.textAlign = "left";
+  // ===== Supporting stats (3) =====
+  const statsY = blockBottom + 22;
   const stats = [
-    [money(cost), "Est. cost"],
-    [human(processed), "Processed tokens"],
-    [streak + "d", "Best streak"],
-    [focusStr, "Avg use/day"],
+    [human(processed), "processed tokens"],
+    [streak + "d", "best streak"],
+    [String(tools), "AI tools unified"],
   ];
-  const statW = 240, statGap = 16;
+  const statW = 232, statGap = 16;
   const statsTotalW = stats.length * statW + (stats.length - 1) * statGap;
   let sx = (W - statsTotalW) / 2;
-  const statsY = ty + 42;
   for (const [val, lab] of stats) {
     drawStat(sx, statsY, statW, val, lab);
     sx += statW + statGap;
   }
 
-  // LOTR yardstick (centered)
+  // LOTR yardstick
   const ratio = processed / LOTR;
   const lotrText = ratio >= 100 ? Math.round(ratio) + "x" : ratio.toFixed(1) + "x";
   ctx.textAlign = "center";
-  ctx.fillStyle = "#86a0ad";
-  ctx.font = "14px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("\u2248 " + lotrText + " the length of The Lord of the Rings  \u00b7  " + tools + " tools", CX, statsY + 84);
+  ctx.fillStyle = hexToRgba(ACCENT, 0.85);
+  ctx.font = "14px " + SANS;
+  ctx.fillText("≈ " + lotrText + " the length of The Lord of the Rings", CX, statsY + 90);
 
-  // Tokens-by-tool bar chart
+  // ===== Bottom cluster (anchored to the footer, built upward) =====
+  // Footnote
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(134,160,173,0.5)";
+  ctx.font = "11px ui-monospace, monospace";
+  let footnote = "Cost estimated at public API list prices.";
+  if (standing) footnote += "  *Top % vs. HashMeter's modeled benchmark of 2025–26 AI-coding usage.";
+  if (hashcortxEstimated) footnote += "  HashCortx tokens estimated from message length.";
+  ctx.fillText(footnote, CX, H - 12);
+
+  // Footer
+  ctx.fillStyle = "rgba(134,160,173,0.6)";
+  ctx.font = "12px " + SANS;
+  ctx.textAlign = "left";
+  ctx.fillText("Made with HashMeterAi  ·  100% local & private", 48, H - 32);
+  ctx.textAlign = "right";
+  ctx.fillText("github.com/Hash-7777/HashMeterAi", W - 48, H - 32);
+
+  // Tool split — single stacked bar + legend
   const toolOrder = ["claude", "codex", "kimi", "hashcortx", "cline"];
   const toolLabel = { claude: "Claude", codex: "Codex", kimi: "Kimi", hashcortx: "HashCortx", cline: "Cline" };
-  const toolColors = [ACCENT, "#6fb4ff", "#b79bff", "#54ffc4", "#ffcf6b"];
-  const chartY = statsY + 100;
-  const chartW = W - 168;
-  const presentTools = toolOrder.filter(t => toolTokens[t] > 0);
-  if (presentTools.length > 0) {
-    const maxTok = Math.max(...presentTools.map(t => toolTokens[t]));
-    let by = chartY;
-    for (let i = 0; i < presentTools.length; i++) {
-      const t = presentTools[i];
-      const v = toolTokens[t];
-      const pct = v / maxTok;
-      const bw = Math.max(6, chartW * pct);
-      const bh = 20;
-      if (by + bh > H - 160) break;
-      ctx.textAlign = "left";
-      ctx.fillStyle = "rgba(134,160,173,0.7)";
-      ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText(toolLabel[t], 48, by + 14);
-      roundRect(120, by, bw, bh, 5);
-      ctx.fillStyle = toolColors[i % toolColors.length];
-      ctx.fill();
-
-      // Value label: inside if bar is wide, outside if narrow
-      const valStr = human(v);
-      ctx.font = "bold 11px -apple-system, BlinkMacSystemFont, sans-serif";
-      const valW = ctx.measureText(valStr).width;
-      if (bw > chartW * 0.62) {
-        ctx.fillStyle = "rgba(5,9,13,0.85)";
-        ctx.fillText(valStr, 120 + bw - valW - 8, by + 14);
-      } else {
-        ctx.fillStyle = "rgba(238,244,247,0.9)";
-        ctx.fillText(valStr, 124 + bw + 6, by + 14);
-      }
-      by += 26;
+  const toolColors = { claude: ACCENT, codex: "#6fb4ff", kimi: "#b79bff", hashcortx: "#54ffc4", cline: "#ffcf6b" };
+  const present = toolOrder.filter(t => toolTokens[t] > 0);
+  const sum = present.reduce((a, t) => a + toolTokens[t], 0) || 1;
+  const barX = 120, barW = W - 240, barH = 13, barY = H - 86;
+  if (present.length > 0) {
+    roundRect(barX, barY, barW, barH, 6.5);
+    ctx.fillStyle = "rgba(255,255,255,0.05)";
+    ctx.fill();
+    ctx.save();
+    roundRect(barX, barY, barW, barH, 6.5);
+    ctx.clip();
+    let bx = barX;
+    for (const t of present) {
+      const w = barW * (toolTokens[t] / sum);
+      ctx.fillStyle = toolColors[t];
+      ctx.fillRect(bx, barY, w + 0.5, barH);
+      bx += w;
     }
+    ctx.restore();
+
+    // Legend (centered)
+    ctx.font = "12px " + SANS;
+    const items = present.map(t => ({ t, label: toolLabel[t] + " " + human(toolTokens[t]) }));
+    const dot = 16, gap = 22;
+    const widths = items.map(it => dot + ctx.measureText(it.label).width);
+    const legW = widths.reduce((a, w) => a + w, 0) + gap * (items.length - 1);
+    let lx = (W - legW) / 2;
+    const ly = barY + 32;
+    items.forEach((it, i) => {
+      ctx.fillStyle = toolColors[it.t];
+      ctx.beginPath();
+      ctx.arc(lx + 4, ly - 4, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#9fb3bd";
+      ctx.textAlign = "left";
+      ctx.fillText(it.label, lx + dot, ly);
+      lx += widths[i] + gap;
+    });
   }
 
-  // Top unlocked badges (centered row)
-  const unlocked = achievements.filter(a => a.unlocked).sort((a, b) => b.progress - a.progress);
-  const topBadges = unlocked.slice(0, 3);
-  let badgesY = chartY + (presentTools.length * 26) + 16;
-  if (badgesY < statsY + 100) badgesY = statsY + 100;
-  if (topBadges.length > 0) {
+  // Featured trophy — the single hardest earned badge (by rank)
+  const unlocked = achievements.filter(a => a.unlocked).sort((a, b) => b.rank - a.rank);
+  const top = unlocked[0];
+  if (top) {
+    const r = 25;
+    ctx.font = "bold 22px " + SANS;
+    const nameW = ctx.measureText(top.name).width;
+    ctx.font = "600 11px " + SANS;
+    const labelW = ctx.measureText("RAREST TROPHY").width;
+    const textW = Math.max(nameW, labelW);
+    const gapM = 16;
+    const groupW = 2 * r + gapM + textW;
+    const gx = CX - groupW / 2;
+    const medCy = barY - 40;
+    const medCx = gx + r;
+    drawMedallion(medCx, medCy, r, top.tier);
+    const tx = gx + 2 * r + gapM;
     ctx.textAlign = "left";
-    ctx.fillStyle = "rgba(134,160,173,0.7)";
-    ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
-    ctx.fillText("Top badges", 48, badgesY);
-
-    let badgeTotalW = 0;
-    const badgeWidths = [];
-    for (const b of topBadges) {
-      const w = ctx.measureText(b.name).width + 24;
-      badgeWidths.push(w);
-      badgeTotalW += w;
-    }
-    badgeTotalW += (topBadges.length - 1) * 10;
-    let bx = (W - badgeTotalW) / 2;
-
-    for (let i = 0; i < topBadges.length; i++) {
-      const b = topBadges[i];
-      const color = tierColor[b.tier] || ACCENT;
-      const w = badgeWidths[i];
-      roundRect(bx, badgesY + 12, w, 28, 7);
-      ctx.fillStyle = hexToRgba(color, 0.14);
-      ctx.fill();
-      ctx.lineWidth = 1;
-      ctx.strokeStyle = hexToRgba(color, 0.45);
-      ctx.stroke();
-      ctx.textAlign = "center";
-      ctx.fillStyle = color;
-      ctx.font = "bold 12px -apple-system, BlinkMacSystemFont, sans-serif";
-      ctx.fillText(b.name, bx + w / 2, badgesY + 31);
-      ctx.textAlign = "left";
-      bx += w + 10;
-    }
-    badgesY += 52;
+    ctx.fillStyle = "#86a0ad";
+    ctx.font = "600 11px " + SANS;
+    ctx.fillText("RAREST TROPHY", tx, medCy - 6);
+    ctx.fillStyle = "#eef4f7";
+    ctx.font = "bold 22px " + SANS;
+    ctx.fillText(top.name, tx, medCy + 17);
   }
 
-  // Caveat + estimated note (centered)
-  ctx.textAlign = "center";
-  ctx.fillStyle = "rgba(134,160,173,0.65)";
-  ctx.font = "12px ui-monospace, monospace";
-  let noteY = Math.min(badgesY + 12, H - 56);
-  ctx.fillText("Cost is estimated at public API list prices. Actual billing may differ.", CX, noteY);
-  if (hashcortxEstimated) {
-    noteY += 14;
-    ctx.fillText("HashCortx token counts are estimated from message length.", CX, noteY);
-  }
-
-  // Footer (centered)
-  ctx.fillStyle = "rgba(134,160,173,0.55)";
-  ctx.font = "12px -apple-system, BlinkMacSystemFont, sans-serif";
-  ctx.fillText("Made with HashMeterAi  \u00b7  local & private", CX, H - 22);
   ctx.textAlign = "left";
 }
 
