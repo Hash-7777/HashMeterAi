@@ -162,6 +162,33 @@ fn reset_profile(app: tauri::AppHandle) {
     }
 }
 
+#[tauri::command]
+async fn copy_image_to_clipboard(base64_data: String) -> Result<(), String> {
+    use base64::Engine;
+    let bytes = base64::engine::general_purpose::STANDARD
+        .decode(&base64_data)
+        .map_err(|e| format!("base64 decode failed: {e}"))?;
+
+    let img = image::load_from_memory(&bytes)
+        .map_err(|e| format!("png decode failed: {e}"))?
+        .into_rgba8();
+
+    let (width, height) = (img.width() as usize, img.height() as usize);
+    let raw = img.into_raw();
+
+    let mut clipboard = arboard::Clipboard::new()
+        .map_err(|e| format!("clipboard access failed: {e}"))?;
+
+    clipboard
+        .set_image(arboard::ImageData {
+            width,
+            height,
+            bytes: std::borrow::Cow::Owned(raw),
+        })
+        .map_err(|e| format!("clipboard write failed: {e}"))?;
+    Ok(())
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -187,7 +214,8 @@ pub fn run() {
             get_achievements,
             set_pref,
             open_data_folder,
-            reset_profile
+            reset_profile,
+            copy_image_to_clipboard
         ])
         .run(tauri::generate_context!())
         .expect("error while running HashMeterAi");

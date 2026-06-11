@@ -56,3 +56,11 @@ async function resetProfile() {
     await window.__TAURI__.core.invoke("reset_profile");
   }
 }
+
+async function copyImageToClipboard(base64Data) {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    await window.__TAURI__.core.invoke("copy_image_to_clipboard", { base64Data });
+  } else {
+    return Promise.reject(new Error("Tauri runtime not available"));
+  }
+}
