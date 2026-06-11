@@ -676,7 +676,17 @@ body.compact .stat.stat-lead .val{font-size:24px}
 .set-inline .settings-input{flex:1}
 .set-inline2{flex-direction:row !important;gap:12px}
 .set-sub-field{flex:1;display:flex;flex-direction:column;gap:6px}
-select.settings-input{cursor:pointer}
+select.settings-input{
+  cursor:pointer;
+  appearance:none;
+  -webkit-appearance:none;
+  padding-right:34px;
+  background:
+    rgba(0,0,0,.25)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none' stroke='%2386a0ad' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='2 4 6 8 10 4'/%3E%3C/svg%3E")
+    right 12px center / 12px 12px no-repeat;
+}
+select.settings-input:hover{border-color:var(--line-pk)}
 .set-btn{
   font:inherit;font-size:12px;font-weight:700;letter-spacing:.04em;color:#10202a;
   background:var(--pk);border:0;border-radius:9px;padding:9px 16px;cursor:pointer;transition:.15s;white-space:nowrap;
@@ -687,7 +697,39 @@ select.settings-input{cursor:pointer}
 .set-btn.danger{background:transparent;border:1px solid rgba(255,120,90,.4);color:#ff9c82;align-self:flex-start}
 .set-btn.danger:hover{background:rgba(255,120,90,.1)}
 .set-toggle{display:flex;align-items:flex-start;gap:11px;cursor:pointer}
-.set-toggle input{margin-top:2px;width:16px;height:16px;accent-color:var(--pk);cursor:pointer;flex-shrink:0}
+.set-toggle input[type=checkbox]{
+  appearance:none;
+  -webkit-appearance:none;
+  width:18px;
+  height:18px;
+  margin-top:1px;
+  border-radius:5px;
+  border:1px solid var(--line);
+  background:rgba(0,0,0,.25);
+  cursor:pointer;
+  flex-shrink:0;
+  position:relative;
+  transition:.16s;
+}
+.set-toggle input[type=checkbox]:checked{
+  background:var(--pk);
+  border-color:var(--pk);
+}
+.set-toggle input[type=checkbox]:checked::after{
+  content:"";
+  position:absolute;
+  left:5px;
+  top:2px;
+  width:5px;
+  height:9px;
+  border:solid #10202a;
+  border-width:0 2px 2px 0;
+  transform:rotate(45deg);
+}
+.set-toggle input[type=checkbox]:focus-visible{
+  outline:2px solid var(--line-pk);
+  outline-offset:2px;
+}
 .set-toggle span{display:flex;flex-direction:column;gap:2px}
 .set-toggle b{font-size:12.5px;font-weight:600;color:var(--txt)}
 .set-toggle small{font-size:11px;color:var(--mut)}
