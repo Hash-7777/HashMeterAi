@@ -99,7 +99,11 @@
         <div class="dash-main">
           <div class="dash-cal" id="dash-cal">
             <div class="dash-cal-head">
-              <span class="dash-cal-title" id="dash-cal-title">--</span>
+              <div class="dash-cal-navgroup">
+                <button class="dash-cal-nav" id="dash-cal-prev" title="Previous month">&lt;</button>
+                <span class="dash-cal-title" id="dash-cal-title">--</span>
+                <button class="dash-cal-nav" id="dash-cal-next" title="Next month">&gt;</button>
+              </div>
               <button class="dash-cal-open" id="dash-cal-open" title="Open full calendar">Calendar</button>
             </div>
             <div class="dash-cal-grid" id="dash-cal-grid"></div>
@@ -141,6 +145,7 @@
         </div>
       </div>
       <div class="cal-grid" id="cal-grid"></div>
+      <div class="cal-detail hidden" id="cal-detail"></div>
     </div>
 
     <!-- PERSONA VIEW -->

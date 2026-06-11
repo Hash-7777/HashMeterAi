@@ -1,5 +1,9 @@
 let CAL_YEAR = new Date().getFullYear();
 let CAL_MONTH = new Date().getMonth();
+let MINI_CAL_YEAR = new Date().getFullYear();
+let MINI_CAL_MONTH = new Date().getMonth();
+let MINI_SELECTED = null;
+let CAL_SELECTED = null;
 
 const CAL_COLORS = [
   "rgba(255,255,255,.06)",
@@ -45,7 +49,30 @@ function ymd(y, m, d) {
   return y + "-" + String(m + 1).padStart(2, "0") + "-" + String(d).padStart(2, "0");
 }
 
-// Compact heatmap of the CURRENT month, embedded in the dashboard.
+function sessionCount(rec) {
+  if (!rec || !rec.sessions) return 0;
+  return rec.sessions.length || rec.sessions.size || 0;
+}
+
+function formatDayDetail(ds, rec) {
+  const tok = rec ? rec.newIn + rec.write + rec.out : 0;
+  const models = rec && rec.models ? Object.entries(rec.models) : [];
+  models.sort((a, b) => b[1] - a[1]);
+  const top = models[0];
+  const parts = [
+    "<span>" + human(tok) + " tokens</span>",
+    "<span>" + duration(rec.focus_sec || 0) + " use time</span>",
+    "<span>" + sessionCount(rec) + " sessions</span>",
+    "<span>" + (rec.messages || 0) + " messages</span>",
+  ];
+  if (top) {
+    parts.push("<span>Top model: " + prettyModel(top[0]) + "</span>");
+  }
+  return '<div class="day-detail-date">' + ds + "</div>" +
+    '<div class="day-detail-stats">' + parts.join("") + "</div>";
+}
+
+// Compact heatmap, embedded in the dashboard.
 function renderMiniCalendar() {
   if (!RAW) return;
   const grid = g("dash-cal-grid");
@@ -56,8 +83,8 @@ function renderMiniCalendar() {
   const dayMap = getDayMap(mergedDays(names));
 
   const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth();
+  const y = MINI_CAL_YEAR;
+  const m = MINI_CAL_MONTH;
   const dim = daysInMonth(y, m);
   const fws = firstWeekday(y, m);
 
@@ -85,24 +112,34 @@ function renderMiniCalendar() {
     el.className = "mini-cell mini-empty";
     grid.appendChild(el);
   }
-  const todayStr = ymd(y, m, now.getDate());
+  const todayStr = ymd(now.getFullYear(), now.getMonth(), now.getDate());
   for (let d = 1; d <= dim; d++) {
     const ds = ymd(y, m, d);
     const rec = dayMap[ds];
     const tok = rec ? rec.newIn + rec.write + rec.out : 0;
     const lvl = calIntensity(tok, maxTok);
     const el = document.createElement("div");
-    el.className = "mini-cell" + (ds === todayStr ? " mini-today" : "");
+    el.className = "mini-cell" +
+      (ds === todayStr ? " mini-today" : "") +
+      (ds === MINI_SELECTED ? " mini-selected" : "");
     el.style.background = CAL_COLORS[lvl];
     if (lvl === 4) el.style.boxShadow = "0 0 6px var(--pk)";
     if (rec) el.title = ds + " · " + human(tok) + " tok";
+    el.onclick = function () {
+      MINI_SELECTED = (MINI_SELECTED === ds) ? null : ds;
+      renderMiniCalendar();
+    };
     grid.appendChild(el);
   }
 
   const foot = g("dash-cal-foot");
   if (foot) {
-    foot.textContent = activeDays + " active " + (activeDays === 1 ? "day" : "days") +
-      " · " + human(monthTok) + " tok this month";
+    if (MINI_SELECTED && dayMap[MINI_SELECTED]) {
+      foot.innerHTML = formatDayDetail(MINI_SELECTED, dayMap[MINI_SELECTED]);
+    } else {
+      foot.textContent = activeDays + " active " + (activeDays === 1 ? "day" : "days") +
+        " · " + human(monthTok) + " tok this month";
+    }
   }
 }
 
@@ -151,13 +188,27 @@ function renderCalendar() {
     const tok = rec ? rec.newIn + rec.write + rec.out : 0;
     const lvl = calIntensity(tok, maxTok);
     const el = document.createElement("div");
-    el.className = "cal-cell";
+    el.className = "cal-cell" + (ds === CAL_SELECTED ? " cal-selected" : "");
     el.style.background = CAL_COLORS[lvl];
     if (lvl === 4) el.style.boxShadow = "0 0 8px var(--pk)";
     el.innerHTML = "<div>" + d + "</div>" + (tok > 0 ? '<div class="cal-val">' + human(tok) + "</div>" : "");
+    el.onclick = function () {
+      CAL_SELECTED = (CAL_SELECTED === ds) ? null : ds;
+      renderCalendar();
+    };
     if (rec) {
       el.title = ds + " \u00b7 " + human(tok) + " tok \u00b7 " + duration(rec.focus_sec || 0) + " use time";
     }
     grid.appendChild(el);
+  }
+
+  const detail = g("cal-detail");
+  if (detail) {
+    if (CAL_SELECTED && dayMap[CAL_SELECTED]) {
+      detail.innerHTML = formatDayDetail(CAL_SELECTED, dayMap[CAL_SELECTED]);
+      detail.classList.remove("hidden");
+    } else {
+      detail.classList.add("hidden");
+    }
   }
 }

@@ -190,4 +190,15 @@ g("dash-cal-open").onclick = function () {
   showView("calendar");
 };
 
+g("dash-cal-prev").onclick = function () {
+  MINI_CAL_MONTH--;
+  if (MINI_CAL_MONTH < 0) { MINI_CAL_MONTH = 11; MINI_CAL_YEAR--; }
+  renderMiniCalendar();
+};
+g("dash-cal-next").onclick = function () {
+  MINI_CAL_MONTH++;
+  if (MINI_CAL_MONTH > 11) { MINI_CAL_MONTH = 0; MINI_CAL_YEAR++; }
+  renderMiniCalendar();
+};
+
 boot();
