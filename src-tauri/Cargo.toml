@@ -28,6 +28,8 @@ tauri = { version = "2", features = ["config-json5"] }
 tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
 tauri-plugin-opener = "2"
+# Remembers the window position + size across launches.
+tauri-plugin-window-state = "2"
 
 # Serialization
 serde      = { version = "1", features = ["derive"] }

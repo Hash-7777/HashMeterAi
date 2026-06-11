@@ -111,6 +111,17 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::default().build())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_opener::init())
+        // Restores the window's last position + size, and saves them on move/resize/close.
+        .plugin(tauri_plugin_window_state::Builder::default().build())
+        .setup(|app| {
+            // The window starts hidden (visible:false) so the window-state plugin can
+            // restore its saved geometry before the first paint — no flash in the wrong
+            // place. Show it once that's done.
+            if let Some(w) = app.get_webview_window("main") {
+                let _ = w.show();
+            }
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             scan_usage,
             get_profile,
