@@ -1,4 +1,3 @@
-const LOTR = 580000;
 const SANS = "-apple-system, BlinkMacSystemFont, sans-serif";
 
 async function renderShareCard() {
@@ -18,22 +17,14 @@ async function renderShareCard() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.textBaseline = "alphabetic";
 
-  // Background
-  const grad = ctx.createLinearGradient(0, 0, W, H);
-  grad.addColorStop(0, "#0c1c25");
+  // Background — clean vertical gradient (teal edge, warm pumpkin-tinted middle),
+  // matching the website. No grid.
+  const grad = ctx.createLinearGradient(0, 0, 0, H);
+  grad.addColorStop(0, "#06101a");
+  grad.addColorStop(0.5, "#1a130b");
   grad.addColorStop(1, "#05090d");
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
-
-  // Faint grid
-  ctx.strokeStyle = "rgba(255,255,255,0.03)";
-  ctx.lineWidth = 1;
-  for (let x = 0; x < W; x += 52) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
-  }
-  for (let y = 0; y < H; y += 52) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-  }
 
   // Fetch data
   let persona = null;
@@ -56,7 +47,6 @@ async function renderShareCard() {
   let processed = 0, cost = 0, tools = 0, streak = 0;
   const allDays = {};
   const toolTokens = {};
-  let hashcortxEstimated = false;
   if (snap && snap.tools) {
     for (const [sid, tool] of Object.entries(snap.tools)) {
       if (!tool.present) continue;
@@ -71,7 +61,6 @@ async function renderShareCard() {
         allDays[d.date] += tok;
       }
       toolTokens[sid] = toolTok;
-      if (sid === "hashcortx" && toolTok > 0) hashcortxEstimated = true;
     }
     const ds = Object.keys(allDays).sort();
     let cur = 1, lng = 1;
@@ -248,7 +237,7 @@ async function renderShareCard() {
   ctx.font = "17px " + SANS;
   ctx.fillText(nameLine, CX, y);
 
-  // ===== Hero: estimated dollar value =====
+  // ===== Hero: processed tokens (the truest measure of work) =====
   const heroY = y + 70;
   // Soft radial glow so the headline number really pops.
   const heroGlow = ctx.createRadialGradient(CX, heroY - 16, 0, CX, heroY - 16, 250);
@@ -258,10 +247,10 @@ async function renderShareCard() {
   ctx.fillRect(CX - 340, heroY - 78, 680, 150);
   ctx.fillStyle = "#ffffff";
   ctx.font = "bold 74px " + SANS;
-  ctx.fillText(money(cost), CX, heroY);
+  ctx.fillText(human(processed), CX, heroY);
   ctx.fillStyle = "#9fb3bd";
   ctx.font = "600 14px " + SANS;
-  ctx.fillText("estimated compute value", CX, heroY + 24);
+  ctx.fillText("tokens processed", CX, heroY + 24);
 
   // ===== Top X% pill (honest, from the benchmark) =====
   let blockBottom = heroY + 24;
@@ -284,9 +273,9 @@ async function renderShareCard() {
   }
 
   // ===== Supporting stats (3) =====
-  const statsY = blockBottom + 22;
+  const statsY = blockBottom + 26;
   const stats = [
-    [human(processed), "processed tokens"],
+    [money(cost), "est. compute value"],
     [streak + "d", "best streak"],
     [String(tools), "AI tools unified"],
   ];
@@ -298,14 +287,6 @@ async function renderShareCard() {
     sx += statW + statGap;
   }
 
-  // LOTR yardstick
-  const ratio = processed / LOTR;
-  const lotrText = ratio >= 100 ? Math.round(ratio) + "x" : ratio.toFixed(1) + "x";
-  ctx.textAlign = "center";
-  ctx.fillStyle = hexToRgba(ACCENT, 0.85);
-  ctx.font = "14px " + SANS;
-  ctx.fillText("≈ " + lotrText + " the length of The Lord of the Rings", CX, statsY + 90);
-
   // ===== Bottom cluster (anchored to the footer, built upward) =====
   // Footnote
   ctx.textAlign = "center";
@@ -313,7 +294,6 @@ async function renderShareCard() {
   ctx.font = "11px ui-monospace, monospace";
   let footnote = "Cost estimated at public API list prices.";
   if (standing) footnote += "  *Top % vs. HashMeter's modeled benchmark of 2025–26 AI-coding usage.";
-  if (hashcortxEstimated) footnote += "  HashCortx tokens estimated from message length.";
   ctx.fillText(footnote, CX, H - 12);
 
   // Footer
