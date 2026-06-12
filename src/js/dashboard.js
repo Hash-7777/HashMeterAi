@@ -33,8 +33,22 @@ const MODEL_NAMES = {
   "llama-3.1-8b-instant": "Llama 3.1 8B",
   "llama-3.3-70b-versatile": "Llama 3.3 70B",
   "qwen3-32b": "Qwen3 32B",
+  "hashcortx": "HashCortx",
   "<synthetic>": "Synthetic",
 };
+
+// Models seen under the HashCortx source — used to tag them "via HashCortx" in
+// the Models breakdown (they're real models, just reached through HashCortx).
+function hashcortxModels() {
+  const set = new Set();
+  const t = RAW && RAW.tools && RAW.tools.hashcortx;
+  if (t && t.present) {
+    for (const d of (t.days || [])) {
+      for (const k of Object.keys(d.models || {})) set.add(k);
+    }
+  }
+  return set;
+}
 
 function prettyModel(id) {
   if (MODEL_NAMES[id]) return MODEL_NAMES[id];
@@ -344,14 +358,18 @@ function models(a) {
   }
   // Distinct color per model so the bars actually distinguish them (not one
   // flat pumpkin fill); a leading dot echoes the bar color next to the name.
+  // Models reached through HashCortx get a "via HashCortx" tag.
   const COLORS = ["#FD802E", "#6fb4ff", "#b79bff", "#54ffc4", "#ffcf6b", "#ff7a9c", "#7dd87d", "#f0997b", "#9fb3bd"];
+  const hc = hashcortxModels();
   arr.forEach((p, i) => {
     const m = p[0], t = p[1];
     const color = COLORS[i % COLORS.length];
+    const via = (hc.has(m) && m !== "hashcortx") ? '<span class="mvia">via HashCortx</span>' : "";
     const row = document.createElement("div");
     row.className = "mrow";
     row.innerHTML =
-      '<div class="mname"><span class="mdot" style="background:' + color + '"></span>' + prettyModel(m) + '</div>' +
+      '<div class="mname"><span class="mdot" style="background:' + color + '"></span>' +
+        '<span class="mname-txt">' + prettyModel(m) + '</span>' + via + '</div>' +
       '<div class="mbar"><div class="mfill" style="width:' + (100 * t / max) + '%;background:' + color + '"></div></div>' +
       '<div class="mval">' + human(t) + ' \u00b7 ' + (100 * t / tot).toFixed(1) + '%</div>';
     host.appendChild(row);
