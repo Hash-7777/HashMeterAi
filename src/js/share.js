@@ -38,6 +38,17 @@ async function renderShareCard() {
     console.error("share data error", e);
   }
 
+  // Brand mark for the header — best-effort; the card still renders without it.
+  let logoImg = null;
+  try {
+    const img = new Image();
+    img.src = "assets/share-logo.png";
+    await img.decode();
+    logoImg = img;
+  } catch (_e) {
+    logoImg = null;
+  }
+
   const ptitle = persona ? persona.title : "AI Explorer";
   const psub = persona ? (persona.subtitle || "") : "";
   const standing = persona ? persona.standing : null;
@@ -204,11 +215,12 @@ async function renderShareCard() {
   ctx.fillStyle = ACCENT;
   ctx.fillText("Ai", 48 + ctx.measureText("HashMeter").width + 2, 50);
 
-  // Privacy tag on the right — replaces the tagline to keep the header clean.
-  ctx.textAlign = "right";
-  ctx.fillStyle = "#86a0ad";
-  ctx.font = "600 12px " + SANS;
-  ctx.fillText("100% local  ·  private", W - 48, 48);
+  // Brand mark, top-right (the "100% local · private" line lives in the footer).
+  if (logoImg) {
+    const lh = 46;
+    const lw = lh * ((logoImg.naturalWidth || 1) / (logoImg.naturalHeight || 1));
+    ctx.drawImage(logoImg, W - 48 - lw, 12, lw, lh);
+  }
 
   // A single divider that's an accent gradient (strong under the wordmark,
   // fading out to the right) rather than a flat rule — reads as a design accent.
