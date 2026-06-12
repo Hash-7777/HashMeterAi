@@ -26,7 +26,7 @@ Claude Code, Codex, Kimi, HashCortx — unified into one clean dashboard.
 - **Average focus time.** Honest active-time-with-AI per day.
 - **Your AI persona.** For example, "Prompt Architect, Night-Shift Shipper" — generated from your real patterns, and **every claim shows the number behind it.** No vanity, no lies.
 - **Where you stand.** An honest "top X% of AI developers" read, computed against a documented, fully offline usage benchmark modeled from public 2025–26 figures — always shown with the number behind it, never a made-up rank.
-- **Achievements.** Sixteen ranked trophies — from First Contact to Billionaire, Night Owl to The Whale — each a real threshold with its *true* earn date and a tier-shaped medallion. The single hardest one you've earned headlines your Share card.
+- **Achievements.** Thirty ranked trophies — from First Steps to Billionaire, Night Owl to Whale — each a real threshold with its *true* earn date and a tier-shaped medallion. The single hardest one you've earned headlines your Share card.
 - **Calendar of activity.** Your daily usage as a real calendar.
 - **One-click Share card.** A clean branded image of your stats and persona to post. Brag, honestly.
 
