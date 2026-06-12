@@ -17,7 +17,7 @@ async function loadSettings() {
     g("set-name").value = p.name || "";
     g("set-reduced").checked = !!prefs.reduced_motion;
     g("set-compact").checked = !!prefs.compact;
-    g("set-sync").value = String(prefs.auto_sync_secs || 60);
+    g("set-sync").value = String(prefs.auto_sync_secs ?? 60);
     g("set-range").value = prefs.default_range || "all";
 
     // Personalized hero.
@@ -175,7 +175,8 @@ g("set-compact").onchange = async function () {
 };
 
 g("set-sync").onchange = async function () {
-  const secs = parseInt(this.value, 10) || 60;
+  const v = parseInt(this.value, 10);
+  const secs = Number.isFinite(v) ? v : 60;
   window.PREFS.auto_sync_secs = secs;
   await setPref("auto_sync_secs", secs);
   if (typeof startPolling === "function") startPolling();

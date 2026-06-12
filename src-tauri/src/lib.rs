@@ -123,8 +123,8 @@ fn set_pref(key: String, value: serde_json::Value, app: tauri::AppHandle) {
             }
             "auto_sync_secs" => {
                 if let Some(n) = value.as_u64() {
-                    // Clamp to a sane window: 15s .. 1h.
-                    p.prefs.auto_sync_secs = n.clamp(15, 3600);
+                    // 0 = off (no auto-sync); otherwise clamp to 15s .. 1h.
+                    p.prefs.auto_sync_secs = if n == 0 { 0 } else { n.clamp(15, 3600) };
                 }
             }
             _ => {}

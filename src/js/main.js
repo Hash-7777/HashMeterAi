@@ -63,14 +63,18 @@ function showApp() {
 // --- Energy-aware polling: sync on the configured interval, but pause while
 // the window is hidden or blurred so an idle app does no disk work. ---
 function pollMs() {
-  const s = (window.PREFS && window.PREFS.auto_sync_secs) || 60;
+  const s = window.PREFS && typeof window.PREFS.auto_sync_secs === "number"
+    ? window.PREFS.auto_sync_secs : 60;
+  if (s === 0) return 0; // auto-sync off
   return Math.max(15, s) * 1000;
 }
 
 function startPolling() {
   stopPolling();
   if (document.hidden) return;
-  window._poll = setInterval(load, pollMs());
+  const ms = pollMs();
+  if (ms <= 0) return; // auto-sync off — refresh only on manual Sync
+  window._poll = setInterval(load, ms);
 }
 
 function stopPolling() {
