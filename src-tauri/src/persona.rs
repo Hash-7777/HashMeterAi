@@ -218,11 +218,26 @@ fn parse_date(s: &str) -> chrono::NaiveDate {
 
 fn pick_base(stats: &Stats) -> String {
     let input = stats.new_in + stats.write;
-    if stats.out > 0 && stats.out as f64 / input.max(1) as f64 >= 1.3 {
+    let out_ratio = stats.out as f64 / input.max(1) as f64;
+    let in_ratio = input as f64 / stats.out.max(1) as f64;
+
+    // Generation-heavy: the model writes far more than it's fed.
+    if stats.out > 0 && out_ratio >= 2.5 {
+        return "Output Engine".to_string();
+    }
+    if stats.out > 0 && out_ratio >= 1.3 {
         return "Generator".to_string();
     }
-    if input > 0 && input as f64 / stats.out.max(1) as f64 >= 2.5 {
+    // Context-heavy: huge prompts, lean replies.
+    if input > 0 && in_ratio >= 4.0 {
+        return "Context Hoarder".to_string();
+    }
+    if input > 0 && in_ratio >= 2.5 {
         return "Context Maximalist".to_string();
+    }
+    // Tool breadth.
+    if stats.tools_used >= 5 {
+        return "Full-Stack Operator".to_string();
     }
     if stats.tools_used >= 3 {
         return "Polyglot Operator".to_string();
@@ -235,6 +250,10 @@ fn pick_base(stats: &Stats) -> String {
     if billed_total > 0 && opus as f64 / billed_total as f64 >= 0.55 {
         return "Deep Thinker".to_string();
     }
+    let sonnet = stats.model_share.get("claude-sonnet-4-6").copied().unwrap_or(0);
+    if billed_total > 0 && sonnet as f64 / billed_total as f64 >= 0.55 {
+        return "Workhorse".to_string();
+    }
     let haiku = stats.model_share.get("claude-haiku-4-5-20251001").copied().unwrap_or(0)
         + stats.model_share.get("claude-haiku-4-5").copied().unwrap_or(0);
     if billed_total > 0 && haiku as f64 / billed_total as f64 >= 0.55 {
@@ -244,24 +263,41 @@ fn pick_base(stats: &Stats) -> String {
 }
 
 fn pick_modifier(stats: &Stats) -> String {
+    let avg_focus = stats.total_focus_sec.checked_div(stats.active_days).unwrap_or(0);
+    // Ordered most-impressive first, so the brag-worthiest signal wins.
+    if stats.current_streak >= 30 {
+        return "Iron-Willed".to_string();
+    }
+    if stats.max_day_processed >= 10_000_000 {
+        return "Heavy Lifter".to_string();
+    }
     if stats.peak_hour < 5 {
         return "Night-Shift Shipper".to_string();
-    }
-    if stats.current_streak >= 7 {
-        return "Daily Driver".to_string();
     }
     if stats.max_day_processed >= 1_000_000 {
         return "Marathoner".to_string();
     }
-    let avg_focus = stats.total_focus_sec.checked_div(stats.active_days).unwrap_or(0);
+    if stats.current_streak >= 7 {
+        return "Daily Driver".to_string();
+    }
     if avg_focus >= 3 * 3600 {
         return "Locked-In".to_string();
+    }
+    if stats.peak_hour >= 22 {
+        return "Midnight Tinkerer".to_string();
+    }
+    if (5..8).contains(&stats.peak_hour) {
+        return "Dawn Patroller".to_string();
     }
     "Builder".to_string()
 }
 
 fn pick_subtitle(processed: u64) -> String {
-    if processed >= 100_000_000 {
+    if processed >= 1_000_000_000 {
+        "Titan".to_string()
+    } else if processed >= 250_000_000 {
+        "Powerhouse".to_string()
+    } else if processed >= 100_000_000 {
         "Heavy Operator".to_string()
     } else if processed >= 20_000_000 {
         "Power User".to_string()
@@ -272,22 +308,32 @@ fn pick_subtitle(processed: u64) -> String {
     }
 }
 
+// "a" / "an" for a label, so descriptions read cleanly ("an Output Engine").
+fn article(word: &str) -> &'static str {
+    match word.chars().next() {
+        Some(c) if "AEIOUaeiou".contains(c) => "an",
+        _ => "a",
+    }
+}
+
 fn base_why(stats: &Stats, base: &str) -> String {
+    let input = stats.new_in + stats.write;
     match base {
-        "Generator" => format!(
+        "Output Engine" | "Generator" => format!(
             "out {:.1}\u{00d7} input ({} out / {} in)",
-            stats.out as f64 / (stats.new_in + stats.write).max(1) as f64,
+            stats.out as f64 / input.max(1) as f64,
             human(stats.out),
-            human(stats.new_in + stats.write)
+            human(input)
         ),
-        "Context Maximalist" => format!(
+        "Context Hoarder" | "Context Maximalist" => format!(
             "input {:.1}\u{00d7} output ({} in / {} out)",
-            (stats.new_in + stats.write) as f64 / stats.out.max(1) as f64,
-            human(stats.new_in + stats.write),
+            input as f64 / stats.out.max(1) as f64,
+            human(input),
             human(stats.out)
         ),
-        "Polyglot Operator" => format!("{} tools with usage", stats.tools_used),
+        "Full-Stack Operator" | "Polyglot Operator" => format!("{} tools with usage", stats.tools_used),
         "Deep Thinker" => "Opus >= 55% of billed tokens".to_string(),
+        "Workhorse" => "Sonnet >= 55% of billed tokens".to_string(),
         "Speed Runner" => "Haiku/small >= 55% of billed tokens".to_string(),
         _ => "Balanced input/output ratio".to_string(),
     }
@@ -295,12 +341,13 @@ fn base_why(stats: &Stats, base: &str) -> String {
 
 fn modifier_why(stats: &Stats, modifier: &str) -> String {
     match modifier {
-        "Night-Shift Shipper" => format!("peak hour {}:00", stats.peak_hour),
-        "Daily Driver" => format!("{}-day streak", stats.current_streak),
-        "Marathoner" => format!(
-            "max day {} processed",
-            human(stats.max_day_processed)
-        ),
+        "Night-Shift Shipper" | "Midnight Tinkerer" | "Dawn Patroller" => {
+            format!("peak hour {}:00", stats.peak_hour)
+        }
+        "Iron-Willed" | "Daily Driver" => format!("{}-day streak", stats.current_streak),
+        "Heavy Lifter" | "Marathoner" => {
+            format!("max day {} processed", human(stats.max_day_processed))
+        }
         "Locked-In" => {
             let avg = stats.total_focus_sec.checked_div(stats.active_days).unwrap_or(0);
             format!("avg {} focus/day", duration(avg))
@@ -331,14 +378,18 @@ fn build_description(
 
     let modifier_explain = match modifier {
         "Night-Shift Shipper" => "ships code after midnight",
+        "Midnight Tinkerer" => "ships late into the night",
+        "Dawn Patroller" => "starts before the world wakes",
+        "Iron-Willed" => "never lets the streak break",
         "Daily Driver" => "codes with AI every single day",
+        "Heavy Lifter" => "moves huge volume in a single day",
         "Marathoner" => "has marathon sessions",
         "Locked-In" => "stays locked in for hours",
         _ => "builds steadily",
     };
 
     format!(
-        "{}, you've processed {} tokens across {} tools — mostly {} around {}. You average {} of focused work a day and your best day hit {}. That reads as a {} who {}. Volume tier: {}.",
+        "{}, you've processed {} tokens across {} tools — mostly {} around {}. You average {} of focused work a day and your best day hit {}. That reads as {} {} who {}. Volume tier: {}.",
         cap(name),
         human(stats.processed),
         stats.tools_used,
@@ -346,6 +397,7 @@ fn build_description(
         peak_label,
         duration(avg_focus),
         human(stats.max_day_processed),
+        article(base),
         base,
         modifier_explain,
         subtitle
@@ -457,15 +509,41 @@ mod tests {
     }
 
     #[test]
-    fn generator_when_output_heavy() {
+    fn output_engine_when_very_output_heavy() {
         let mut d = day(60_000);
         d.new_in = 10_000;
         d.write = 0;
-        d.out = 50_000;
+        d.out = 50_000; // out 5x input -> Output Engine (>= 2.5x)
+        d.hours[10] = 1;
+        let snap = snap_with(vec![d], true);
+        let p = from_snapshot(&snap, "Test");
+        assert!(p.title.contains("Output Engine"));
+    }
+
+    #[test]
+    fn generator_when_moderately_output_heavy() {
+        let mut d = day(60_000);
+        d.new_in = 40_000;
+        d.write = 0;
+        d.out = 64_000; // out 1.6x input -> Generator, below the 2.5x cut
         d.hours[10] = 1;
         let snap = snap_with(vec![d], true);
         let p = from_snapshot(&snap, "Test");
         assert!(p.title.contains("Generator"));
+        assert!(!p.title.contains("Output Engine"));
+    }
+
+    #[test]
+    fn workhorse_when_sonnet_heavy() {
+        let mut d = day(60_000);
+        d.new_in = 60_000;
+        d.write = 0;
+        d.out = 45_000; // ratios sub-threshold so model affinity decides
+        d.hours[14] = 5;
+        d.models.insert("claude-sonnet-4-6".to_string(), 100);
+        let snap = snap_with(vec![d], true);
+        let p = from_snapshot(&snap, "Test");
+        assert!(p.title.contains("Workhorse"));
     }
 
     #[test]
