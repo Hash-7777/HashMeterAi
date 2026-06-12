@@ -45,6 +45,10 @@ impl Source for HashCortx {
         webkit_roots(ctx).iter().any(|r| r.is_dir())
     }
 
+    fn roots(&self, ctx: &ScanCtx) -> Vec<std::path::PathBuf> {
+        webkit_roots(ctx)
+    }
+
     fn scan(&self, ctx: &ScanCtx) -> Vec<UsageEvent> {
         let mut events = Vec::new();
         let mut seen_chats: HashSet<String> = HashSet::new();

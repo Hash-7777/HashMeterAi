@@ -39,6 +39,10 @@ impl Source for Cline {
             .any(|r| r.is_dir())
     }
 
+    fn roots(&self, ctx: &ScanCtx) -> Vec<std::path::PathBuf> {
+        possible_roots(ctx)
+    }
+
     fn scan(&self, ctx: &ScanCtx) -> Vec<UsageEvent> {
         let mut events = Vec::new();
         for root in possible_roots(ctx) {

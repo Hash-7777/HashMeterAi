@@ -28,6 +28,10 @@ impl Source for Codex {
         ctx.home.join(".codex/sessions").is_dir()
     }
 
+    fn roots(&self, ctx: &ScanCtx) -> Vec<std::path::PathBuf> {
+        vec![ctx.home.join(".codex/sessions")]
+    }
+
     fn scan(&self, ctx: &ScanCtx) -> Vec<UsageEvent> {
         let root = ctx.home.join(".codex/sessions");
         let mut events = Vec::new();

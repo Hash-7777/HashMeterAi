@@ -14,6 +14,7 @@ use crate::aggregate;
 use crate::model::Snapshot;
 use crate::sources::{ScanCtx, registry};
 use rayon::prelude::*;
+use serde::Serialize;
 use std::path::PathBuf;
 use std::sync::{Mutex, OnceLock};
 use std::time::Instant;
@@ -61,6 +62,92 @@ pub fn cached(max_age_secs: u64) -> Snapshot {
         }
     }
     run()
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct RootDiag {
+    pub path: String,
+    pub exists: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SourceDiag {
+    pub id: String,
+    pub label: String,
+    /// Whether the adapter currently detects the tool (a root exists).
+    pub detected: bool,
+    /// The candidate paths the adapter looks at, with existence.
+    pub roots: Vec<RootDiag>,
+    pub days: usize,
+    pub processed: u64,
+    pub messages: u64,
+    pub latest: Option<String>,
+    pub top_model: Option<String>,
+}
+
+/// Per-source diagnostics for the Settings panel: which paths each adapter
+/// resolves to (per-user, via home_dir), whether they exist, and what was
+/// parsed from them. Stats come from the cached snapshot (no extra disk walk),
+/// so it stays cheap. Designed to make "shows 0 for me" debuggable on any
+/// machine without exposing any message content.
+pub fn diagnose() -> Vec<SourceDiag> {
+    let home = dirs::home_dir().unwrap_or_else(|| PathBuf::from("."));
+    let ctx = ScanCtx { home: &home };
+    let snap = cached(90);
+
+    registry()
+        .iter()
+        .map(|src| {
+            let id = src.id();
+            let roots = src
+                .roots(&ctx)
+                .into_iter()
+                .map(|p| RootDiag {
+                    exists: p.exists(),
+                    path: p.display().to_string(),
+                })
+                .collect();
+            let detected = src.detect(&ctx);
+
+            let mut days = 0;
+            let mut processed = 0u64;
+            let mut messages = 0u64;
+            let mut latest: Option<String> = None;
+            let mut top_model: Option<String> = None;
+
+            if let Some(t) = snap.tools.get(id) {
+                if t.present {
+                    days = t.days.len();
+                    for d in &t.days {
+                        processed += d.new_in + d.write + d.out;
+                        messages += d.messages;
+                    }
+                    latest = t.days.iter().map(|d| d.date.clone()).max();
+                    if let Some(ld) = &latest {
+                        if let Some(d) = t.days.iter().find(|d| &d.date == ld) {
+                            top_model = d
+                                .models
+                                .iter()
+                                .max_by_key(|(_, v)| **v)
+                                .map(|(k, _)| k.clone());
+                        }
+                    }
+                }
+            }
+
+            SourceDiag {
+                id: id.to_string(),
+                label: src.label().to_string(),
+                detected,
+                roots,
+                days,
+                processed,
+                messages,
+                latest,
+                top_model,
+            }
+        })
+        .collect()
 }
 
 #[cfg(test)]

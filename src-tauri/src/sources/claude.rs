@@ -29,6 +29,10 @@ impl Source for Claude {
         ctx.home.join(".claude/projects").is_dir()
     }
 
+    fn roots(&self, ctx: &ScanCtx) -> Vec<std::path::PathBuf> {
+        vec![ctx.home.join(".claude/projects")]
+    }
+
     fn scan(&self, ctx: &ScanCtx) -> Vec<UsageEvent> {
         let root = ctx.home.join(".claude/projects");
         let mut events = Vec::new();

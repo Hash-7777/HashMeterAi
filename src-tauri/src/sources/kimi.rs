@@ -30,6 +30,13 @@ impl Source for Kimi {
             || ctx.home.join(".kimi/sessions").is_dir()
     }
 
+    fn roots(&self, ctx: &ScanCtx) -> Vec<std::path::PathBuf> {
+        vec![
+            ctx.home.join(".kimi-code/sessions"),
+            ctx.home.join(".kimi/sessions"),
+        ]
+    }
+
     fn scan(&self, ctx: &ScanCtx) -> Vec<UsageEvent> {
         let mut events = Vec::new();
         events.extend(scan_new(ctx));

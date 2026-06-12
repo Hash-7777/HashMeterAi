@@ -5,7 +5,7 @@
 // ==============================================================
 
 use crate::model::UsageEvent;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 pub mod claude;
 pub mod cline;
@@ -22,6 +22,12 @@ pub trait Source: Sync {
     fn label(&self) -> &'static str;
     fn detect(&self, ctx: &ScanCtx) -> bool;
     fn scan(&self, ctx: &ScanCtx) -> Vec<UsageEvent>;
+    /// The candidate filesystem roots this adapter looks at, for the Settings
+    /// diagnostics panel. Default empty.
+    fn roots(&self, ctx: &ScanCtx) -> Vec<PathBuf> {
+        let _ = ctx;
+        Vec::new()
+    }
 }
 
 pub fn registry() -> Vec<Box<dyn Source>> {

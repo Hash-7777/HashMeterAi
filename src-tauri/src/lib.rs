@@ -27,6 +27,11 @@ fn scan_usage() -> Snapshot {
 }
 
 #[tauri::command]
+fn get_diagnostics() -> Vec<scan::SourceDiag> {
+    scan::diagnose()
+}
+
+#[tauri::command]
 fn get_profile(app: tauri::AppHandle) -> store::Profile {
     if let Ok(store) = app.store("profile.json") {
         if let Some(val) = store.get("profile") {
@@ -211,6 +216,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             scan_usage,
+            get_diagnostics,
             get_profile,
             set_name,
             get_persona,
