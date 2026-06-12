@@ -9,14 +9,16 @@ const SRC_LABEL = {
   codex: "Codex",
   kimi: "Kimi",
   hashcortx: "HashCortx",
+  hashcerebrum: "HashCerebrum",
   cline: "Cline",
   all: "All tools",
 };
 
-const ALL_SRCS = ["claude", "codex", "kimi", "hashcortx", "cline"];
+const ALL_SRCS = ["claude", "codex", "kimi", "hashcortx", "hashcerebrum", "cline"];
 
-// Sources whose token counts are estimated rather than measured.
-const ESTIMATED_SRCS = new Set(["hashcortx"]);
+// Sources whose token counts are estimated rather than measured. HashCortx and
+// HashCerebrum now record real per-response counts, so nothing is estimated.
+const ESTIMATED_SRCS = new Set([]);
 
 // Clean display names for model ids. Never show a raw hyphenated id.
 const MODEL_NAMES = {
@@ -317,7 +319,7 @@ function render() {
   g("h-focus-sub").textContent = a.focus_sec > 0 ? "focused, gaps under 5 min" : "no use time data";
 
   animate(g("h-cost"), Math.round(a.cost * 100), function (v) { return "$" + (v / 100).toFixed(2); });
-  g("h-cost-sub").textContent = SOURCE === "hashcortx" ? "free-tier \u00b7 not billed" : "all time \u00b7 public list rates";
+  g("h-cost-sub").textContent = (SOURCE === "hashcortx" || SOURCE === "hashcerebrum") ? "free-tier \u00b7 not billed" : "all time \u00b7 public list rates";
 
   g("s-cur").textContent = st[1] > 0 ? "keep it going" : "start a new one";
   animate(g("t-sessions"), a.sessions.size, commas);
