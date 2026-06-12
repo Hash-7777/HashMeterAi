@@ -10,8 +10,10 @@ use std::path::{Path, PathBuf};
 pub mod claude;
 pub mod cline;
 pub mod codex;
+pub mod hashcerebrum;
 pub mod hashcortx;
 pub mod kimi;
+pub mod usage_log;
 
 pub struct ScanCtx<'a> {
     pub home: &'a Path,
@@ -36,6 +38,7 @@ pub fn registry() -> Vec<Box<dyn Source>> {
         Box::new(codex::Codex),
         Box::new(kimi::Kimi),
         Box::new(hashcortx::HashCortx),
+        Box::new(hashcerebrum::HashCerebrum),
         Box::new(cline::Cline),
     ]
 }

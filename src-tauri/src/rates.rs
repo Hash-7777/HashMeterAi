@@ -94,11 +94,11 @@ pub fn default_rate(source: &str) -> Rate {
             cache_write: 0.60,
             cache_read: 0.15,
         },
-        // HashCortx: token counts are estimated from message text (the app does
-        // not record real usage), and it runs on free-tier providers (Groq,
-        // Cerebras, SambaNova, ...). We therefore do not invent a dollar cost —
-        // its rate is zero and the UI labels its tokens as estimated.
-        "hashcortx" => Rate {
+        // HashCortx and HashCerebrum now record REAL token counts (usage.jsonl),
+        // but they run on free-tier providers (Groq, Cerebras, SambaNova, Gemini
+        // free, local Ollama, ...). The token counts are measured; we still do
+        // not invent a dollar cost for free-tier compute, so the rate is zero.
+        "hashcortx" | "hashcerebrum" => Rate {
             input: 0.0,
             output: 0.0,
             cache_write: 0.0,
