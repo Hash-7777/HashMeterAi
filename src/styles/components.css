@@ -621,7 +621,9 @@
   padding:5px 9px;cursor:pointer;transition:.15s;
 }
 .dash-cal-open:hover{background:rgba(253,128,46,.2)}
-.dash-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+/* Capped + centered so the squares stay small (compact, never taller/wider than
+   the panel). minmax(0,…) lets cells shrink on a narrow window — no overflow. */
+.dash-cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;max-width:294px;margin:0 auto;width:100%}
 .mini-cell{
   aspect-ratio:1;
   border-radius:5px;
@@ -629,7 +631,7 @@
   font-size:9px;color:var(--txt);
   background:rgba(255,255,255,.05);
 }
-.mini-dow{font-size:8px;color:var(--mut);font-weight:700;background:transparent !important}
+.mini-dow{aspect-ratio:auto;height:14px;font-size:8px;color:var(--mut);font-weight:700;background:transparent !important}
 .mini-empty{background:transparent !important}
 .mini-cell{cursor:pointer;transition:.12s;border:1px solid transparent}
 .mini-cell:hover{border-color:var(--line-pk)}
