@@ -54,8 +54,25 @@ function hashcortxModels() {
 
 function prettyModel(id) {
   if (MODEL_NAMES[id]) return MODEL_NAMES[id];
-  return id.replace(/^claude-/, "").split(/[-_/]/).filter(Boolean)
+  // HashCerebrum logs its full model ref "cloud:provider:model" /
+  // "local:ollama:model" — show just the model name, cleaned up.
+  let m = id.includes(":") ? id.split(":").pop() : id;
+  if (MODEL_NAMES[m]) return MODEL_NAMES[m];
+  return m.replace(/^claude-/, "").split(/[-_/\s]+/).filter(Boolean)
     .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+}
+
+// Models seen under the HashCerebrum source — tagged "via HashCerebrum" in the
+// Models breakdown, the same way HashCortx models are.
+function hashcerebrumModels() {
+  const set = new Set();
+  const t = RAW && RAW.tools && RAW.tools.hashcerebrum;
+  if (t && t.present) {
+    for (const d of (t.days || [])) {
+      for (const k of Object.keys(d.models || {})) set.add(k);
+    }
+  }
+  return set;
 }
 
 function sdays(name) {
@@ -290,7 +307,7 @@ function render() {
     g("t-long").textContent = "0d";
     g("t-peak").textContent = "\u2014";
     g("t-fav").textContent = "\u2014";
-    g("foot").innerHTML = '<span style="color:var(--mut)">No usage yet \u2014 start coding with any AI tool and check back.</span>';
+    g("foot").innerHTML = "";
     g("cal-grid").innerHTML = "";
     g("mlist").innerHTML = "";
     return;
@@ -363,10 +380,13 @@ function models(a) {
   // Models reached through HashCortx get a "via HashCortx" tag.
   const COLORS = ["#FD802E", "#6fb4ff", "#b79bff", "#54ffc4", "#ffcf6b", "#ff7a9c", "#7dd87d", "#f0997b", "#9fb3bd"];
   const hc = hashcortxModels();
+  const hcer = hashcerebrumModels();
   arr.forEach((p, i) => {
     const m = p[0], t = p[1];
     const color = COLORS[i % COLORS.length];
-    const via = (hc.has(m) && m !== "hashcortx") ? '<span class="mvia">via HashCortx</span>' : "";
+    const via = (hc.has(m) && m !== "hashcortx") ? '<span class="mvia">via HashCortx</span>'
+              : (hcer.has(m) && m !== "hashcerebrum") ? '<span class="mvia">via HashCerebrum</span>'
+              : "";
     const row = document.createElement("div");
     row.className = "mrow";
     row.innerHTML =
