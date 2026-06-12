@@ -836,3 +836,23 @@ select.settings-input:hover{border-color:var(--line-pk)}
 .set-note{font-size:12px;color:var(--mut);line-height:1.6}
 .set-note b{color:var(--txt)}
 .set-version{font-size:11px;color:var(--mut);font-family:var(--mono);text-align:center;margin-top:4px}
+
+/* Diagnostics panel */
+.set-diag{display:flex;flex-direction:column;gap:10px}
+.diag-src{border:1px solid var(--line);border-radius:11px;padding:10px 12px;background:rgba(0,0,0,.18)}
+.diag-src.off{opacity:.55}
+.diag-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.diag-name{font-size:13px;font-weight:700;color:var(--txt)}
+.diag-stat{font-size:11px;color:var(--mut);font-family:var(--mono)}
+.diag-src.ok .diag-stat{color:var(--ok)}
+.diag-src.warn .diag-stat{color:var(--warn)}
+.diag-roots{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.diag-root{display:flex;align-items:center;gap:8px;font-size:11px;font-family:var(--mono);color:var(--mut)}
+.diag-rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:var(--mut)}
+.diag-root.ok .diag-rdot{background:var(--ok);box-shadow:0 0 6px var(--ok)}
+.diag-root.miss .diag-rdot{background:#ff8a6a}
+.diag-rpath{flex:1;min-width:0;word-break:break-all;color:var(--txt);opacity:.85}
+.diag-rstate{flex-shrink:0}
+.diag-root.ok .diag-rstate{color:var(--ok)}
+.diag-root.miss .diag-rstate{color:#ff8a6a}
+.diag-sample{font-size:11px;color:var(--mut);margin-top:7px;font-family:var(--mono)}

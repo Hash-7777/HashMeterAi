@@ -5,6 +5,13 @@ async function scanUsage() {
   return { generated_at: new Date().toISOString(), tools: {} };
 }
 
+async function getDiagnostics() {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    return await window.__TAURI__.core.invoke("get_diagnostics");
+  }
+  return [];
+}
+
 async function getProfile() {
   if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
     return await window.__TAURI__.core.invoke("get_profile");

@@ -30,8 +30,78 @@ async function loadSettings() {
 
     renderAccentSwatches(prefs.accent || "#FD802E");
     renderSourceStatus();
+    renderDiagnostics();
   } catch (e) {
     console.error("settings load error", e);
+  }
+}
+
+// Per-source diagnostics: resolved paths (per-user), whether they exist, and
+// what was parsed — so "shows 0 for me" is debuggable on any machine. No
+// message content is ever shown.
+async function renderDiagnostics() {
+  const host = g("set-diag");
+  if (!host) return;
+  host.innerHTML = '<div class="set-hint">Scanning…</div>';
+  let diag = [];
+  try {
+    diag = await getDiagnostics();
+  } catch (e) {
+    console.error("diagnostics error", e);
+    host.innerHTML = '<div class="set-hint">Diagnostics unavailable.</div>';
+    return;
+  }
+  window._DIAG = diag;
+  host.innerHTML = "";
+  for (const s of diag) {
+    const roots = (s.roots || []).map(r =>
+      '<div class="diag-root ' + (r.exists ? "ok" : "miss") + '">' +
+        '<span class="diag-rdot"></span><span class="diag-rpath">' + r.path + '</span>' +
+        '<span class="diag-rstate">' + (r.exists ? "found" : "not found") + '</span></div>'
+    ).join("");
+    let stat, cls;
+    if (!s.detected) { stat = "not detected on this machine"; cls = "off"; }
+    else if (s.processed > 0) {
+      stat = human(s.processed) + " processed · " + commas(s.messages) + " msgs · " + s.days +
+        " days" + (s.latest ? " · latest " + s.latest : "");
+      cls = "ok";
+    } else { stat = "detected, but 0 parsed — likely a format mismatch"; cls = "warn"; }
+    const sample = (s.detected && s.top_model && s.top_model !== "<synthetic>")
+      ? '<div class="diag-sample">latest top model: ' + prettyModel(s.top_model) + "</div>" : "";
+
+    const el = document.createElement("div");
+    el.className = "diag-src " + cls;
+    el.innerHTML =
+      '<div class="diag-head"><span class="diag-name">' + s.label + "</span>" +
+        '<span class="diag-stat">' + stat + "</span></div>" +
+      '<div class="diag-roots">' + roots + "</div>" + sample;
+    host.appendChild(el);
+  }
+
+  const btn = g("set-diag-copy");
+  if (btn) btn.onclick = copyDiagReport;
+}
+
+async function copyDiagReport() {
+  const diag = window._DIAG || [];
+  const lines = ["HashMeterAi diagnostics", new Date().toISOString(), ""];
+  for (const s of diag) {
+    lines.push(s.label + " (" + s.id + ") — " + (s.detected ? "detected" : "NOT detected"));
+    for (const r of (s.roots || [])) lines.push("  " + (r.exists ? "[found]   " : "[missing] ") + r.path);
+    if (s.detected) {
+      lines.push("  parsed: " + s.processed + " processed tokens, " + s.messages + " msgs, " +
+        s.days + " days, latest " + (s.latest || "-") + ", top model " + (s.top_model || "-"));
+    }
+    lines.push("");
+  }
+  const text = lines.join("\n");
+  const btn = g("set-diag-copy");
+  try {
+    await navigator.clipboard.writeText(text);
+    if (btn) { btn.textContent = "Copied!"; setTimeout(() => btn.textContent = "Copy report", 1600); }
+  } catch (e) {
+    console.error("copy report failed", e);
+    if (btn) { btn.textContent = "Copy failed"; setTimeout(() => btn.textContent = "Copy report", 1600); }
   }
 }
 
