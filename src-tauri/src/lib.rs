@@ -208,8 +208,22 @@ pub fn run() {
         .setup(|app| {
             // The window starts hidden (visible:false) so the window-state plugin can
             // restore its saved geometry before the first paint — no flash in the wrong
-            // place. Show it once that's done.
+            // place. But a corrupt/tiny or off-screen saved state would otherwise make
+            // the app open as a sliver in the corner, so validate the restored size and
+            // fall back to a sane centered default if it's below our minimum.
             if let Some(w) = app.get_webview_window("main") {
+                let too_small = match (w.inner_size(), w.scale_factor()) {
+                    (Ok(size), Ok(scale)) => {
+                        let lw = size.width as f64 / scale;
+                        let lh = size.height as f64 / scale;
+                        lw < 1000.0 || lh < 640.0
+                    }
+                    _ => true,
+                };
+                if too_small {
+                    let _ = w.set_size(tauri::LogicalSize::new(1380.0, 860.0));
+                    let _ = w.center();
+                }
                 let _ = w.show();
             }
             Ok(())
