@@ -401,8 +401,8 @@
 
 /* Category rows — three stacked sections, each scrolling horizontally so the
    whole Achievements view fits on one page. */
-.ach-cats{display:flex;flex-direction:column;gap:16px}
-.ach-cat{display:flex;flex-direction:column;gap:9px}
+.ach-cats{display:flex;flex-direction:column;gap:13px}
+.ach-cat{display:flex;flex-direction:column;gap:8px}
 .ach-cat-head{display:flex;align-items:baseline;gap:10px}
 .ach-cat-label{font-size:13px;font-weight:700;letter-spacing:.02em;color:var(--txt)}
 .ach-cat-count{font-size:11px;color:var(--mut);font-family:var(--mono)}
@@ -422,6 +422,8 @@
 .ach-cat-row::-webkit-scrollbar-track{background:transparent}
 .ach-badge{
   position:relative;
+  display:flex;
+  flex-direction:column;
   background:linear-gradient(180deg,var(--panel),var(--panel2));
   border:1px solid var(--line);
   border-radius:14px;
@@ -430,6 +432,9 @@
   transition:.2s;
   overflow:hidden;
 }
+/* Footer (earned date / % + completion bar) pinned to the bottom so the bar is
+   always on the same line across every card in the row. */
+.ach-foot{margin-top:auto;display:flex;flex-direction:column;gap:6px;padding-top:9px}
 .ach-badge:hover{border-color:var(--line-pk);transform:translateY(-2px)}
 .ach-badge::before{
   content:"";
@@ -478,14 +483,14 @@
 .ach-date{
   font-size:10px;
   color:var(--pk2);
-  margin-top:6px;
+  margin:0;
   font-family:var(--mono);
 }
 .ach-progress-bar{
   height:4px;
   border-radius:2px;
   background:rgba(0,0,0,.3);
-  margin-top:10px;
+  margin:0;
   overflow:hidden;
 }
 .ach-progress-fill{
@@ -496,7 +501,7 @@
 .ach-pct{
   font-size:10px;
   color:var(--mut);
-  margin-top:4px;
+  margin:0;
   font-family:var(--mono);
 }
 

@@ -26,35 +26,26 @@ const ACH_GLYPHS = {
   boxes: '<rect x="3.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.2"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.2"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.2"/>',
   atom: '<circle cx="12" cy="12" r="2"/><ellipse cx="12" cy="12" rx="9" ry="3.6"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9" ry="3.6" transform="rotate(120 12 12)"/>',
   medal: '<circle cx="12" cy="15" r="6"/><path d="M9 9.6 6.5 3M15 9.6 17.5 3M12 12.6l.85 1.7 1.9.28-1.37 1.34.32 1.88L12 16.6l-1.7.9.32-1.88L9.25 14.26l1.9-.28z"/>',
+  diamond: '<path d="M12 3 21 9.5 12 21 3 9.5z"/><path d="M3 9.5h18M8 9.5 12 3l4 6.5-4 11.5z"/>',
+  shuffle: '<path d="M16 4h4v4M20 4l-7 7M16 20h4v-4M20 20 4 4"/>',
+  shield: '<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
   star: '<path d="m12 3 2.6 5.6L21 9.3l-4.5 4.3 1.1 6.2L12 17l-5.6 2.8 1.1-6.2L3 9.3l6.4-.7z"/>',
 };
 
-// One unique glyph per trophy id (ids are stable across the curation).
+// Glyph per trophy id (ids are stable across the curation).
 const ACH_ICON_FOR = {
-  earlybird: "signal",    // First Contact
-  streak7: "hook",        // Hooked
-  tens: "coin",           // The Stack
-  polyglot3: "layers",    // Polyglot
-  nightowl: "moon",       // Night Owl
-  marathon: "flag",       // Marathoner
-  deep_work: "anchor",    // Deep Diver
-  hundred: "vault",       // The Vault
-  polymath: "brain",      // Mind Palace
-  ultra_day: "weight",    // Heavy Lifter
-  around_clock: "clock",  // Around the Clock
-  cache_master: "wand",   // Cache Sorcerer
-  spend1k: "dollar",      // Big Spender
-  billion: "gem",         // Billionaire
-  streak100: "infinity",  // Unbroken
-  spend5k: "whale",       // The Whale
-  archive: "box",         // The Archive
-  high_roller: "dice",    // High Roller
-  five_billion: "crown",  // Ten-Figure Mind
-  streak30: "flame",      // Ironclad
-  colossus: "mountain",   // Colossus
-  polyglot5: "boxes",     // Full Stack
-  omnivore: "atom",       // Omnivore
-  veteran: "medal",       // Veteran
+  // Volume
+  tens: "coin", fifty_m: "coin", hundred: "vault", spend1k: "dollar",
+  archive: "box", high_roller: "dice", billion: "gem", spend5k: "whale",
+  five_billion: "crown", ten_billion: "diamond",
+  // Intensity
+  streak7: "hook", nightowl: "moon", marathon: "flag", deep_work: "anchor",
+  ultra_day: "weight", streak30: "flame", streak60: "flame", colossus: "mountain",
+  streak100: "infinity", mega_day: "mountain",
+  // Mastery
+  earlybird: "signal", hopper: "shuffle", polyglot3: "layers", polymath: "brain",
+  polyglot5: "boxes", around_clock: "clock", cache_master: "wand", omnivore: "atom",
+  veteran: "medal", lifer: "shield",
 };
 
 // Display categories — one horizontally-scrolling row each, in this order.
@@ -77,7 +68,7 @@ async function loadAchievements() {
 
     // Personalized header with a per-tier breakdown of what's earned.
     const name = (window.USER_NAME || "").trim();
-    const owner = name ? name + "'s badges" : "Achievements";
+    const owner = name ? name + "'s trophies" : "Trophies";
     const tiers = ["legendary", "epic", "rare", "common"];
     const chips = tiers.map(t => {
       const all = list.filter(a => a.tier === t);
@@ -133,18 +124,21 @@ function buildBadge(a) {
   el.className = "ach-badge tier-" + a.tier + (a.unlocked ? " unlocked" : " locked");
 
   const pct = Math.round(a.progress * 100);
-  const date = a.earned_date && a.unlocked
-    ? '<div class="ach-date">earned ' + a.earned_date + "</div>"
-    : "";
-  const progress = a.unlocked
+  // Meta line (earned date when unlocked, % when locked) sits ABOVE the bar so
+  // the bar is always the last element — pinned to the card bottom and aligned
+  // across every card in the row.
+  const meta = a.unlocked
+    ? (a.earned_date ? '<div class="ach-date">earned ' + a.earned_date + "</div>" : '<div class="ach-date">earned</div>')
+    : '<div class="ach-pct">' + pct + "%</div>";
+  const bar = a.unlocked
     ? '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:100%"></div></div>'
-    : '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:' + pct + '%"></div></div><div class="ach-pct">' + pct + "%</div>";
+    : '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:' + pct + '%"></div></div>';
 
   el.innerHTML =
     '<div class="ach-tier-tag">' + a.tier + "</div>" +
     '<div class="ach-icon">' + achIcon(a.id) + "</div>" +
     '<div class="ach-name">' + a.name + "</div>" +
     '<div class="ach-desc">' + a.description + "</div>" +
-    date + progress;
+    '<div class="ach-foot">' + meta + bar + "</div>";
   return el;
 }
