@@ -322,7 +322,7 @@ function render() {
   g("t-peak").textContent = hourLabel(ph);
   g("s-peak").textContent = commas(a.hours[ph]) + " msgs";
 
-  const fav = Object.entries(a.models).sort((x, y) => y[1] - x[1])[0];
+  const fav = Object.entries(a.models).filter(([m]) => m && m !== "<synthetic>").sort((x, y) => y[1] - x[1])[0];
   g("t-fav").textContent = fav ? prettyModel(fav[0]) : "\u2014";
   g("s-fav").textContent = fav ? human(fav[1]) + " tok" : "";
 
@@ -332,7 +332,8 @@ function render() {
 }
 
 function models(a) {
-  const arr = Object.entries(a.models).sort((x, y) => y[1] - x[1]);
+  // Hide the synthetic placeholder model from the breakdown.
+  const arr = Object.entries(a.models).filter(([m]) => m && m !== "<synthetic>").sort((x, y) => y[1] - x[1]);
   const max = arr.length ? arr[0][1] : 1;
   const tot = arr.reduce((s, p) => s + p[1], 0) || 1;
   const host = g("mlist");

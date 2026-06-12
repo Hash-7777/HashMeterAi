@@ -105,9 +105,12 @@ function showView(name) {
   if (name === "settings") loadSettings();
   if (name === "share") renderShareCard();
   if (name === "dashboard") {
-    g("models-card").classList.add("hidden");
+    // Reset to the Overview sub-tab and keep the segmented buttons in sync, so
+    // coming back from another view never shows Overview with Models still lit.
     TAB = "overview";
+    g("models-card").classList.add("hidden");
     g("overview").classList.remove("hidden");
+    updateTabButtons();
   }
 }
 
