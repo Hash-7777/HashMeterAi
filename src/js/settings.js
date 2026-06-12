@@ -202,6 +202,15 @@ g("set-open-data").onclick = async function () {
   }
 };
 
+// Ecosystem links in Settings open the repo in the system browser.
+document.addEventListener("click", function (e) {
+  const el = e.target.closest("[data-eco-url]");
+  if (!el) return;
+  e.preventDefault();
+  const url = el.getAttribute("data-eco-url");
+  if (url) openExternalUrl(url).catch(function () {});
+});
+
 g("set-reset").onclick = async function () {
   const ok = confirm("Reset all app data? This clears your name, preferences, and unlocked badges.");
   if (!ok) return;

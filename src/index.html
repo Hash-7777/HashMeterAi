@@ -179,84 +179,91 @@
           </div>
         </div>
 
-        <div class="settings-cols">
-          <div class="settings-col">
-            <!-- Profile -->
-            <section class="set-card">
-              <div class="set-card-title">Profile</div>
-              <label class="set-field">
-                <span class="set-label">Display name</span>
-                <div class="set-inline">
-                  <input type="text" id="set-name" maxlength="40" class="settings-input" placeholder="Your name">
-                  <button class="set-btn" id="set-save-name">Save</button>
-                </div>
-                <span class="set-hint">Personalizes your dashboard, persona, and share card.</span>
-              </label>
-            </section>
+        <!-- Profile -->
+        <section class="set-card">
+          <div class="set-card-title">Profile</div>
+          <label class="set-field">
+            <span class="set-label">Display name</span>
+            <div class="set-inline">
+              <input type="text" id="set-name" maxlength="40" class="settings-input" placeholder="Your name">
+              <button class="set-btn" id="set-save-name">Save</button>
+            </div>
+            <span class="set-hint">Personalizes your dashboard, persona, and share card.</span>
+          </label>
+        </section>
 
-            <!-- Appearance -->
-            <section class="set-card">
-              <div class="set-card-title">Appearance</div>
-              <div class="set-field">
-                <span class="set-label">Accent color</span>
-                <div class="set-swatches" id="set-accent"></div>
-              </div>
-              <label class="set-toggle">
-                <input type="checkbox" id="set-reduced">
-                <span><b>Reduced motion</b><small>Disable count-up and transition animations.</small></span>
-              </label>
-              <label class="set-toggle">
-                <input type="checkbox" id="set-compact">
-                <span><b>Compact density</b><small>Tighter spacing — fits more on small screens.</small></span>
-              </label>
-            </section>
-
-            <!-- Danger zone -->
-            <section class="set-card danger">
-              <div class="set-card-title">Reset</div>
-              <p class="set-note">Clears your name, preferences, and unlocked badges. Usage data on disk is untouched.</p>
-              <button class="set-btn danger" id="set-reset">Reset app</button>
-            </section>
+        <!-- Appearance -->
+        <section class="set-card">
+          <div class="set-card-title">Appearance</div>
+          <div class="set-field">
+            <span class="set-label">Accent color</span>
+            <div class="set-swatches" id="set-accent"></div>
           </div>
+          <label class="set-toggle">
+            <input type="checkbox" id="set-reduced">
+            <span><b>Reduced motion</b><small>Disable count-up and transition animations.</small></span>
+          </label>
+          <label class="set-toggle">
+            <input type="checkbox" id="set-compact">
+            <span><b>Compact density</b><small>Tighter spacing — fits more on small screens.</small></span>
+          </label>
+        </section>
 
-          <div class="settings-col">
-            <!-- Data & sync -->
-            <section class="set-card">
-              <div class="set-card-title">Data &amp; sync</div>
-              <div class="set-field set-inline2">
-                <label class="set-sub-field">
-                  <span class="set-label">Auto-sync</span>
-                  <select id="set-sync" class="settings-input">
-                    <option value="30">Every 30 seconds</option>
-                    <option value="60">Every minute</option>
-                    <option value="300">Every 5 minutes</option>
-                    <option value="900">Every 15 minutes</option>
-                    <option value="0">Off</option>
-                  </select>
-                </label>
-                <label class="set-sub-field">
-                  <span class="set-label">Default range</span>
-                  <select id="set-range" class="settings-input">
-                    <option value="all">All time</option>
-                    <option value="30">Last 30 days</option>
-                    <option value="7">Last 7 days</option>
-                  </select>
-                </label>
-              </div>
-              <div class="set-field">
-                <span class="set-label">Detected sources</span>
-                <div class="set-sources" id="set-sources"></div>
-              </div>
-              <button class="set-btn ghost" id="set-open-data">Open data folder</button>
-            </section>
-
-            <!-- Privacy -->
-            <section class="set-card">
-              <div class="set-card-title">Privacy</div>
-              <p class="set-note">HashMeterAi reads only local usage metadata. No network, no telemetry, no message content leaves this device. HashCortx and HashCerebrum record their real per-response token counts, which HashMeterAi reads as <b>measured</b>.</p>
-            </section>
+        <!-- Data & sync -->
+        <section class="set-card">
+          <div class="set-card-title">Data &amp; sync</div>
+          <div class="set-field set-inline2">
+            <label class="set-sub-field">
+              <span class="set-label">Auto-sync</span>
+              <select id="set-sync" class="settings-input">
+                <option value="30">Every 30 seconds</option>
+                <option value="60">Every minute</option>
+                <option value="300">Every 5 minutes</option>
+                <option value="900">Every 15 minutes</option>
+                <option value="0">Off</option>
+              </select>
+            </label>
+            <label class="set-sub-field">
+              <span class="set-label">Default range</span>
+              <select id="set-range" class="settings-input">
+                <option value="all">All time</option>
+                <option value="30">Last 30 days</option>
+                <option value="7">Last 7 days</option>
+              </select>
+            </label>
           </div>
-        </div>
+          <div class="set-field">
+            <span class="set-label">Detected sources</span>
+            <div class="set-sources" id="set-sources"></div>
+          </div>
+          <button class="set-btn ghost" id="set-open-data">Open data folder</button>
+        </section>
+
+        <!-- Privacy -->
+        <section class="set-card">
+          <div class="set-card-title">Privacy</div>
+          <p class="set-note">HashMeterAi reads only local usage metadata. No network, no telemetry, no message content leaves this device. HashCortx and HashCerebrum record their real per-response token counts, which HashMeterAi reads as <b>measured</b>.</p>
+        </section>
+
+        <!-- The Hash ecosystem -->
+        <section class="set-card">
+          <div class="set-card-title">The Hash ecosystem</div>
+          <p class="set-hint">Local-first, privacy-first apps by the same developer.</p>
+          <div class="set-eco">
+            <a class="set-eco-app" data-eco-url="https://github.com/Hash-7777/HashMeterAi">
+              <span class="set-eco-name">HashMeterAi <span class="set-eco-here">this app</span></span>
+              <span class="set-eco-desc">See how much AI you really use — the honest local usage meter.</span>
+            </a>
+            <a class="set-eco-app" data-eco-url="https://github.com/Hash-7777/HashCortX">
+              <span class="set-eco-name">HashCortX</span>
+              <span class="set-eco-desc">The local-first AI workspace — 11 modes, 10 providers, zero telemetry.</span>
+            </a>
+            <a class="set-eco-app" data-eco-url="https://github.com/Hash-7777/HashCerebrum">
+              <span class="set-eco-name">HashCerebrum</span>
+              <span class="set-eco-desc">Local-first medical-research workbench with a 3D brain interface.</span>
+            </a>
+          </div>
+        </section>
 
         <!-- Diagnostics -->
         <section class="set-card" id="diag-card">
@@ -264,6 +271,13 @@
           <p class="set-hint">What HashMeterAi reads on this machine — the resolved paths, whether they exist, and what was parsed. No message content is shown. Handy for debugging "shows 0" on a new machine.</p>
           <div class="set-diag" id="set-diag"></div>
           <button class="set-btn ghost" id="set-diag-copy">Copy report</button>
+        </section>
+
+        <!-- Reset (kept last so it's out of the way) -->
+        <section class="set-card danger">
+          <div class="set-card-title">Reset</div>
+          <p class="set-note">Clears your name, preferences, and unlocked badges. Usage data on disk is untouched.</p>
+          <button class="set-btn danger" id="set-reset">Reset app</button>
         </section>
 
         <div class="set-version">HashMeterAi · Version 0.1.0</div>

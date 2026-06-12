@@ -162,6 +162,20 @@ fn open_data_folder(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+/// Open an external http(s) URL in the system browser (used by the Settings
+/// ecosystem links). Restricted to http(s) so the renderer can't open an
+/// arbitrary scheme.
+#[tauri::command]
+fn open_external_url(app: tauri::AppHandle, url: String) -> Result<(), String> {
+    if !(url.starts_with("https://") || url.starts_with("http://")) {
+        return Err("only http(s) urls are allowed".into());
+    }
+    app.opener()
+        .open_url(url, None::<&str>)
+        .map_err(|e| format!("failed to open url: {e}"))?;
+    Ok(())
+}
+
 #[tauri::command]
 fn reset_profile(app: tauri::AppHandle) {
     if let Ok(store) = app.store("profile.json") {
@@ -237,6 +251,7 @@ pub fn run() {
             get_achievements,
             set_pref,
             open_data_folder,
+            open_external_url,
             reset_profile,
             copy_image_to_clipboard
         ])

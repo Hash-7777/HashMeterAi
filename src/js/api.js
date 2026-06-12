@@ -58,6 +58,13 @@ async function openDataFolder() {
   return Promise.reject(new Error("Tauri runtime not available"));
 }
 
+async function openExternalUrl(url) {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    return await window.__TAURI__.core.invoke("open_external_url", { url });
+  }
+  return Promise.reject(new Error("Tauri runtime not available"));
+}
+
 async function resetProfile() {
   if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
     await window.__TAURI__.core.invoke("reset_profile");
