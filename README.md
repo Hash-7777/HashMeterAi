@@ -80,6 +80,18 @@ Requires Rust (stable) and Node 18+.
 
 **Tauri v2 + Rust + vanilla JavaScript** — no Electron, no bundler. One small native binary (target under 15 MB). All parsing and aggregation in Rust (parallel and incremental, so refresh is instant). The UI is plain HTML, CSS, and JS.
 
+## The Hash ecosystem
+
+HashMeterAi is one of three local-first, privacy-first apps by the same developer — no cloud, no telemetry, your data stays on your machine:
+
+| App | What it is |
+|---|---|
+| **[HashMeterAi](https://github.com/Hash-7777/HashMeterAi)** *(this app)* | See how much AI you really use — the honest local usage meter for AI coding tools. |
+| **[HashCortX](https://github.com/Hash-7777/HashCortX)** | The local-first AI workspace — eleven modes, ten providers, zero telemetry. |
+| **[HashCerebrum](https://github.com/Hash-7777/HashCerebrum)** | A local-first medical-research workbench with a 3D brain interface for searching, citing, and peer-reviewing research. |
+
+HashCortX and HashCerebrum write a local token-usage log that HashMeterAi reads, so your usage across the whole ecosystem is measured accurately in one place.
+
 ## Contributing
 
 Issues and PRs welcome — especially new source adapters. Keep it honest, local, and light.
