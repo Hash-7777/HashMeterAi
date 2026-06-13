@@ -37,15 +37,17 @@ const ACH_GLYPHS = {
 // Glyph per trophy id (ids are stable across the curation).
 const ACH_ICON_FOR = {
   // Volume
-  first_million: "coin", tens: "coin", fifty_m: "coin", hundred: "vault",
-  spend100: "dollar", spend500: "dollar", spend1k: "dollar", high_roller: "dice",
-  archive: "box", quarter_b: "gem", billion: "gem", spend5k: "whale",
-  five_billion: "crown", ten_billion: "diamond",
+  spend10: "dollar", first_million: "coin", five_m: "coin", tens: "coin",
+  spend100: "dollar", twenty_five_m: "coin", spend250: "dollar", fifty_m: "coin",
+  hundred: "vault", spend500: "dollar", spend1k: "dollar", archive: "box",
+  quarter_b: "gem", high_roller: "dice", billion: "gem", spend5k: "whale",
+  two_half_b: "gem", five_billion: "crown", spend10k: "whale", ten_billion: "diamond",
   // Intensity
-  streak3: "hook", streak7: "hook", streak14: "flag", nightowl: "moon",
-  marathon: "flag", big_day5: "flame", focused2: "clock", deep_work: "anchor",
-  ultra_day: "weight", streak30: "flame", streak60: "flame", colossus: "mountain",
-  streak100: "infinity", mega_day: "bolt",
+  streak3: "hook", early_riser: "signal", streak7: "hook", focused2: "clock",
+  nightowl: "moon", marathon: "flag", big_day5: "flame", focused4: "clock",
+  deep_work: "anchor", streak14: "flag", streak21: "flag", deep_work8: "anchor",
+  ultra_day: "weight", streak30: "flame", streak45: "flame", streak60: "flame",
+  colossus: "mountain", streak100: "infinity", ludicrous_day: "bolt", mega_day: "bolt",
   // Mastery
   earlybird: "signal", two_tools: "layers", hopper: "shuffle", polyglot3: "layers",
   models6: "shuffle", cache_half: "wand", active_days_30: "medal", polymath: "brain",
@@ -67,6 +69,9 @@ const ACH_GLYPHS_LEGENDARY = {
   mega_day: '<path d="M13.6 2 4.8 13.4h5L8.4 22 19.2 10.2h-5.2z" fill="currentColor"/><path d="M13.6 2 4.8 13.4h5" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linejoin="round"/>',
   omnivore: '<circle cx="12" cy="12" r="2.4" fill="currentColor"/><ellipse cx="12" cy="12" rx="9" ry="3.7" fill="none" stroke="currentColor" stroke-width="1.9"/><ellipse cx="12" cy="12" rx="9" ry="3.7" transform="rotate(60 12 12)" fill="none" stroke="currentColor" stroke-width="1.9"/><ellipse cx="12" cy="12" rx="9" ry="3.7" transform="rotate(120 12 12)" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="20.5" cy="12" r="1" fill="rgba(255,255,255,.85)"/>',
   models_16: '<rect x="3.3" y="3.3" width="7.4" height="7.4" rx="1.8" fill="currentColor"/><rect x="13.3" y="3.3" width="7.4" height="7.4" rx="1.8" fill="currentColor"/><rect x="3.3" y="13.3" width="7.4" height="7.4" rx="1.8" fill="currentColor"/><rect x="13.3" y="13.3" width="7.4" height="7.4" rx="1.8" fill="currentColor"/><rect x="5.3" y="5.3" width="2.6" height="2.6" rx=".7" fill="rgba(255,255,255,.6)"/><rect x="15.3" y="15.3" width="2.6" height="2.6" rx=".7" fill="rgba(255,255,255,.5)"/>',
+  two_half_b: '<path d="M6 3.4h12l3.1 5.3L12 21 2.9 8.7z" fill="currentColor"/><path d="M2.9 8.7h18.2M9 3.4 7 8.7l5 12.3 5-12.3-2-5.3M7 8.7h10" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="1.1"/><path d="M9.6 5.6 11 7M14.4 5.6 13 7" stroke="rgba(255,255,255,.8)" stroke-width="1" stroke-linecap="round"/>',
+  spend10k: '<path d="M3 13c0-3 3-5.4 7-5.4 4.5 0 7.8 3 7.8 6.4 0 .8-.2 1.4-.2 1.4-1.4 2-4.1 3-6.8 3C6.9 18.4 3 16 3 13z" fill="currentColor"/><path d="M17.8 8.6c.9-.6 1.7-1.5 1.9-2.7.2 1.3.7 2.2.6 2.5" fill="currentColor"/><circle cx="8" cy="11.8" r="1.05" fill="rgba(255,255,255,.9)"/><path d="M5.4 15.2c1.4.9 3.2 1.4 5.2 1.4" fill="none" stroke="rgba(255,255,255,.45)" stroke-width="1"/>',
+  ludicrous_day: '<path d="M13.6 2 4.8 13.4h5L8.4 22 19.2 10.2h-5.2z" fill="currentColor"/><path d="M13.6 2 4.8 13.4h5" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linejoin="round"/>',
   veteran: '<path d="M8.8 3 6.2 9M15.2 3l2.6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="15" r="6.2" fill="currentColor"/><path d="m12 11.2 1.08 2.18 2.4.35-1.74 1.7.41 2.4L12 18.78l-2.15 1.13.41-2.4-1.74-1.7 2.4-.35z" fill="rgba(255,255,255,.92)"/>',
   lifer: '<path d="M12 2.8 20.2 6v6.2c0 5.2-3.7 8.3-8.2 9.3-4.5-1-8.2-4.1-8.2-9.3V6z" fill="currentColor"/><path d="M8.4 12.2l2.5 2.5 4.8-5" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>',
 };
