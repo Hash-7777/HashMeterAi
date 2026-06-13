@@ -2,6 +2,7 @@ let RAW = null;
 let RANGE = "all";
 let SOURCE = "all";
 let LASTSYNC = 0;
+let SYNC_TXT = "";
 let HERO_TOKEN_VIEW = 1; // 0 = Pure Signal, 1 = Real Work, 2 = Full Footprint
 
 const SRC_LABEL = {
@@ -417,16 +418,24 @@ async function load() {
         typeof renderSourceStatus === "function") {
       renderSourceStatus();
     }
-    g("sync").textContent = "\u25cf live \u00b7 synced just now";
+    SYNC_TXT = "\u25cf live \u00b7 synced just now";
+    g("sync").textContent = SYNC_TXT;
   } catch (e) {
     g("sync").textContent = "scan error";
     console.error(e);
   }
 }
 
+// Tick once a second, but the displayed unit scales (s -> m -> h -> d) and we
+// only touch the DOM when the rendered string actually changes \u2014 so once we're
+// past a minute the label updates rarely, not every second.
 setInterval(function () {
-  const s = Math.max(0, Math.round((Date.now() - LASTSYNC) / 1000));
-  g("sync").textContent = "\u25cf live \u00b7 synced " + s + "s ago";
+  if (!LASTSYNC) return;
+  const txt = "\u25cf live \u00b7 synced " + timeAgo(Date.now() - LASTSYNC);
+  if (txt !== SYNC_TXT) {
+    SYNC_TXT = txt;
+    g("sync").textContent = txt;
+  }
 }, 1000);
 
 g("h-processed-tile").onclick = function () {

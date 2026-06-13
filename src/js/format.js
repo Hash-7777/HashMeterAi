@@ -25,6 +25,20 @@ function hourLabel(h) {
   return ((h % 12) || 12) + " " + (h < 12 ? "AM" : "PM");
 }
 
+// Relative "time ago" that rolls its unit up as it grows: seconds, then minutes,
+// then hours, then days — so the sync indicator reads "8s ago", "3m ago",
+// "2h ago", "5d ago" instead of an ever-climbing seconds count.
+function timeAgo(ms) {
+  const s = Math.max(0, Math.floor(ms / 1000));
+  if (s < 5) return "just now";
+  if (s < 60) return s + "s ago";
+  const m = Math.floor(s / 60);
+  if (m < 60) return m + "m ago";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h ago";
+  return Math.floor(h / 24) + "d ago";
+}
+
 // --- Color helpers (accent theming) ---
 function hexToRgb(hex) {
   let h = (hex || "").replace("#", "");
