@@ -2,7 +2,7 @@ let CAL_YEAR = new Date().getFullYear();
 let CAL_MONTH = new Date().getMonth();
 let MINI_CAL_YEAR = new Date().getFullYear();
 let MINI_CAL_MONTH = new Date().getMonth();
-let MINI_SELECTED = null;
+let DAYPOP_DS = null;
 let CAL_SELECTED = null;
 
 const CAL_COLORS = [
@@ -54,11 +54,24 @@ function sessionCount(rec) {
   return rec.sessions.length || rec.sessions.size || 0;
 }
 
+function prettyDate(ds) {
+  const d = new Date(ds + "T00:00:00");
+  if (isNaN(d.getTime())) return ds;
+  return d.toLocaleDateString(undefined, {
+    weekday: "short", month: "short", day: "numeric", year: "numeric",
+  });
+}
+
 function formatDayDetail(ds, rec) {
+  const niceDate = prettyDate(ds);
   const tok = rec ? rec.newIn + rec.write + rec.out : 0;
-  const models = rec && rec.models ? Object.entries(rec.models) : [];
+  if (!rec || tok === 0) {
+    return '<div class="day-detail-date">' + niceDate + "</div>" +
+      '<div class="day-detail-empty">No AI activity this day</div>';
+  }
+  const models = rec.models ? Object.entries(rec.models) : [];
   models.sort((a, b) => b[1] - a[1]);
-  const top = models[0];
+  const top = models.find(m => m[0] && m[0] !== "<synthetic>");
   const parts = [
     "<span>" + human(tok) + " tokens</span>",
     "<span>" + duration(rec.focus_sec || 0) + " use time</span>",
@@ -68,7 +81,7 @@ function formatDayDetail(ds, rec) {
   if (top) {
     parts.push("<span>Top model: " + prettyModel(top[0]) + "</span>");
   }
-  return '<div class="day-detail-date">' + ds + "</div>" +
+  return '<div class="day-detail-date">' + niceDate + "</div>" +
     '<div class="day-detail-stats">' + parts.join("") + "</div>";
 }
 
@@ -77,6 +90,7 @@ function renderMiniCalendar() {
   if (!RAW) return;
   const grid = g("dash-cal-grid");
   if (!grid) return;
+  hideDayPop();
 
   const active = ALL_SRCS.filter(s => RAW.tools[s] && RAW.tools[s].present);
   const names = SOURCE === "all" ? active : [SOURCE];
@@ -119,27 +133,27 @@ function renderMiniCalendar() {
     const tok = rec ? rec.newIn + rec.write + rec.out : 0;
     const lvl = calIntensity(tok, maxTok);
     const el = document.createElement("div");
-    el.className = "mini-cell" +
-      (ds === todayStr ? " mini-today" : "") +
-      (ds === MINI_SELECTED ? " mini-selected" : "");
+    el.className = "mini-cell" + (ds === todayStr ? " mini-today" : "");
     el.style.background = CAL_COLORS[lvl];
     if (lvl === 4) el.style.boxShadow = "0 0 6px var(--pk)";
     if (rec) el.title = ds + " · " + human(tok) + " tok";
-    el.onclick = function () {
-      MINI_SELECTED = (MINI_SELECTED === ds) ? null : ds;
-      renderMiniCalendar();
+    el.onclick = function (ev) {
+      ev.stopPropagation();
+      if (DAYPOP_DS === ds && isDayPopOpen()) { hideDayPop(); return; }
+      for (const c of grid.querySelectorAll(".mini-cell.mini-active")) {
+        c.classList.remove("mini-active");
+      }
+      el.classList.add("mini-active");
+      DAYPOP_DS = ds;
+      showDayPop(el, ds, rec);
     };
     grid.appendChild(el);
   }
 
   const foot = g("dash-cal-foot");
   if (foot) {
-    if (MINI_SELECTED && dayMap[MINI_SELECTED]) {
-      foot.innerHTML = formatDayDetail(MINI_SELECTED, dayMap[MINI_SELECTED]);
-    } else {
-      foot.textContent = activeDays + " active " + (activeDays === 1 ? "day" : "days") +
-        " · " + human(monthTok) + " tok this month";
-    }
+    foot.textContent = activeDays + " active " + (activeDays === 1 ? "day" : "days") +
+      " · " + human(monthTok) + " tok this month";
   }
 }
 
@@ -212,3 +226,57 @@ function renderCalendar() {
     }
   }
 }
+
+// ===== Dashboard mini-calendar day popover =====
+// A transient floating panel: clicking a day shows its stats next to the cell
+// without changing layout, so the dashboard never grows into a scroll.
+function isDayPopOpen() {
+  const p = g("day-pop");
+  return !!(p && p.classList.contains("show"));
+}
+
+function showDayPop(anchor, ds, rec) {
+  const pop = g("day-pop");
+  if (!pop || !anchor) return;
+  pop.innerHTML = formatDayDetail(ds, rec);
+  // Measure while invisible, then place beside the cell — preferring below,
+  // flipping above when there's no room, and clamping to the viewport.
+  pop.style.visibility = "hidden";
+  pop.classList.add("show");
+  const r = anchor.getBoundingClientRect();
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  const M = 8;
+  let left = r.left + r.width / 2 - pw / 2;
+  let top = r.bottom + M;
+  if (top + ph > window.innerHeight - M) top = r.top - ph - M;
+  if (top < M) top = M;
+  left = Math.max(M, Math.min(left, window.innerWidth - pw - M));
+  pop.style.left = left + "px";
+  pop.style.top = top + "px";
+  pop.style.visibility = "";
+}
+
+function hideDayPop() {
+  const pop = g("day-pop");
+  if (pop) pop.classList.remove("show");
+  DAYPOP_DS = null;
+  for (const c of document.querySelectorAll(".mini-cell.mini-active")) {
+    c.classList.remove("mini-active");
+  }
+}
+
+// Dismiss on any outside click, Esc, content scroll, or window resize.
+document.addEventListener("click", function (e) {
+  if (!isDayPopOpen()) return;
+  const pop = g("day-pop");
+  if (pop && pop.contains(e.target)) return;
+  hideDayPop();
+});
+document.addEventListener("keydown", function (e) {
+  if (e.key === "Escape") hideDayPop();
+});
+window.addEventListener("resize", hideDayPop);
+(function () {
+  const c = g("content");
+  if (c) c.addEventListener("scroll", hideDayPop, { passive: true });
+})();

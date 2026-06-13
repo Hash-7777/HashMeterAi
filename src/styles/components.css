@@ -688,6 +688,30 @@
 .mini-cell:hover{border-color:var(--line-pk)}
 .mini-today{outline:1.5px solid var(--pk);outline-offset:-1px}
 .mini-selected{outline:2px solid var(--pk);outline-offset:-1.5px;box-shadow:0 0 8px rgba(253,128,46,.25)}
+.mini-cell.mini-active{outline:2px solid var(--pk);outline-offset:-1.5px;box-shadow:0 0 9px rgba(253,128,46,.35)}
+
+/* Floating day-detail popover for the dashboard mini calendar — a transient
+   overlay so a day's stats never grow the panel or push the page into scroll.
+   Click anywhere outside (or Esc / scroll / resync) dismisses it. */
+.day-pop{
+  position:fixed;
+  left:0;top:0;
+  z-index:60;
+  min-width:178px;
+  max-width:268px;
+  background:linear-gradient(180deg,var(--panel),var(--panel2));
+  border:1px solid var(--line-pk);
+  border-radius:12px;
+  padding:12px 14px;
+  box-shadow:0 14px 40px rgba(0,0,0,.55);
+  opacity:0;
+  transform:translateY(5px) scale(.97);
+  transform-origin:top center;
+  transition:opacity .14s ease,transform .14s ease;
+  pointer-events:none;
+}
+.day-pop.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto}
+.day-detail-empty{font-size:11px;color:var(--mut);font-family:var(--mono);letter-spacing:.02em}
 .dash-cal-navgroup{display:flex;align-items:center;gap:6px}
 .dash-cal-nav{
   font:inherit;font-size:11px;font-weight:800;color:var(--mut);
