@@ -427,6 +427,8 @@
   grid-template-columns:repeat(auto-fill,minmax(155px,1fr));
   gap:12px;
 }
+.ach-note{font-size:11.5px;color:var(--mut);margin:-6px 0 16px;line-height:1.55;max-width:760px}
+.ach-note b{color:var(--txt);font-weight:600}
 
 /* Category rows — three stacked sections, each scrolling horizontally so the
    whole Achievements view fits on one page. */

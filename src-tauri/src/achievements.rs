@@ -178,35 +178,35 @@ fn best_streak(s: &Stats) -> u64 {
 // dates every trophy from the same logic.
 fn definitions() -> Vec<Def> {
     vec![
-        // ===== Volume: cumulative tokens (full billed footprint) + spend =====
-        def("first_million", "First Million", "Reach 1,000,000 total tokens", COMMON, VOLUME, 4,
-            Box::new(|s| (s.billed as f64 / 1_000_000.0, s.billed >= 1_000_000))),
-        def("tens", "10M Club", "Reach 10,000,000 total tokens", RARE, VOLUME, 7,
-            Box::new(|s| (s.billed as f64 / 10_000_000.0, s.billed >= 10_000_000))),
+        // ===== Volume: cumulative processed tokens + spend =====
+        def("first_million", "First Million", "Process 1,000,000 tokens", COMMON, VOLUME, 4,
+            Box::new(|s| (s.processed as f64 / 1_000_000.0, s.processed >= 1_000_000))),
+        def("tens", "10M Club", "Process 10,000,000 tokens", RARE, VOLUME, 7,
+            Box::new(|s| (s.processed as f64 / 10_000_000.0, s.processed >= 10_000_000))),
         def("spend100", "First Hundred", "Reach $100 of estimated compute", RARE, VOLUME, 8,
             Box::new(|s| (s.cost / 100.0, s.cost >= 100.0))),
-        def("fifty_m", "50M Club", "Reach 50,000,000 total tokens", RARE, VOLUME, 18,
-            Box::new(|s| (s.billed as f64 / 50_000_000.0, s.billed >= 50_000_000))),
-        def("hundred", "100M Club", "Reach 100,000,000 total tokens", EPIC, VOLUME, 20,
-            Box::new(|s| (s.billed as f64 / 100_000_000.0, s.billed >= 100_000_000))),
+        def("fifty_m", "50M Club", "Process 50,000,000 tokens", RARE, VOLUME, 18,
+            Box::new(|s| (s.processed as f64 / 50_000_000.0, s.processed >= 50_000_000))),
+        def("hundred", "100M Club", "Process 100,000,000 tokens", EPIC, VOLUME, 20,
+            Box::new(|s| (s.processed as f64 / 100_000_000.0, s.processed >= 100_000_000))),
         def("spend500", "Five Hundred Club", "Reach $500 of estimated compute", EPIC, VOLUME, 21,
             Box::new(|s| (s.cost / 500.0, s.cost >= 500.0))),
         def("spend1k", "Big Spender", "Reach $1,000 of estimated compute", EPIC, VOLUME, 26,
             Box::new(|s| (s.cost / 1000.0, s.cost >= 1000.0))),
-        def("archive", "Half-Billion", "Reach 500,000,000 total tokens", EPIC, VOLUME, 34,
-            Box::new(|s| (s.billed as f64 / 500_000_000.0, s.billed >= 500_000_000))),
-        def("quarter_b", "Quarter-Billion", "Reach 250,000,000 total tokens", EPIC, VOLUME, 35,
-            Box::new(|s| (s.billed as f64 / 250_000_000.0, s.billed >= 250_000_000))),
+        def("archive", "Half-Billion", "Process 500,000,000 tokens", EPIC, VOLUME, 34,
+            Box::new(|s| (s.processed as f64 / 500_000_000.0, s.processed >= 500_000_000))),
+        def("quarter_b", "Quarter-Billion", "Process 250,000,000 tokens", EPIC, VOLUME, 35,
+            Box::new(|s| (s.processed as f64 / 250_000_000.0, s.processed >= 250_000_000))),
         def("high_roller", "High Roller", "Reach $2,500 of estimated compute", EPIC, VOLUME, 36,
             Box::new(|s| (s.cost / 2500.0, s.cost >= 2500.0))),
-        def("billion", "Billionaire", "Reach 1,000,000,000 total tokens", LEGENDARY, VOLUME, 38,
-            Box::new(|s| (s.billed as f64 / 1_000_000_000.0, s.billed >= 1_000_000_000))),
+        def("billion", "Billionaire", "Process 1,000,000,000 tokens", LEGENDARY, VOLUME, 38,
+            Box::new(|s| (s.processed as f64 / 1_000_000_000.0, s.processed >= 1_000_000_000))),
         def("spend5k", "Whale", "Reach $5,000 of estimated compute", LEGENDARY, VOLUME, 41,
             Box::new(|s| (s.cost / 5000.0, s.cost >= 5000.0))),
-        def("five_billion", "5B Club", "Reach 5,000,000,000 total tokens", LEGENDARY, VOLUME, 45,
-            Box::new(|s| (s.billed as f64 / 5_000_000_000.0, s.billed >= 5_000_000_000))),
-        def("ten_billion", "Ten-Billion Titan", "Reach 10,000,000,000 total tokens", LEGENDARY, VOLUME, 47,
-            Box::new(|s| (s.billed as f64 / 10_000_000_000.0, s.billed >= 10_000_000_000))),
+        def("five_billion", "5B Club", "Process 5,000,000,000 tokens", LEGENDARY, VOLUME, 45,
+            Box::new(|s| (s.processed as f64 / 5_000_000_000.0, s.processed >= 5_000_000_000))),
+        def("ten_billion", "Ten-Billion Titan", "Process 10,000,000,000 tokens", LEGENDARY, VOLUME, 47,
+            Box::new(|s| (s.processed as f64 / 10_000_000_000.0, s.processed >= 10_000_000_000))),
 
         // ===== Intensity: single-day bursts, streaks, focus, cadence =====
         def("streak3", "Three-Peat", "Hold a 3-day activity streak", COMMON, INTENSITY, 2,
@@ -220,26 +220,26 @@ fn definitions() -> Vec<Def> {
                 let p = if s.peak_hour < 4 { (s.peak_events as f64 / 50.0).min(1.0) } else { 0.0 };
                 (p, s.peak_hour < 4 && s.peak_events >= 50)
             })),
-        def("marathon", "Marathoner", "Run 1,000,000 tokens in a single day", RARE, INTENSITY, 11,
-            Box::new(|s| (s.max_day_billed as f64 / 1_000_000.0, s.max_day_billed >= 1_000_000))),
-        def("big_day5", "Big Day", "Run 5,000,000 tokens in a single day", RARE, INTENSITY, 12,
-            Box::new(|s| (s.max_day_billed as f64 / 5_000_000.0, s.max_day_billed >= 5_000_000))),
+        def("marathon", "Marathoner", "Process 1,000,000 tokens in a single day", RARE, INTENSITY, 11,
+            Box::new(|s| (s.max_day_processed as f64 / 1_000_000.0, s.max_day_processed >= 1_000_000))),
+        def("big_day5", "Big Day", "Process 5,000,000 tokens in a single day", RARE, INTENSITY, 12,
+            Box::new(|s| (s.max_day_processed as f64 / 5_000_000.0, s.max_day_processed >= 5_000_000))),
         def("deep_work", "Deep Diver", "6h+ of focused work in a single day", RARE, INTENSITY, 17,
             Box::new(|s| (s.max_day_focus_sec as f64 / (6.0 * 3600.0), s.max_day_focus_sec >= 6 * 3600))),
         def("streak14", "Fortnight", "Hold a 14-day activity streak", RARE, INTENSITY, 19,
             Box::new(|s| (best_streak(s) as f64 / 14.0, best_streak(s) >= 14))),
-        def("ultra_day", "Heavy Lifter", "Run 10,000,000 tokens in a single day", EPIC, INTENSITY, 27,
-            Box::new(|s| (s.max_day_billed as f64 / 10_000_000.0, s.max_day_billed >= 10_000_000))),
+        def("ultra_day", "Heavy Lifter", "Process 10,000,000 tokens in a single day", EPIC, INTENSITY, 27,
+            Box::new(|s| (s.max_day_processed as f64 / 10_000_000.0, s.max_day_processed >= 10_000_000))),
         def("streak30", "Iron Streak", "Hold a 30-day activity streak", EPIC, INTENSITY, 30,
             Box::new(|s| (best_streak(s) as f64 / 30.0, best_streak(s) >= 30))),
         def("streak60", "Iron Will", "Hold a 60-day activity streak", EPIC, INTENSITY, 37,
             Box::new(|s| (best_streak(s) as f64 / 60.0, best_streak(s) >= 60))),
-        def("colossus", "Powerhouse", "Run 25,000,000 tokens in a single day", LEGENDARY, INTENSITY, 39,
-            Box::new(|s| (s.max_day_billed as f64 / 25_000_000.0, s.max_day_billed >= 25_000_000))),
+        def("colossus", "Powerhouse", "Process 25,000,000 tokens in a single day", LEGENDARY, INTENSITY, 39,
+            Box::new(|s| (s.max_day_processed as f64 / 25_000_000.0, s.max_day_processed >= 25_000_000))),
         def("streak100", "Unstoppable", "Hold a 100-day activity streak", LEGENDARY, INTENSITY, 40,
             Box::new(|s| (best_streak(s) as f64 / 100.0, best_streak(s) >= 100))),
-        def("mega_day", "Juggernaut", "Run 50,000,000 tokens in a single day", LEGENDARY, INTENSITY, 46,
-            Box::new(|s| (s.max_day_billed as f64 / 50_000_000.0, s.max_day_billed >= 50_000_000))),
+        def("mega_day", "Juggernaut", "Process 50,000,000 tokens in a single day", LEGENDARY, INTENSITY, 46,
+            Box::new(|s| (s.max_day_processed as f64 / 50_000_000.0, s.max_day_processed >= 50_000_000))),
 
         // ===== Mastery: breadth, models, cache, milestones =====
         def("earlybird", "First Steps", "Record your first AI activity", COMMON, MASTERY, 1,
@@ -287,9 +287,10 @@ fn definitions() -> Vec<Def> {
 
 #[derive(Default)]
 struct Stats {
-    // Token trophies count the full billed footprint (the big "total tokens"
-    // number, incl. cache reads) so a heavy user's milestones match the totals
-    // the rest of the app shows them — not just real-work tokens.
+    // Token trophies count PROCESSED tokens — real work (input + cache-write +
+    // output), matching the app's headline "tokens processed". `billed` (which
+    // also counts cache re-reads) is kept only for the cache-share trophies.
+    processed: u64,
     billed: u64,
     cache_read: u64,
     cost: f64,
@@ -298,7 +299,7 @@ struct Stats {
     tools_used: usize,
     longest_streak: u64,
     current_streak: u64,
-    max_day_billed: u64,
+    max_day_processed: u64,
     max_day_focus_sec: u64,
     peak_hour: u8,
     peak_events: u64,
@@ -335,13 +336,14 @@ fn compute_stats_filtered(snap: &Snapshot, max_date: Option<&str>) -> Stats {
             }
             tools_with_usage.insert(id.as_str());
 
-            let billed = d.new_in + d.write + d.read + d.out;
-            s.billed += billed;
+            let proc = d.new_in + d.write + d.out;
+            s.processed += proc;
+            s.billed += d.new_in + d.write + d.read + d.out;
             s.cache_read += d.read;
             s.cost += d.cost;
 
             let agg = all_days.entry(d.date.clone()).or_default();
-            agg.billed += billed;
+            agg.processed += proc;
             agg.focus_sec += d.focus_sec;
 
             for m in d.models.keys() {
@@ -364,7 +366,7 @@ fn compute_stats_filtered(snap: &Snapshot, max_date: Option<&str>) -> Stats {
     }
 
     s.active_days = all_days.len() as u64;
-    s.max_day_billed = all_days.values().map(|d| d.billed).max().unwrap_or(0);
+    s.max_day_processed = all_days.values().map(|d| d.processed).max().unwrap_or(0);
     s.max_day_focus_sec = all_days.values().map(|d| d.focus_sec).max().unwrap_or(0);
 
     let (long, cur) = streaks(&all_days);
@@ -376,7 +378,7 @@ fn compute_stats_filtered(snap: &Snapshot, max_date: Option<&str>) -> Stats {
 
 #[derive(Default)]
 struct DayAgg {
-    billed: u64,
+    processed: u64,
     focus_sec: u64,
 }
 
