@@ -69,7 +69,7 @@ pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
     });
     if stats.tools_used >= 2 {
         traits.push(Trait {
-            label: "Polyglot".to_string(),
+            label: "Multi-Tool".to_string(),
             why: format!("{} tools with usage", stats.tools_used),
         });
     }
@@ -240,7 +240,7 @@ fn pick_base(stats: &Stats) -> String {
         return "Full-Stack Operator".to_string();
     }
     if stats.tools_used >= 3 {
-        return "Polyglot Operator".to_string();
+        return "Multi-Tool Operator".to_string();
     }
     // Model affinity is measured against total billed tokens (the same basis
     // model_share is keyed on), so numerator and denominator share a unit.
@@ -331,7 +331,7 @@ fn base_why(stats: &Stats, base: &str) -> String {
             human(input),
             human(stats.out)
         ),
-        "Full-Stack Operator" | "Polyglot Operator" => format!("{} tools with usage", stats.tools_used),
+        "Full-Stack Operator" | "Multi-Tool Operator" => format!("{} tools with usage", stats.tools_used),
         "Deep Thinker" => "Opus >= 55% of billed tokens".to_string(),
         "Workhorse" => "Sonnet >= 55% of billed tokens".to_string(),
         "Speed Runner" => "Haiku/small >= 55% of billed tokens".to_string(),
