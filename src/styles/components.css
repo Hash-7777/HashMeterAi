@@ -646,7 +646,10 @@
 /* Glowing preview — capped width so the whole tab fits without scrolling. The
    glow color is set per theme (--share-glow) and gently pulses. */
 .share-preview{
-  display:inline-block;max-width:600px;width:100%;line-height:0;border-radius:12px;
+  display:inline-block;width:100%;line-height:0;border-radius:12px;
+  /* As large as fits without scrolling: width is bounded by the height the tab
+     has left (card is 1.905:1), capped at 1040px and floored at 360px. */
+  max-width:clamp(360px, calc((100vh - 340px) * 1.905), 1040px);
   --share-glow:rgba(253,128,46,.5);
   box-shadow:0 0 30px var(--share-glow);
   animation:share-glow 3s ease-in-out infinite;
@@ -866,10 +869,10 @@ body.compact .stat.stat-lead .val{font-size:20px}
 @keyframes ach-glow-legend{0%,100%{filter:drop-shadow(0 0 13px var(--glow))}50%{filter:drop-shadow(0 0 30px rgba(255,216,120,.95))}}
 @keyframes ach-spin{to{transform:rotate(360deg)}}
 
-/* Legendary hero row: its own wrapping, full-width row with room around the
-   cards so the whole-card gold glow renders un-clipped (category rows scroll). */
+/* Legendary hero row: a side-scrolling row like the category rows, with extra
+   vertical padding so the whole-card gold glow has room before the row clips. */
 .ach-legend .ach-cat-label{color:#ffcf6b}
-.ach-legend-row{overflow:visible;flex-wrap:wrap;padding:8px 2px 16px}
+.ach-legend-row{padding:12px 2px 15px}
 .ach-badge.tier-legendary{border-color:rgba(255,207,107,.3)}
 .ach-badge.tier-legendary.unlocked{box-shadow:0 0 24px rgba(255,195,85,.4);animation:ach-box-legend 2.6s ease-in-out infinite}
 @keyframes ach-box-legend{0%,100%{box-shadow:0 0 16px rgba(255,190,80,.3)}50%{box-shadow:0 0 38px rgba(255,205,95,.62)}}
