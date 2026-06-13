@@ -48,9 +48,10 @@ const ACH_ICON_FOR = {
   streak100: "infinity", mega_day: "bolt",
   // Mastery
   earlybird: "signal", two_tools: "layers", hopper: "shuffle", polyglot3: "layers",
-  models6: "shuffle", polymath: "brain", polyglot5: "boxes", around_clock: "clock",
-  cache_master: "wand", models10: "atom", omnivore: "atom", veteran: "medal",
-  lifer: "shield",
+  models6: "shuffle", cache_half: "wand", active_days_30: "medal", polymath: "brain",
+  polyglot5: "boxes", all_six_tools: "boxes", active_days_50: "medal", around_clock: "clock",
+  around_clock_24: "clock", cache_adept: "wand", cache_master: "wand", models10: "atom",
+  models_16: "boxes", omnivore: "atom", veteran: "medal", lifer: "shield",
 };
 
 // Ornate, sparkle-detailed figures for the legendary roster only — keyed by
@@ -65,6 +66,7 @@ const ACH_GLYPHS_LEGENDARY = {
   streak100: '<path d="M12 12c1.8-2.5 3.5-3.6 5.2-3.6a3.6 3.6 0 0 1 0 7.2c-1.7 0-3.4-1.1-5.2-3.6z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 12c-1.8 2.5-3.5 3.6-5.2 3.6a3.6 3.6 0 0 1 0-7.2c1.7 0 3.4 1.1 5.2 3.6z" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>',
   mega_day: '<path d="M13.6 2 4.8 13.4h5L8.4 22 19.2 10.2h-5.2z" fill="currentColor"/><path d="M13.6 2 4.8 13.4h5" fill="none" stroke="rgba(255,255,255,.4)" stroke-width="1" stroke-linejoin="round"/>',
   omnivore: '<circle cx="12" cy="12" r="2.4" fill="currentColor"/><ellipse cx="12" cy="12" rx="9" ry="3.7" fill="none" stroke="currentColor" stroke-width="1.9"/><ellipse cx="12" cy="12" rx="9" ry="3.7" transform="rotate(60 12 12)" fill="none" stroke="currentColor" stroke-width="1.9"/><ellipse cx="12" cy="12" rx="9" ry="3.7" transform="rotate(120 12 12)" fill="none" stroke="currentColor" stroke-width="1.9"/><circle cx="20.5" cy="12" r="1" fill="rgba(255,255,255,.85)"/>',
+  models_16: '<rect x="3.3" y="3.3" width="7.4" height="7.4" rx="1.8" fill="currentColor"/><rect x="13.3" y="3.3" width="7.4" height="7.4" rx="1.8" fill="currentColor"/><rect x="3.3" y="13.3" width="7.4" height="7.4" rx="1.8" fill="currentColor"/><rect x="13.3" y="13.3" width="7.4" height="7.4" rx="1.8" fill="currentColor"/><rect x="5.3" y="5.3" width="2.6" height="2.6" rx=".7" fill="rgba(255,255,255,.6)"/><rect x="15.3" y="15.3" width="2.6" height="2.6" rx=".7" fill="rgba(255,255,255,.5)"/>',
   veteran: '<path d="M8.8 3 6.2 9M15.2 3l2.6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="12" cy="15" r="6.2" fill="currentColor"/><path d="m12 11.2 1.08 2.18 2.4.35-1.74 1.7.41 2.4L12 18.78l-2.15 1.13.41-2.4-1.74-1.7 2.4-.35z" fill="rgba(255,255,255,.92)"/>',
   lifer: '<path d="M12 2.8 20.2 6v6.2c0 5.2-3.7 8.3-8.2 9.3-4.5-1-8.2-4.1-8.2-9.3V6z" fill="currentColor"/><path d="M8.4 12.2l2.5 2.5 4.8-5" fill="none" stroke="rgba(255,255,255,.92)" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/>',
 };
