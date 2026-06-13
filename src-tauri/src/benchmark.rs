@@ -26,14 +26,24 @@ const FLOOR: u64 = 500_000;
 
 /// (monthly processed tokens, percentile at-or-below this level). Monotonic in
 /// both columns; we log-interpolate between anchors and clamp past the ends.
+///
+/// Denser than before so the percentile moves smoothly instead of in big jumps.
+/// Calibrated to public 2025-26 figures: a typical daily AI-coding user lands
+/// around 1-2M tokens/month (~50th pct), heavy daily agentic users 8-30M
+/// (~75-92nd), and documented power users at 100M+/month sit in the top ~1-2%.
 const ANCHORS: &[(f64, f64)] = &[
-    (500_000.0, 25.0),
+    (500_000.0, 20.0),
+    (1_000_000.0, 35.0),
     (2_000_000.0, 50.0),
-    (8_000_000.0, 75.0),
-    (20_000_000.0, 90.0),
-    (50_000_000.0, 97.0),
-    (100_000_000.0, 99.0),
-    (200_000_000.0, 99.7),
+    (4_000_000.0, 62.0),
+    (8_000_000.0, 74.0),
+    (15_000_000.0, 84.0),
+    (30_000_000.0, 92.0),
+    (60_000_000.0, 96.5),
+    (100_000_000.0, 98.5),
+    (200_000_000.0, 99.4),
+    (500_000_000.0, 99.8),
+    (1_000_000_000.0, 99.95),
 ];
 
 const NOTE: &str = "Modeled benchmark of 2025\u{2013}26 AI-coding usage \u{2014} not a live ranking.";
