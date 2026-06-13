@@ -784,32 +784,55 @@ body.compact .stat.stat-lead .val{font-size:20px}
 .ach-badge.tier-rare{border-color:rgba(111,180,255,.3)}
 .ach-badge.tier-epic{border-color:rgba(183,155,255,.32)}
 .ach-badge.tier-legendary{border-color:rgba(255,207,107,.4)}
-.ach-badge.unlocked.tier-epic{box-shadow:0 0 18px rgba(150,120,255,.14)}
-.ach-badge.unlocked.tier-legendary{box-shadow:0 0 22px rgba(255,180,80,.18)}
+.ach-badge.unlocked.tier-epic{box-shadow:0 0 20px rgba(150,120,255,.18)}
 .tier-rare .ach-tier-tag{color:#6fb4ff}
 .tier-epic .ach-tier-tag{color:#b79bff}
 .tier-legendary .ach-tier-tag{color:#ffcf6b}
 
-.ach-icon{width:42px;height:42px}
-.ach-icon svg{width:21px;height:21px;display:block}
+.ach-icon{width:50px;height:50px;position:relative;isolation:isolate;overflow:hidden;margin:0 auto 10px}
+.ach-icon svg{width:26px;height:26px;display:block;position:relative;z-index:1;filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
 .ach-badge .ach-icon{color:#10202a}
-.ach-badge.locked .ach-icon{background:var(--ch);box-shadow:none;filter:none;color:var(--mut)}
-.ach-badge.tier-common.unlocked .ach-icon{background:linear-gradient(135deg,var(--pk-dim),var(--pk))}
-.ach-badge.tier-rare.unlocked .ach-icon{background:linear-gradient(135deg,#3a6fb0,#6fb4ff)}
-.ach-badge.tier-epic.unlocked .ach-icon{background:linear-gradient(135deg,#6b4fd0,#b79bff)}
-.ach-badge.tier-legendary.unlocked .ach-icon{background:linear-gradient(135deg,#c9962e,#ffcf6b)}
+.ach-badge.tier-legendary .ach-icon{color:#3a2606}
+.ach-badge.locked .ach-icon{background:var(--ch);box-shadow:none;filter:none;color:var(--mut);animation:none}
+.ach-badge.locked .ach-icon svg{filter:none}
+.ach-badge.tier-common.unlocked .ach-icon{background:linear-gradient(150deg,#ffc890,var(--pk) 48%,#b3560f);--glow:rgba(253,128,46,.6)}
+.ach-badge.tier-rare.unlocked .ach-icon{background:linear-gradient(150deg,#cfe6ff,#5aa6ff 48%,#2c5ea6);--glow:rgba(111,180,255,.6)}
+.ach-badge.tier-epic.unlocked .ach-icon{background:linear-gradient(150deg,#e7daff,#a98bff 48%,#5638bf);--glow:rgba(160,130,255,.65)}
+.ach-badge.tier-legendary.unlocked .ach-icon{background:linear-gradient(150deg,#fff1c4,#ffce5e 46%,#b07d1c);--glow:rgba(255,205,95,.7)}
 
 /* Tier-shaped medallions: each rarity gets its own silhouette. clip-path drops
    the box-shadow, so unlocked glow is re-applied as a drop-shadow filter that
    follows the clipped shape. */
 .ach-badge.tier-common .ach-icon{border-radius:50%}                 /* circle */
-.ach-badge.tier-rare .ach-icon{border-radius:11px;clip-path:none}   /* rounded square */
+.ach-badge.tier-rare .ach-icon{border-radius:13px;clip-path:none}   /* rounded square */
 .ach-badge.tier-epic .ach-icon{border-radius:0;clip-path:polygon(50% 0,100% 0,100% 56%,50% 100%,0 56%,0 0)}       /* shield */
 .ach-badge.tier-legendary .ach-icon{border-radius:0;clip-path:polygon(50% 1%,93% 25%,93% 75%,50% 99%,7% 75%,7% 25%)} /* hexagon */
-.ach-badge.tier-common.unlocked .ach-icon{box-shadow:0 0 14px rgba(253,128,46,.35)}
-.ach-badge.tier-rare.unlocked .ach-icon{box-shadow:0 0 14px rgba(111,180,255,.38)}
-.ach-badge.tier-epic.unlocked .ach-icon{filter:drop-shadow(0 0 9px rgba(150,120,255,.5))}
-.ach-badge.tier-legendary.unlocked .ach-icon{filter:drop-shadow(0 0 11px rgba(255,200,90,.55))}
+
+/* Glossy top sheen on every earned medallion. */
+.ach-badge.unlocked .ach-icon::after{content:"";position:absolute;left:0;top:0;right:0;height:50%;z-index:2;pointer-events:none;background:linear-gradient(180deg,rgba(255,255,255,.42),rgba(255,255,255,0))}
+/* Sunburst behind epic + legendary figures; the legendary one slowly rotates. */
+.ach-badge.unlocked.tier-epic .ach-icon::before,
+.ach-badge.unlocked.tier-legendary .ach-icon::before{content:"";position:absolute;inset:-30%;z-index:0;pointer-events:none;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,0) 0deg,rgba(255,255,255,.18) 5deg,rgba(255,255,255,0) 11deg)}
+.ach-badge.unlocked.tier-legendary .ach-icon::before{animation:ach-spin 9s linear infinite}
+
+/* Stronger, pulsating glow per tier. Static values stay bright so the medals
+   still read as glowy when "Reduced motion" freezes the pulse. */
+.ach-badge.tier-common.unlocked .ach-icon,
+.ach-badge.tier-rare.unlocked .ach-icon{box-shadow:inset 0 1px 1px rgba(255,255,255,.45),0 0 14px var(--glow);animation:ach-glow-shadow 2.8s ease-in-out infinite}
+.ach-badge.tier-epic.unlocked .ach-icon{filter:drop-shadow(0 0 13px var(--glow));animation:ach-glow-filter 2.6s ease-in-out infinite}
+.ach-badge.tier-legendary.unlocked .ach-icon{filter:drop-shadow(0 0 15px var(--glow));animation:ach-glow-legend 2.6s ease-in-out infinite}
+@keyframes ach-glow-shadow{0%,100%{box-shadow:inset 0 1px 1px rgba(255,255,255,.45),0 0 12px var(--glow)}50%{box-shadow:inset 0 1px 1px rgba(255,255,255,.45),0 0 27px var(--glow)}}
+@keyframes ach-glow-filter{0%,100%{filter:drop-shadow(0 0 11px var(--glow))}50%{filter:drop-shadow(0 0 27px var(--glow))}}
+@keyframes ach-glow-legend{0%,100%{filter:drop-shadow(0 0 13px var(--glow))}50%{filter:drop-shadow(0 0 30px rgba(255,216,120,.95))}}
+@keyframes ach-spin{to{transform:rotate(360deg)}}
+
+/* Legendary hero row: its own wrapping, full-width row with room around the
+   cards so the whole-card gold glow renders un-clipped (category rows scroll). */
+.ach-legend .ach-cat-label{color:#ffcf6b}
+.ach-legend-row{overflow:visible;flex-wrap:wrap;padding:8px 2px 16px}
+.ach-badge.tier-legendary{border-color:rgba(255,207,107,.3)}
+.ach-badge.tier-legendary.unlocked{box-shadow:0 0 24px rgba(255,195,85,.4);animation:ach-box-legend 2.6s ease-in-out infinite}
+@keyframes ach-box-legend{0%,100%{box-shadow:0 0 16px rgba(255,190,80,.3)}50%{box-shadow:0 0 38px rgba(255,205,95,.62)}}
 
 /* ===== Settings ===== */
 .settings-hero{display:flex;align-items:center;gap:14px;margin-bottom:2px}
