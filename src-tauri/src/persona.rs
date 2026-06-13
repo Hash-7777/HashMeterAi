@@ -414,6 +414,11 @@ fn pretty_model(id: &str) -> String {
         "gpt-5.5" => "GPT-5.5".to_string(),
         "gpt-5" => "GPT-5".to_string(),
         "kimi-code/kimi-for-coding" => "Kimi for Coding".to_string(),
+        "kimi-k2" => "Kimi K2".to_string(),
+        "kimi-k2-turbo" => "Kimi K2 Turbo".to_string(),
+        "qwen3-32b" => "Qwen3 32B".to_string(),
+        "qwen3-coder" => "Qwen3 Coder".to_string(),
+        "qwen-max" => "Qwen Max".to_string(),
         "<synthetic>" => "Synthetic".to_string(),
         other => other
             .strip_prefix("claude-")

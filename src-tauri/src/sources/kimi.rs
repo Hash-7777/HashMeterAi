@@ -62,12 +62,20 @@ fn scan_new(ctx: &ScanCtx) -> Vec<UsageEvent> {
                 if line.is_empty() {
                     continue;
                 }
-                if !line.contains("usage") && !line.contains("modelAlias") {
+                if !line.contains("usage") && !line.contains("model") {
                     continue;
                 }
                 if let Ok(ev) = serde_json::from_str::<serde_json::Value>(&line) {
-                    if let Some(ma) = ev.get("modelAlias").and_then(|v| v.as_str()) {
-                        model = ma.to_string();
+                    // Track the active model so each usage record is attributed to
+                    // the model that produced it (Kimi can switch versions within a
+                    // session). Prefer the most specific field present.
+                    for key in ["model", "modelName", "modelId", "modelAlias"] {
+                        if let Some(m) = ev.get(key).and_then(|v| v.as_str()) {
+                            if !m.is_empty() {
+                                model = m.to_string();
+                                break;
+                            }
+                        }
                     }
                     if ev.get("type").and_then(|v| v.as_str()) != Some("usage.record") {
                         continue;
@@ -195,7 +203,15 @@ fn parse_old_line(
         .unwrap_or(0);
     let ot = tu.get("output").and_then(|v| v.as_u64()).unwrap_or(0);
 
-    let model = "kimi-code/kimi-for-coding";
+    // Use the per-message model when the transcript records one, so Kimi usage
+    // is classified by model rather than lumped under a single name.
+    let model = payload
+        .get("model")
+        .or_else(|| payload.get("model_name"))
+        .or_else(|| ev.get("message").and_then(|m| m.get("model")))
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.is_empty())
+        .unwrap_or("kimi-code/kimi-for-coding");
     let cost = event_cost(model, "kimi", ni, cw, cr, ot);
 
     Some(UsageEvent {
@@ -296,5 +312,16 @@ mod tests {
     fn kimi_new_ignores_non_usage_record() {
         let ev = serde_json::json!({"type": "context.append_loop_event", "time": 0});
         assert!(parse_new_line(&ev, "sid", "model").is_none());
+    }
+
+    #[test]
+    fn kimi_old_reads_model_when_present() {
+        // When the transcript records a model, usage is attributed to it instead
+        // of the generic Kimi name — so Kimi is classified by model.
+        let mut seen = HashSet::new();
+        let mut ev = synth_old(1750152000.0, "mid-x", 10, 0, 0, 5);
+        ev["message"]["payload"]["model"] = serde_json::json!("kimi-2.6");
+        let evt = parse_old_line(&ev, "sid", &mut seen).unwrap();
+        assert_eq!(evt.model, "kimi-2.6");
     }
 }

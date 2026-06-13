@@ -36,6 +36,13 @@ const MODEL_NAMES = {
   "llama-3.1-8b-instant": "Llama 3.1 8B",
   "llama-3.3-70b-versatile": "Llama 3.3 70B",
   "qwen3-32b": "Qwen3 32B",
+  "qwen3-coder": "Qwen3 Coder",
+  "qwen3-235b-a22b": "Qwen3 235B",
+  "qwen2.5-coder-32b": "Qwen2.5 Coder 32B",
+  "qwen-max": "Qwen Max",
+  "kimi-k2": "Kimi K2",
+  "kimi-k2-turbo": "Kimi K2 Turbo",
+  "kimi-k2-0905-preview": "Kimi K2 (0905)",
   "hashcortx": "HashCortx",
   "<synthetic>": "Synthetic",
 };
