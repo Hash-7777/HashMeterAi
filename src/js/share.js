@@ -1,5 +1,32 @@
 const SANS = "-apple-system, BlinkMacSystemFont, sans-serif";
 
+let SHARE_THEME = 0;
+
+// Card themes the user can pick before exporting. The first ("Default") tracks
+// the app's accent preference; the rest are fixed alternative palettes. All are
+// dark so the card's light text stays legible.
+function shareThemes() {
+  const accent = (window.PREFS && window.PREFS.accent) || "#FD802E";
+  return [
+    { id: "default", name: "Default", accent: accent, bg: ["#06101a", "#1a130b", "#05090d"] },
+    { id: "midnight", name: "Midnight", accent: "#6fb4ff", bg: ["#060a14", "#0b1830", "#05080f"] },
+    { id: "aurora", name: "Aurora", accent: "#2ec5a8", bg: ["#05110f", "#0a2620", "#05100d"] },
+    { id: "violet", name: "Violet", accent: "#9b8cff", bg: ["#0a0816", "#160f2e", "#070611"] },
+    { id: "gold", name: "Gold", accent: "#ffce5e", bg: ["#0f0a04", "#241804", "#0c0802"] },
+    { id: "mono", name: "Mono", accent: "#cfd8e0", bg: ["#0a0d11", "#161b21", "#06080b"] },
+  ];
+}
+
+function renderShareThemes() {
+  const host = g("share-themes");
+  if (!host) return;
+  host.innerHTML = shareThemes().map((t, i) =>
+    '<button class="share-theme-btn' + (i === SHARE_THEME ? " on" : "") + '" data-theme="' + i + '">' +
+      '<span class="share-theme-sw" style="background:' + t.accent + '"></span>' + t.name +
+    "</button>"
+  ).join("");
+}
+
 async function renderShareCard() {
   const canvas = g("share-canvas");
   const ctx = canvas.getContext("2d");
@@ -7,7 +34,6 @@ async function renderShareCard() {
   const H = 630;
   const CX = W / 2;
   const dpr = window.devicePixelRatio || 1;
-  const ACCENT = (window.PREFS && window.PREFS.accent) || "#FD802E";
 
   // Render at device-pixel ratio for crisp PNGs on retina displays.
   canvas.width = W * dpr;
@@ -17,12 +43,19 @@ async function renderShareCard() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.textBaseline = "alphabetic";
 
-  // Background — clean vertical gradient (teal edge, warm pumpkin-tinted middle),
-  // matching the website. No grid.
+  // Active card theme (chosen via the theme buttons). Drives the accent and the
+  // background gradient; the preview's glow is tinted to match.
+  renderShareThemes();
+  const theme = shareThemes()[SHARE_THEME] || shareThemes()[0];
+  const ACCENT = theme.accent;
+  const preview = g("share-preview");
+  if (preview) preview.style.setProperty("--share-glow", hexToRgba(ACCENT, 0.5));
+
+  // Background — clean vertical gradient from the active theme. No grid.
   const grad = ctx.createLinearGradient(0, 0, 0, H);
-  grad.addColorStop(0, "#06101a");
-  grad.addColorStop(0.5, "#1a130b");
-  grad.addColorStop(1, "#05090d");
+  grad.addColorStop(0, theme.bg[0]);
+  grad.addColorStop(0.5, theme.bg[1]);
+  grad.addColorStop(1, theme.bg[2]);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, W, H);
 
@@ -379,4 +412,13 @@ g("share-save").onclick = function () {
   link.download = "hashmeterai-share.png";
   link.href = canvas.toDataURL("image/png");
   link.click();
+};
+
+// Pick a card theme, then re-render the canvas (and the swatches' active state).
+g("share-themes").onclick = function (e) {
+  const b = e.target.closest(".share-theme-btn");
+  if (!b) return;
+  SHARE_THEME = parseInt(b.dataset.theme, 10) || 0;
+  renderShareThemes();
+  renderShareCard();
 };

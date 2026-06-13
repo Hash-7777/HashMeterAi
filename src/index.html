@@ -289,12 +289,15 @@
     <div id="view-share" class="hidden">
       <div class="share-wrap">
         <h3>Share your AI usage</h3>
-        <canvas id="share-canvas" width="1200" height="630" style="max-width:100%;height:auto;border-radius:12px;margin-top:16px;border:1px solid var(--line)"></canvas>
+        <div class="share-themes" id="share-themes"></div>
+        <div class="share-preview" id="share-preview">
+          <canvas id="share-canvas" width="1200" height="630"></canvas>
+        </div>
         <div class="share-actions">
           <button class="share-btn primary" id="share-copy">Copy image</button>
           <button class="share-btn" id="share-save">Save PNG</button>
         </div>
-        <p style="font-size:11px;color:var(--mut);margin-top:10px">What is shown: your persona, processed tokens, top-percent standing, estimated cost, best streak, tools unified, and your rarest trophy. Nothing else leaves your device.</p>
+        <p class="share-note">What is shown: your persona, processed tokens, top-percent standing, estimated cost, best streak, tools unified, and your rarest trophy. Nothing else leaves your device.</p>
       </div>
     </div>
 

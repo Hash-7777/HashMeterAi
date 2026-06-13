@@ -631,6 +631,29 @@
 .share-wrap{
   text-align:center;
 }
+.share-wrap h3{margin-bottom:2px}
+/* Theme picker — choose a card palette before exporting. */
+.share-themes{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:12px 0 14px}
+.share-theme-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  font:inherit;font-size:11px;font-weight:600;letter-spacing:.03em;color:var(--mut);
+  background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:9px;
+  padding:6px 11px 6px 8px;cursor:pointer;transition:.15s;
+}
+.share-theme-btn:hover{color:var(--txt);border-color:var(--line-pk)}
+.share-theme-btn.on{color:var(--txt);border-color:var(--pk);background:rgba(253,128,46,.10)}
+.share-theme-sw{width:13px;height:13px;border-radius:4px;flex-shrink:0;box-shadow:0 0 0 1px rgba(0,0,0,.35) inset}
+/* Glowing preview — capped width so the whole tab fits without scrolling. The
+   glow color is set per theme (--share-glow) and gently pulses. */
+.share-preview{
+  display:inline-block;max-width:600px;width:100%;line-height:0;border-radius:12px;
+  --share-glow:rgba(253,128,46,.5);
+  box-shadow:0 0 30px var(--share-glow);
+  animation:share-glow 3s ease-in-out infinite;
+}
+@keyframes share-glow{0%,100%{box-shadow:0 0 22px var(--share-glow)}50%{box-shadow:0 0 48px var(--share-glow)}}
+#share-canvas{display:block;width:100%;height:auto;border-radius:12px;border:1px solid var(--line)}
+.share-note{font-size:11px;color:var(--mut);margin-top:10px}
 .share-actions{
   display:flex;
   gap:10px;
