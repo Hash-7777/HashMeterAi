@@ -2,7 +2,9 @@
 // HashMeterAi — Cost rate table
 //
 // $ per 1_000_000 tokens: (input, output, cache_write, cache_read)
-// Anthropic rates are exact; OpenAI / Kimi are estimates.
+// Anthropic and OpenAI rates are public list prices, encoded via per-provider
+// helpers so cache pricing follows each provider's rule exactly. Kimi is an
+// estimate. HashCortx / HashCerebrum are free-tier (zero, see default_rate).
 // ==============================================================
 
 use std::collections::HashMap;
@@ -14,62 +16,65 @@ pub struct Rate {
     pub cache_read: f64,
 }
 
+// Anthropic bills cache writes at 1.25x the input rate and cache reads at 0.10x.
+// Encoding the rule here keeps every Claude row exact and consistent.
+fn anthropic(input: f64, output: f64) -> Rate {
+    Rate {
+        input,
+        output,
+        cache_write: input * 1.25,
+        cache_read: input * 0.10,
+    }
+}
+
+// OpenAI charges cached input at the input rate (no separate write premium) and
+// cache reads at 0.10x input.
+fn openai(input: f64, output: f64) -> Rate {
+    Rate {
+        input,
+        output,
+        cache_write: input,
+        cache_read: input * 0.10,
+    }
+}
+
+// Moonshot / Kimi — cache read at 0.25x input (estimate).
+fn kimi(input: f64, output: f64) -> Rate {
+    Rate {
+        input,
+        output,
+        cache_write: input,
+        cache_read: input * 0.25,
+    }
+}
+
 pub fn rate_table() -> HashMap<&'static str, Rate> {
     let mut m = HashMap::new();
-    m.insert(
-        "claude-opus-4-8",
-        Rate {
-            input: 5.0,
-            output: 25.0,
-            cache_write: 6.25,
-            cache_read: 0.50,
-        },
-    );
-    m.insert(
-        "claude-opus-4-7",
-        Rate {
-            input: 5.0,
-            output: 25.0,
-            cache_write: 6.25,
-            cache_read: 0.50,
-        },
-    );
-    m.insert(
-        "claude-sonnet-4-6",
-        Rate {
-            input: 3.0,
-            output: 15.0,
-            cache_write: 3.75,
-            cache_read: 0.30,
-        },
-    );
-    m.insert(
-        "claude-haiku-4-5-20251001",
-        Rate {
-            input: 1.0,
-            output: 5.0,
-            cache_write: 1.25,
-            cache_read: 0.10,
-        },
-    );
-    m.insert(
-        "gpt-5.5",
-        Rate {
-            input: 1.25,
-            output: 10.0,
-            cache_write: 1.25,
-            cache_read: 0.125,
-        },
-    );
-    m.insert(
-        "kimi-code/kimi-for-coding",
-        Rate {
-            input: 0.60,
-            output: 2.50,
-            cache_write: 0.60,
-            cache_read: 0.15,
-        },
-    );
+
+    // ===== Anthropic (Claude) — public list prices, exact =====
+    m.insert("claude-fable-5", anthropic(10.0, 50.0));
+    m.insert("claude-opus-4-8", anthropic(5.0, 25.0));
+    m.insert("claude-opus-4-7", anthropic(5.0, 25.0));
+    m.insert("claude-opus-4-6", anthropic(5.0, 25.0));
+    m.insert("claude-opus-4-5", anthropic(5.0, 25.0));
+    m.insert("claude-sonnet-4-6", anthropic(3.0, 15.0));
+    m.insert("claude-sonnet-4-5", anthropic(3.0, 15.0));
+    m.insert("claude-haiku-4-5", anthropic(1.0, 5.0));
+    m.insert("claude-haiku-4-5-20251001", anthropic(1.0, 5.0));
+
+    // ===== OpenAI (Codex) — public list prices for the GPT-5 family =====
+    m.insert("gpt-5.5", openai(1.25, 10.0));
+    m.insert("gpt-5.1", openai(1.25, 10.0));
+    m.insert("gpt-5", openai(1.25, 10.0));
+    m.insert("gpt-5-codex", openai(1.25, 10.0));
+    m.insert("gpt-5.5-codex", openai(1.25, 10.0));
+    m.insert("gpt-5-mini", openai(0.25, 2.0));
+    m.insert("gpt-5-nano", openai(0.05, 0.40));
+
+    // ===== Kimi (Moonshot) — estimate =====
+    m.insert("kimi-code/kimi-for-coding", kimi(0.60, 2.50));
+    m.insert("kimi-k2", kimi(0.60, 2.50));
+
     m
 }
 
