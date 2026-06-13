@@ -37,17 +37,20 @@ const ACH_GLYPHS = {
 // Glyph per trophy id (ids are stable across the curation).
 const ACH_ICON_FOR = {
   // Volume
-  tens: "coin", fifty_m: "coin", hundred: "vault", spend1k: "dollar",
-  archive: "box", high_roller: "dice", billion: "gem", spend5k: "whale",
+  first_million: "coin", tens: "coin", fifty_m: "coin", hundred: "vault",
+  spend100: "dollar", spend500: "dollar", spend1k: "dollar", high_roller: "dice",
+  archive: "box", quarter_b: "gem", billion: "gem", spend5k: "whale",
   five_billion: "crown", ten_billion: "diamond",
   // Intensity
-  streak7: "hook", nightowl: "moon", marathon: "flag", deep_work: "anchor",
+  streak3: "hook", streak7: "hook", streak14: "flag", nightowl: "moon",
+  marathon: "flag", big_day5: "flame", focused2: "clock", deep_work: "anchor",
   ultra_day: "weight", streak30: "flame", streak60: "flame", colossus: "mountain",
   streak100: "infinity", mega_day: "bolt",
   // Mastery
-  earlybird: "signal", hopper: "shuffle", polyglot3: "layers", polymath: "brain",
-  polyglot5: "boxes", around_clock: "clock", cache_master: "wand", omnivore: "atom",
-  veteran: "medal", lifer: "shield",
+  earlybird: "signal", two_tools: "layers", hopper: "shuffle", polyglot3: "layers",
+  models6: "shuffle", polymath: "brain", polyglot5: "boxes", around_clock: "clock",
+  cache_master: "wand", models10: "atom", omnivore: "atom", veteran: "medal",
+  lifer: "shield",
 };
 
 // Ornate, sparkle-detailed figures for the legendary roster only — keyed by
