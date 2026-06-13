@@ -53,6 +53,7 @@ async function renderTopTrophies() {
         '<div class="ach-badge tier-' + a.tier + ' unlocked ptrophy">' +
           '<div class="ach-icon">' + achIcon(a.id, a.tier) + "</div>" +
           '<div class="ptrophy-name">' + a.name + "</div>" +
+          '<div class="ptrophy-desc">' + a.description + "</div>" +
           '<div class="ptrophy-tier">' + a.tier + "</div>" +
         "</div>"
       ).join("") +
