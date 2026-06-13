@@ -230,7 +230,7 @@ fn definitions() -> Vec<Def> {
             Box::new(|s| (if s.active_days > 0 { 1.0 } else { 0.0 }, s.active_days > 0))),
         def("hopper", "Model Hopper", "Use 4 distinct models", COMMON, MASTERY, 3,
             Box::new(|s| (s.models_used as f64 / 4.0, s.models_used >= 4))),
-        def("polyglot3", "Polyglot", "Run 3 different AI tools", RARE, MASTERY, 5,
+        def("polyglot3", "Triple Threat", "Run 3 different AI tools", RARE, MASTERY, 5,
             Box::new(|s| (s.tools_used as f64 / 3.0, s.tools_used >= 3))),
         def("polymath", "Model Master", "Use 8 distinct models", EPIC, MASTERY, 11,
             Box::new(|s| (s.models_used as f64 / 8.0, s.models_used >= 8))),
