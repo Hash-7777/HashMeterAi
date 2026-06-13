@@ -56,6 +56,27 @@ function wrapShareText(ctx, text, maxWidth, font, maxLines) {
   return lines;
 }
 
+// Build a trophy's real SVG emblem as an <img> so the share canvas can draw the
+// actual figure (dark engraving) on the medallion instead of a generic star.
+// Reuses the same glyph sets as the Trophies tab. Returns null on failure.
+async function loadTrophyFigure(id, tier) {
+  try {
+    const inner = (tier === "legendary" && typeof ACH_GLYPHS_LEGENDARY !== "undefined" && ACH_GLYPHS_LEGENDARY[id])
+      ? ACH_GLYPHS_LEGENDARY[id]
+      : (ACH_GLYPHS[ACH_ICON_FOR[id]] || ACH_GLYPHS.star);
+    const color = tier === "legendary" ? "#3a2606" : "#10202a";
+    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" ' +
+      'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ' +
+      'style="color:' + color + '">' + inner + "</svg>";
+    const img = new Image();
+    img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
+    await img.decode();
+    return img;
+  } catch (_e) {
+    return null;
+  }
+}
+
 async function renderShareCard() {
   const canvas = g("share-canvas");
   const ctx = canvas.getContext("2d");
@@ -251,7 +272,7 @@ async function renderShareCard() {
     ctx.fillStyle = color;
     ctx.fill();
   }
-  function drawMedallion(cx, cy, r, tier) {
+  function drawMedallion(cx, cy, r, tier, withStar) {
     const [c1, c2] = MEDAL_GRAD[tier] || MEDAL_GRAD.common;
     const lg = ctx.createLinearGradient(cx - r, cy - r, cx + r, cy + r);
     lg.addColorStop(0, c1);
@@ -259,7 +280,9 @@ async function renderShareCard() {
     medalPath(cx, cy, r, tier);
     ctx.fillStyle = lg;
     ctx.fill();
-    drawStar(cx, cy - (tier === "epic" ? 1 : 0), r * 0.42, "rgba(14,26,34,0.78)");
+    if (withStar !== false) {
+      drawStar(cx, cy - (tier === "epic" ? 1 : 0), r * 0.42, "rgba(14,26,34,0.78)");
+    }
   }
 
   // ===== Header =====
@@ -388,6 +411,8 @@ async function renderShareCard() {
     const r = 19;
     const colW = (W - 96) / tops.length;
     const rowCy = H - 86;
+    // Preload each trophy's real figure so the medallion shows the actual emblem.
+    const figs = await Promise.all(tops.map(t => loadTrophyFigure(t.id, t.tier)));
     for (let i = 0; i < tops.length; i++) {
       const t = tops[i];
       const colCx = 48 + colW * i + colW / 2;
@@ -400,7 +425,13 @@ async function renderShareCard() {
       const gapM = 12;
       const groupW = 2 * r + gapM + Math.max(nameW, descW);
       const gx = colCx - groupW / 2;
-      drawMedallion(gx + r, rowCy, r, t.tier);
+      const mcx = gx + r;
+      const fig = figs[i];
+      drawMedallion(mcx, rowCy, r, t.tier, !fig);
+      if (fig) {
+        const fs = r * 1.4;
+        ctx.drawImage(fig, mcx - fs / 2, rowCy - fs / 2, fs, fs);
+      }
       const tx = gx + 2 * r + gapM;
       ctx.textAlign = "left";
       ctx.fillStyle = "#eef4f7";
@@ -453,10 +484,16 @@ g("share-copy").onclick = async function () {
 
 g("share-save").onclick = function () {
   const canvas = g("share-canvas");
-  const link = document.createElement("a");
-  link.download = "hashmeterai-share.png";
-  link.href = canvas.toDataURL("image/png");
-  link.click();
+  try {
+    const link = document.createElement("a");
+    link.download = "hashmeterai-share.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  } catch (e) {
+    console.error("save failed", e);
+    g("share-save").textContent = "Save failed";
+    setTimeout(() => { g("share-save").textContent = "Save PNG"; }, 2000);
+  }
 };
 
 // Pick a card theme, then re-render the canvas (and the swatches' active state).
