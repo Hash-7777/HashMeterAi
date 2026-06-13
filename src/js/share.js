@@ -27,6 +27,35 @@ function renderShareThemes() {
   ).join("");
 }
 
+// Wrap text to a max width on the canvas, capped at maxLines (last line
+// ellipsized if it still overflows). Used for trophy descriptions on the card.
+function wrapShareText(ctx, text, maxWidth, font, maxLines) {
+  ctx.font = font;
+  const words = String(text).split(/\s+/).filter(Boolean);
+  const lines = [];
+  let line = "";
+  for (const w of words) {
+    const test = line ? line + " " + w : w;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      lines.push(line);
+      line = w;
+    } else {
+      line = test;
+    }
+  }
+  if (line) lines.push(line);
+  if (lines.length > maxLines) {
+    const kept = lines.slice(0, maxLines);
+    let last = kept[maxLines - 1];
+    while (last && ctx.measureText(last + "…").width > maxWidth) {
+      last = last.replace(/\s*\S$/, "");
+    }
+    kept[maxLines - 1] = last + "…";
+    return kept;
+  }
+  return lines;
+}
+
 async function renderShareCard() {
   const canvas = g("share-canvas");
   const ctx = canvas.getContext("2d");
@@ -343,30 +372,46 @@ async function renderShareCard() {
     sx += statW + statGap;
   }
 
-  // ===== Rarest trophy — the single hardest earned badge (centered) =====
+  // ===== Rarest trophies — the three hardest earned badges, each with its
+  // description so anyone who sees the card understands what it took. =====
   const unlocked = achievements.filter(a => a.unlocked).sort((a, b) => b.rank - a.rank);
-  const top = unlocked[0];
-  if (top) {
-    const r = 24;
-    ctx.font = "bold 22px " + SANS;
-    const nameW = ctx.measureText(top.name).width;
-    ctx.font = "600 11px " + SANS;
-    const labelW = ctx.measureText("RAREST TROPHY").width;
-    const textW = Math.max(nameW, labelW);
-    const gapM = 15;
-    const groupW = 2 * r + gapM + textW;
-    const gx = CX - groupW / 2;
-    const medCy = H - 88;
-    const medCx = gx + r;
-    drawMedallion(medCx, medCy, r, top.tier);
-    const tx = gx + 2 * r + gapM;
-    ctx.textAlign = "left";
+  const tops = unlocked.slice(0, 3);
+  if (tops.length) {
+    ctx.textAlign = "center";
     ctx.fillStyle = "#86a0ad";
     ctx.font = "600 11px " + SANS;
-    ctx.fillText("RAREST TROPHY", tx, medCy - 6);
-    ctx.fillStyle = "#eef4f7";
-    ctx.font = "bold 22px " + SANS;
-    ctx.fillText(top.name, tx, medCy + 17);
+    ctx.save();
+    ctx.letterSpacing = "1.5px";
+    ctx.fillText(tops.length > 1 ? "RAREST TROPHIES" : "RAREST TROPHY", CX, H - 128);
+    ctx.restore();
+
+    const r = 19;
+    const colW = (W - 96) / tops.length;
+    const rowCy = H - 86;
+    for (let i = 0; i < tops.length; i++) {
+      const t = tops[i];
+      const colCx = 48 + colW * i + colW / 2;
+      ctx.font = "bold 15px " + SANS;
+      const nameW = ctx.measureText(t.name).width;
+      const descLines = wrapShareText(ctx, t.description, colW - 2 * r - 34, "11px " + SANS, 2);
+      let descW = 0;
+      ctx.font = "11px " + SANS;
+      for (const l of descLines) descW = Math.max(descW, ctx.measureText(l).width);
+      const gapM = 12;
+      const groupW = 2 * r + gapM + Math.max(nameW, descW);
+      const gx = colCx - groupW / 2;
+      drawMedallion(gx + r, rowCy, r, t.tier);
+      const tx = gx + 2 * r + gapM;
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#eef4f7";
+      ctx.font = "bold 15px " + SANS;
+      ctx.fillText(t.name, tx, rowCy - 4);
+      ctx.fillStyle = "#9fb3bd";
+      ctx.font = "11px " + SANS;
+      let dy = rowCy + 12;
+      for (const line of descLines) { ctx.fillText(line, tx, dy); dy += 13; }
+    }
+    ctx.textAlign = "left";
   }
 
   // ===== Footer =====
