@@ -9,17 +9,13 @@ const SRC_LABEL = {
   claude: "Claude",
   codex: "Codex",
   kimi: "Kimi",
-  qwen: "Qwen",
+  qwen: "Qwen CLI",
   hashcortx: "HashCortx",
   hashcerebrum: "HashCerebrum",
-  cline: "Cline",
-  glm: "GLM",
-  minimax: "MiniMax",
-  gemini: "Gemini",
   all: "All tools",
 };
 
-const ALL_SRCS = ["claude", "codex", "kimi", "qwen", "hashcortx", "hashcerebrum", "cline", "glm", "minimax", "gemini"];
+const ALL_SRCS = ["claude", "codex", "kimi", "qwen", "hashcortx", "hashcerebrum"];
 
 // Sources whose token counts are estimated rather than measured. HashCortx and
 // HashCerebrum now record real per-response counts, so nothing is estimated.
@@ -214,6 +210,11 @@ function pretty(name) {
 }
 
 function animate(el, target, fmt) {
+  // Cancel any count-up still running on this element. Switching tools quickly
+  // fires a fresh render (and a fresh animate) before the previous one finishes;
+  // without this, the overlapping rAF loops fight over textContent and the
+  // numbers flicker/overlap between the old and new tool's values.
+  if (el._animRaf) { cancelAnimationFrame(el._animRaf); el._animRaf = null; }
   const start = parseFloat(el.dataset.val) || 0;
   const diff = target - start;
   if (!diff) { el.textContent = fmt(target); el.dataset.val = target; return; }
@@ -224,10 +225,10 @@ function animate(el, target, fmt) {
     const ease = 1 - Math.pow(1 - p, 3);
     const v = start + diff * ease;
     el.textContent = fmt(v);
-    if (p < 1) requestAnimationFrame(step);
-    else { el.dataset.val = target; }
+    if (p < 1) { el._animRaf = requestAnimationFrame(step); }
+    else { el.dataset.val = target; el._animRaf = null; }
   }
-  requestAnimationFrame(step);
+  el._animRaf = requestAnimationFrame(step);
 }
 
 function srcCost(name) {
@@ -316,32 +317,17 @@ function updateGreeting(a, days) {
 
 function render() {
   if (!RAW) return;
-  const days = selDays();
+  const allDays = selDays();
 
-  // Empty state
-  if (!days.length) {
-    updateGreeting(null, []);
-    if (g("dash-cal-grid")) g("dash-cal-grid").innerHTML = "";
-    if (g("dash-cal-foot")) g("dash-cal-foot").textContent = "";
-    g("h-processed").textContent = "0";
-    g("h-processed-lab").textContent = "Real Work";
-    g("h-processed-sub").textContent = "No usage yet";
-    g("h-focus").textContent = "0m";
-    g("h-focus-sub").textContent = "Start coding with AI";
-    g("h-cost").textContent = "$0.00";
-    g("t-sessions").textContent = "0";
-    g("t-messages").textContent = "0";
-    g("t-days").textContent = "0";
-    g("t-cur").textContent = "0d";
-    g("t-long").textContent = "0d";
-    g("t-peak").textContent = "\u2014";
-    g("t-fav").textContent = "\u2014";
-    g("foot").innerHTML = "";
-    g("cal-grid").innerHTML = "";
-    g("mlist").innerHTML = "";
-    return;
-  }
+  // Apply the All / 30d / 7d range to the hero tiles + stats. "all" shows
+  // everything; 30d/7d keep only days within that window of the most recent
+  // activity. The month calendar navigates independently and ignores the range.
+  const days = RANGE === "all" ? allDays : allDays.filter(d => inRange(d.date, allDays));
 
+  // No early return for the empty case: agg([]) / streaks([]) yield zeros and
+  // the calendar renderers draw an empty month, so a tool (or range) with no
+  // usage shows a clean zero state with the calendar intact (it used to blank
+  // and vanish \u2014 the calendars were cleared and we returned before redrawing).
   const a = agg(days);
   const st = streaks(days);
 
@@ -365,7 +351,8 @@ function render() {
   g("h-focus-sub").textContent = a.focus_sec > 0 ? "focused, gaps under 5 min" : "no use time data";
 
   animate(g("h-cost"), Math.round(a.cost * 100), function (v) { return "$" + (v / 100).toFixed(2); });
-  g("h-cost-sub").textContent = (SOURCE === "hashcortx" || SOURCE === "hashcerebrum") ? "free-tier \u00b7 not billed" : "all time \u00b7 public list rates";
+  const rangeWord = RANGE === "all" ? "all time" : "last " + RANGE + " days";
+  g("h-cost-sub").textContent = (SOURCE === "hashcortx" || SOURCE === "hashcerebrum") ? "free-tier \u00b7 not billed" : rangeWord + " \u00b7 public list rates";
 
   g("s-cur").textContent = st[1] > 0 ? "keep it going" : "start a new one";
   animate(g("t-sessions"), a.sessions.size, commas);
@@ -419,10 +406,19 @@ function models(a) {
     const row = document.createElement("div");
     row.className = "mrow";
     row.innerHTML =
-      '<div class="mname"><span class="mdot" style="background:' + color + '"></span>' +
+      '<div class="mname"><span class="mdot"></span>' +
         '<span class="mname-txt">' + prettyModel(m) + '</span>' + via + '</div>' +
-      '<div class="mbar"><div class="mfill" style="width:' + (100 * t / max) + '%;background:' + color + '"></div></div>' +
+      '<div class="mbar"><div class="mfill"></div></div>' +
       '<div class="mval">' + human(t) + ' \u00b7 ' + (100 * t / tot).toFixed(1) + '%</div>';
+    // Apply the bar width + color via CSSOM, NOT an inline style="" attribute.
+    // Tauri's CSP carries a nonce, which nullifies style-src 'unsafe-inline', so
+    // style attributes injected through innerHTML are dropped \u2014 that left every
+    // bar at width:auto (full) and the CSS fallback colour (flat pumpkin). CSSOM
+    // style mutations are not governed by CSP, so they always take effect.
+    row.querySelector(".mdot").style.background = color;
+    const fill = row.querySelector(".mfill");
+    fill.style.width = (100 * t / max) + "%";
+    fill.style.background = color;
     host.appendChild(row);
   });
 }

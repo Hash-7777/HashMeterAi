@@ -110,9 +110,12 @@ async function loadAchievements() {
     g("ach-header").innerHTML =
       '<div class="ach-head-row"><span class="ach-head-title">' + owner + "</span>" +
       '<span class="ach-head-count">' + unlocked + " / " + list.length + " unlocked</span></div>" +
-      '<div class="ach-head-bar"><div class="ach-head-fill" style="width:' +
-      (list.length ? Math.round(100 * unlocked / list.length) : 0) + '%"></div></div>' +
+      '<div class="ach-head-bar"><div class="ach-head-fill"></div></div>' +
       '<div class="ach-head-chips">' + chips + "</div>";
+    // CSSOM, not an inline style="" attribute: Tauri's nonce'd CSP drops inline
+    // style attributes injected via innerHTML, which left every bar full-width.
+    const headFill = g("ach-header").querySelector(".ach-head-fill");
+    if (headFill) headFill.style.width = (list.length ? Math.round(100 * unlocked / list.length) : 0) + "%";
 
     const host = g("ach-grid");
     host.innerHTML = "";
@@ -172,9 +175,7 @@ function buildBadge(a) {
   const meta = a.unlocked
     ? (a.earned_date ? '<div class="ach-date">earned ' + a.earned_date + "</div>" : '<div class="ach-date">earned</div>')
     : '<div class="ach-pct">' + pct + "%</div>";
-  const bar = a.unlocked
-    ? '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:100%"></div></div>'
-    : '<div class="ach-progress-bar"><div class="ach-progress-fill" style="width:' + pct + '%"></div></div>';
+  const bar = '<div class="ach-progress-bar"><div class="ach-progress-fill"></div></div>';
 
   el.innerHTML =
     '<div class="ach-tier-tag">' + a.tier + "</div>" +
@@ -182,5 +183,8 @@ function buildBadge(a) {
     '<div class="ach-name">' + a.name + "</div>" +
     '<div class="ach-desc">' + a.description + "</div>" +
     '<div class="ach-foot">' + meta + bar + "</div>";
+  // CSSOM width (see header note): inline style="" attributes are dropped by the
+  // nonce'd CSP, so set the fill width on the element directly.
+  el.querySelector(".ach-progress-fill").style.width = (a.unlocked ? 100 : pct) + "%";
   return el;
 }

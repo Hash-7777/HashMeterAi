@@ -22,9 +22,12 @@ function renderShareThemes() {
   if (!host) return;
   host.innerHTML = shareThemes().map((t, i) =>
     '<button class="share-theme-btn' + (i === SHARE_THEME ? " on" : "") + '" data-theme="' + i + '">' +
-      '<span class="share-theme-sw" style="background:' + t.accent + '"></span>' + t.name +
+      '<span class="share-theme-sw"></span>' + t.name +
     "</button>"
   ).join("");
+  // CSSOM color (inline style="" attributes are stripped by the nonce'd CSP).
+  const sws = host.querySelectorAll(".share-theme-sw");
+  shareThemes().forEach((t, i) => { if (sws[i]) sws[i].style.background = t.accent; });
 }
 
 // Wrap text to a max width on the canvas, capped at maxLines (last line
@@ -66,8 +69,8 @@ async function loadTrophyFigure(id, tier) {
       : (ACH_GLYPHS[ACH_ICON_FOR[id]] || ACH_GLYPHS.star);
     const color = tier === "legendary" ? "#3a2606" : "#10202a";
     const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64" ' +
-      'fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" ' +
-      'style="color:' + color + '">' + inner + "</svg>";
+      'fill="none" stroke="' + color + '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+      inner + "</svg>";
     const img = new Image();
     img.src = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg);
     await img.decode();
