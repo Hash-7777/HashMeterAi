@@ -6,7 +6,7 @@
 <title>HashMeterAi</title>
 <!-- Paint the dark app background on the very first frame so the webview never
      flashes white while the stylesheets and boot data load. -->
-<style>html,body{margin:0;background:#05090d}</style>
+<style>html{background:#05090d}body{margin:0}</style>
 <link rel="stylesheet" href="styles/theme.css">
 <link rel="stylesheet" href="styles/layout.css">
 <link rel="stylesheet" href="styles/components.css">
@@ -55,28 +55,25 @@
     <!-- DASHBOARD VIEW -->
     <div id="view-dashboard">
       <div class="bars">
-        <div class="seg" id="tab">
-          <button data-t="overview" class="on">Overview</button>
-          <button data-t="models">Models</button>
+        <div class="bars-top">
+          <div class="seg" id="tab">
+            <button data-t="overview" class="on">Overview</button>
+            <button data-t="models">Models</button>
+          </div>
+          <div class="seg ghost" id="range">
+            <button data-r="all" class="on">All</button>
+            <button data-r="30">30d</button>
+            <button data-r="7">7d</button>
+          </div>
         </div>
         <div class="seg" id="src">
           <button data-s="all" class="on">All tools</button>
           <button data-s="claude">Claude</button>
           <button data-s="codex">Codex</button>
           <button data-s="kimi">Kimi</button>
-          <button data-s="qwen">Qwen</button>
+          <button data-s="qwen">Qwen CLI</button>
           <button data-s="hashcortx">HashCortx</button>
           <button data-s="hashcerebrum">HashCerebrum</button>
-          <button data-s="cline">Cline</button>
-          <button data-s="glm">GLM</button>
-          <button data-s="minimax">MiniMax</button>
-          <button data-s="gemini">Gemini</button>
-        </div>
-        <div class="spacer"></div>
-        <div class="seg ghost" id="range">
-          <button data-r="all" class="on">All</button>
-          <button data-r="30">30d</button>
-          <button data-r="7">7d</button>
         </div>
       </div>
 
