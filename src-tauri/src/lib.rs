@@ -280,6 +280,10 @@ pub fn run() {
                     let _ = w.set_size(tauri::LogicalSize::new(1380.0, 860.0));
                     let _ = w.center();
                 }
+                // Paint the dark app background (--bg #05090d) into the webview
+                // before the first frame, so showing the window never flashes the
+                // webview's default white between show() and the first HTML paint.
+                let _ = w.set_background_color(Some(tauri::webview::Color(5, 9, 13, 255)));
                 let _ = w.show();
             }
             Ok(())
