@@ -101,9 +101,16 @@ HashCortX and HashCerebrum write a local token-usage log that HashMeterAi reads,
 
 Issues and PRs welcome — especially new source adapters. Keep it honest, local, and light.
 
+## Disclaimer
+
+- **Estimates, not bills.** The cost figure is the value of compute at public API list prices — on a subscription you don't pay per token. Token counts are read from each tool's local files and may differ from a provider's official dashboard.
+- **Not a live ranking.** The "top X%" standing is a percentile against a static, modeled 2025–26 usage benchmark computed entirely on your machine — it is labeled as a modeled benchmark, not a real-time leaderboard.
+- **Trademarks.** All product names, logos, and brands are the property of their respective owners and are used for identification only. HashMeterAi is independent and is **not** affiliated with, endorsed by, or sponsored by Anthropic, OpenAI, Google, Alibaba, Moonshot AI, Z.ai, MiniMax, or any other tool named.
+- **No warranty.** HashMeterAi is provided "as is", without warranty of any kind, as set out in the license.
+
 ## License
 
-[Apache-2.0](LICENSE), Copyright 2026 Seif Hashish (Hash-7777)
+[Apache-2.0](LICENSE), Copyright 2026 Seif Hashish (Hash-7777). Provided "as is", without warranty of any kind.
 
 ---
 
