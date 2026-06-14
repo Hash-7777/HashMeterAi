@@ -68,12 +68,12 @@ pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
         why: modifier_why(&stats, modifier_key),
     });
     traits.push(Trait {
-        label: rotate(&["Volume", "Token Mileage", "Raw Throughput", "Total Output"], seed),
+        label: rotate(&["Volume", "Total Output", "Raw Power", "Mileage"], seed),
         why: format!("{} processed tokens", human(stats.processed)),
     });
     if stats.tools_used >= 2 {
         traits.push(Trait {
-            label: rotate(&["Multi-Tool", "Tool Spread", "Stack Breadth", "Cross-Tool"], seed),
+            label: rotate(&["Multi-Tool", "Tool Spread", "Many Tools", "Tool Range"], seed),
             why: format!("{} tools with usage", stats.tools_used),
         });
     }
@@ -285,16 +285,16 @@ fn pick_base(stats: &Stats) -> &'static str {
 // (what the tests assert); the rest are synonyms cycled daily via the seed.
 fn base_label(key: &str, seed: u64) -> String {
     let pool: &[&str] = match key {
-        "output_engine" => &["Output Engine", "Token Foundry", "Generation Reactor", "Prose Furnace"],
-        "generator" => &["Generator", "Prolific Producer", "Draft Machine", "Idea Forge"],
-        "context_hoarder" => &["Context Hoarder", "Context Glutton", "Prompt Packrat", "Context Vacuum"],
-        "context_maximalist" => &["Context Maximalist", "Prompt Maximalist", "Context Stacker", "Big-Context Builder"],
-        "full_stack_operator" => &["Full-Stack Operator", "Omni-Tool Pilot", "Everything Engineer", "Polyglot Operator"],
-        "multi_tool_operator" => &["Multi-Tool Operator", "Toolbelt Tactician", "Cross-Tool Operator", "Switch-Hitter"],
-        "deep_thinker" => &["Deep Thinker", "Opus Devotee", "Heavyweight Reasoner", "Big-Brain Operator"],
-        "workhorse" => &["Workhorse", "Steady Hand", "Sonnet Specialist", "Reliable Engine"],
-        "speed_runner" => &["Speed Runner", "Velocity Coder", "Quickdraw", "Fast-Twitch Builder"],
-        _ => &["AI Engineer", "All-Rounder", "Code Conductor", "Balanced Builder"],
+        "output_engine" => &["Output Engine", "The Creator", "Idea Machine", "Word Wizard"],
+        "generator" => &["Generator", "Content Machine", "Big Producer", "The Maker"],
+        "context_hoarder" => &["Context Hoarder", "Deep Diver", "The Researcher", "Detail Hound"],
+        "context_maximalist" => &["Context Maximalist", "Big Reader", "Info Sponge", "Detail Lover"],
+        "full_stack_operator" => &["Power User", "Tool Master", "All-Rounder", "The Versatile"],
+        "multi_tool_operator" => &["Tool Juggler", "Multi-Tasker", "Tool Hopper", "Switch Hitter"],
+        "deep_thinker" => &["Deep Thinker", "The Strategist", "Big Brain", "Mastermind"],
+        "workhorse" => &["Workhorse", "The Reliable", "Steady Hand", "Daily Grinder"],
+        "speed_runner" => &["Speed Runner", "The Sprinter", "Quick Draw", "Fast Mover"],
+        _ => &["AI Engineer", "Code Pilot", "The Generalist", "Balanced Builder"],
     };
     rotate(pool, seed)
 }
@@ -331,15 +331,15 @@ fn pick_modifier(stats: &Stats) -> &'static str {
 
 fn modifier_label(key: &str, seed: u64) -> String {
     let pool: &[&str] = match key {
-        "iron_willed" => &["Iron-Willed", "Unbreakable", "Relentless", "Unstoppable"],
-        "heavy_lifter" => &["Heavy Lifter", "Powerlifter", "Token Titan", "Max-Day Monster"],
-        "night_shift" => &["Night-Shift Shipper", "Nocturnal Coder", "After-Hours Ace", "Moonlight Shipper"],
-        "marathoner" => &["Marathoner", "Long-Hauler", "Endurance Coder", "Distance Runner"],
-        "daily_driver" => &["Daily Driver", "Everyday Operator", "Streak Keeper", "Clockwork Coder"],
-        "locked_in" => &["Locked-In", "Deep-Focus Diver", "Flow-State Fixture", "In the Zone"],
-        "midnight_tinkerer" => &["Midnight Tinkerer", "Late-Night Hacker", "Witching-Hour Builder", "Owl-Hours Operator"],
-        "dawn_patroller" => &["Dawn Patroller", "Early Riser", "Sunrise Shipper", "First-Light Builder"],
-        _ => &["Builder", "Steady Builder", "Craftsperson", "Maker"],
+        "iron_willed" => &["Unstoppable", "Iron-Willed", "Relentless", "The Machine"],
+        "heavy_lifter" => &["Heavy Lifter", "Powerhouse", "The Beast", "Token Titan"],
+        "night_shift" => &["Night Owl", "Midnight Coder", "Late-Night Legend", "The Nocturnal"],
+        "marathoner" => &["Marathoner", "Long Hauler", "Endurance Coder", "Distance Runner"],
+        "daily_driver" => &["Daily Driver", "Everyday Hero", "Streak Master", "The Regular"],
+        "locked_in" => &["Laser Focused", "Locked In", "In the Zone", "Deep Focus"],
+        "midnight_tinkerer" => &["Late-Night Coder", "Midnight Maker", "After Hours", "Evening Owl"],
+        "dawn_patroller" => &["Early Bird", "Sunrise Coder", "Morning Person", "Dawn Riser"],
+        _ => &["Builder", "The Steady", "The Maker", "Craftsman"],
     };
     rotate(pool, seed)
 }
@@ -613,6 +613,6 @@ mod tests {
         d.hours[2] = 100;
         let snap = snap_with(vec![d], true);
         let p = from_snapshot(&snap, "Test");
-        assert!(p.title.contains("Night-Shift Shipper"));
+        assert!(p.title.contains("Night Owl"));
     }
 }
