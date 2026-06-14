@@ -33,7 +33,7 @@ impl Source for Qwen {
     }
 
     fn label(&self) -> &'static str {
-        "Qwen"
+        "Qwen CLI"
     }
 
     fn detect(&self, ctx: &ScanCtx) -> bool {

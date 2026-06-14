@@ -161,7 +161,7 @@ mod oracle_tests {
         println!("\n=== ORACLE COMPARISON ===");
         println!("{:<7} {:>3} sessions  {:>2} days  real {:>14}  processed {:>14}  billed {:>16}  cost ${:>10.2}",
                  "source", "sess", "days", "real", "proc", "billed", "cost");
-        for src in ["claude", "codex", "kimi", "hashcortx", "cline"] {
+        for src in ["claude", "codex", "kimi", "hashcortx"] {
             let tool = snap.tools.get(src).unwrap();
             let days = &tool.days;
             let real: u64 = days.iter().map(|d| d.new_in + d.out).sum();

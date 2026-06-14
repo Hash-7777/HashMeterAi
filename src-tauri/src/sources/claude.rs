@@ -40,7 +40,6 @@ impl Source for Claude {
 
         let files = walk_jsonl(&root);
         for path in files {
-            let mut file_events = Vec::new();
             if let Ok(file) = File::open(&path) {
                 let reader = BufReader::new(file);
                 for line in reader.lines().map_while(Result::ok) {
@@ -49,37 +48,18 @@ impl Source for Claude {
                     }
                     if let Ok(ev) = serde_json::from_str::<serde_json::Value>(&line) {
                         if let Some(evt) = parse_line(&ev, &mut seen) {
-                            file_events.push(evt);
+                            events.push(evt);
                         }
                     }
                 }
             }
-            // A Claude Code session uses one provider (base URL) throughout, so
-            // route the whole file by the model family of its assistant turns —
-            // GLM/MiniMax/Gemini sessions go to their own tab, including the
-            // user-message events that carry no model of their own.
-            let src = route_file(&file_events);
-            for ev in &mut file_events {
-                ev.source = src;
-            }
-            events.extend(file_events);
         }
+        // Provider models reached through Claude Code (GLM/MiniMax/Gemini via an
+        // Anthropic-compatible base URL) stay under the Claude tab — the work
+        // really was Claude Code. They keep their own model name, so they still
+        // appear by name in the Models breakdown.
         events
     }
-}
-
-// Decide which source a file's events belong to from its assistant models. The
-// first non-Claude family wins (one provider per session); default Claude.
-fn route_file(events: &[UsageEvent]) -> &'static str {
-    for ev in events {
-        if !ev.model.is_empty() {
-            let s = crate::sources::source_for_model(&ev.model);
-            if s != "claude" {
-                return s;
-            }
-        }
-    }
-    "claude"
 }
 
 fn walk_jsonl(root: &PathBuf) -> Vec<PathBuf> {
@@ -250,27 +230,16 @@ mod tests {
     }
 
     #[test]
-    fn glm_session_routes_to_glm_including_user_turn() {
-        // A user turn (no model) + a GLM assistant turn: the whole session is
-        // routed to the GLM tab, not Claude.
+    fn provider_model_through_claude_stays_claude() {
+        // A GLM/MiniMax/Gemini turn reached through Claude Code keeps source
+        // "claude" (folded in) while preserving its own model name.
         let mut seen = HashSet::new();
-        let user = parse_line(&synth_user("2026-06-10T12:00:00Z"), &mut seen).unwrap();
-        let asst = parse_line(
+        let ev = parse_line(
             &synth_assistant("2026-06-10T12:01:00Z", "m1", "glm-4.6", 10, 0, 0, 5),
             &mut seen,
         )
         .unwrap();
-        assert_eq!(route_file(&[user, asst]), "glm");
-    }
-
-    #[test]
-    fn plain_claude_session_stays_claude() {
-        let mut seen = HashSet::new();
-        let asst = parse_line(
-            &synth_assistant("2026-06-10T12:01:00Z", "m2", "claude-opus-4-8", 10, 0, 0, 5),
-            &mut seen,
-        )
-        .unwrap();
-        assert_eq!(route_file(&[asst]), "claude");
+        assert_eq!(ev.source, "claude");
+        assert_eq!(ev.model, "glm-4.6");
     }
 }
