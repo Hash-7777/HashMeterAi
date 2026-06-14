@@ -173,14 +173,14 @@
   display:grid;
   grid-template-columns:repeat(3,1fr);
   gap:13px;
-  margin-bottom:16px;
+  margin-bottom:13px;
 }
 .hero-tile{
   position:relative;
   background:linear-gradient(180deg,var(--panel),var(--panel2));
   border:1px solid var(--line);
   border-radius:15px;
-  padding:20px 18px 16px;
+  padding:15px 18px 13px;
   text-align:center;
   overflow:hidden;
 }
@@ -196,7 +196,7 @@
   opacity:.7;
 }
 .hero-val{
-  font-size:36px;
+  font-size:32px;
   font-weight:700;
   line-height:1;
   letter-spacing:.01em;

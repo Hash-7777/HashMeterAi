@@ -1,30 +1,35 @@
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
+/* Base color lives on <html> so the very first frame is dark (anti-flash); the
+   body is transparent so the body::before gradient below is never obscured by an
+   opaque body background — that's why the wallpaper wasn't showing. */
+html{background:var(--bg)}
 body{
-  background:var(--bg);
+  background:transparent;
   color:var(--txt);
   font-family:var(--font);
   -webkit-font-smoothing:antialiased;
   height:100vh;
   overflow:hidden;            /* single page — never scroll the window */
 }
-/* Clean, minimalist background matching the HashMeterAi website: a deep
-   vertical gradient (teal edges through a warm pumpkin-tinted band) with a soft
-   accent glow at the top. No grid. */
+/* Background matching the HashMeterAi website: a deep vertical gradient with a
+   visible teal band near the top and a warm pumpkin-tinted band through the
+   middle, plus a soft accent glow at the top. Same color stops as the site's
+   body::before so the app and the marketing page read as one product. */
 body::before{
   content:"";
   position:fixed;
   inset:0;
   z-index:-2;
   background:
-    radial-gradient(1000px 520px at 50% -12%,rgba(253,128,46,.07),transparent 60%),
+    radial-gradient(1100px 560px at 50% -14%,rgba(253,128,46,.13),transparent 62%),
     linear-gradient(180deg,
       #05090d 0%,
-      #0b2030 19%,
-      #131009 43%,
-      #20150a 54%,
-      #131009 65%,
-      #0b2030 83%,
+      #0d2530 16%,
+      #0f1612 34%,
+      #24160a 52%,
+      #2e1a0b 66%,
+      #122530 84%,
       #05090d 100%);
 }
 .wrap{height:100vh;display:flex;flex-direction:column;overflow:hidden}
@@ -38,8 +43,8 @@ body::before{
   gap:16px;
   padding:10px 22px 10px 84px;
   border-bottom:1px solid var(--line);
-  background:rgba(5,9,13,.85);
-  backdrop-filter:blur(12px);
+  background:rgba(5,9,13,.72);
+  backdrop-filter:blur(16px);
 }
 .toolbar-left{display:flex;align-items:center;gap:10px}
 .toolbar-logo{height:32px;width:auto;filter:drop-shadow(0 0 8px rgba(253,128,46,.35))}
@@ -88,7 +93,11 @@ body::before{
 .brand b{color:var(--pk);font-weight:700}
 .logo{height:80px;width:auto;object-fit:contain;filter:drop-shadow(0 0 12px rgba(253,128,46,.4))}
 .spacer{flex:1}
-.bars{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+/* Dashboard control bar: a top row (Overview/Models on the left, the All/30d/7d
+   range pinned to the top-right corner) over the tool-source row. Children hug
+   their content; .bars-top stretches so space-between pushes the range right. */
+.bars{display:flex;flex-direction:column;align-items:flex-start;gap:9px;margin-bottom:14px}
+.bars-top{align-self:stretch;display:flex;align-items:center;justify-content:space-between;gap:12px}
 .hidden{display:none !important}
 
 .content{
@@ -99,7 +108,7 @@ body::before{
   width:100%;
   max-width:1280px;
   margin:0 auto;
-  padding:18px 26px 22px;
+  padding:14px 26px 16px;
 }
 .content::-webkit-scrollbar{width:10px}
 .content::-webkit-scrollbar-thumb{
@@ -112,9 +121,9 @@ body::before{
 .content::-webkit-scrollbar-track{background:transparent}
 
 /* Personalized greeting */
-.greeting{margin-bottom:16px}
+.greeting{margin-bottom:11px}
 .greeting-hi{
-  font-size:42px;
+  font-size:35px;
   font-weight:400;
   letter-spacing:.01em;
   line-height:1.15;
