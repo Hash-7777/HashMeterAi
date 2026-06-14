@@ -708,9 +708,15 @@
   background:rgba(255,255,255,.1);
 }
 
-/* Legend */
+/* Legend — swatch colors set via classes (not inline style attributes, which the
+   nonce'd CSP drops) so the heatmap key actually shows its colors. */
 .legend{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--mut);margin-top:12px;font-family:var(--mono)}
 .legend i{width:14px;height:14px;border-radius:4px;display:inline-block}
+.legend i.lv0{background:rgba(255,255,255,.06)}
+.legend i.lv1{background:#5c3a22}
+.legend i.lv2{background:#b15d23}
+.legend i.lv3{background:#fd802e}
+.legend i.lv4{background:#ffb27a;box-shadow:0 0 8px var(--pk)}
 
 /* ===== Dashboard calendar panel (1:2) ===== */
 .dash-cal{
