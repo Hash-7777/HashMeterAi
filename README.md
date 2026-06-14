@@ -5,7 +5,7 @@
 ### See how much AI you really use.
 
 **The honest, local-first usage meter for AI coding tools.**
-Claude Code, Codex, Kimi, HashCortx, HashCerebrum — unified into one clean dashboard.
+Claude Code, Codex, Kimi, Qwen, GLM, MiniMax, Gemini, HashCortx, HashCerebrum — unified into one clean dashboard.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-FD802E)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Windows%20|%20Linux-1b323f)](#install)
@@ -26,7 +26,7 @@ Claude Code, Codex, Kimi, HashCortx, HashCerebrum — unified into one clean das
 - **Average focus time.** Honest active-time-with-AI per day.
 - **Your AI persona.** For example, "Prompt Architect, Night-Shift Shipper" — generated from your real patterns, and **every claim shows the number behind it.** No vanity, no lies.
 - **Where you stand.** An honest "top X% of AI developers" read, computed against a documented, fully offline usage benchmark modeled from public 2025–26 figures — always shown with the number behind it, never a made-up rank.
-- **Achievements.** Thirty ranked trophies — from First Steps to Billionaire, Night Owl to Whale — each a real threshold with its *true* earn date and a tier-shaped medallion. The single hardest one you've earned headlines your Share card.
+- **Achievements.** Sixty ranked trophies across **Volume**, **Intensity**, and **Mastery** (twenty each) — from First Steps to the Billion-token clubs, Night Owl to Whale. Every token trophy counts **processed (real-work) tokens**, not the inflated billed footprint, and shows its *true* earn date on a tier-shaped medallion. Your three rarest headline your Share card.
 - **Calendar of activity.** Your daily usage as a real calendar.
 - **One-click Share card.** A clean branded image of your stats and persona to post. Brag, honestly.
 
@@ -50,10 +50,13 @@ The only thing that ever leaves is a brag-card image that **you** choose to expo
 |---|---|
 | Claude Code | Supported |
 | Codex (OpenAI) | Supported |
-| Kimi | Supported |
+| Kimi | Supported (classified by model) |
+| Qwen Code | Supported (classified by model) |
+| GLM (Z.ai), MiniMax, Gemini | Supported — these run *through* Claude Code via an Anthropic-compatible endpoint, so they're read from Claude's transcripts and routed to their own tab by model family |
 | HashCortx | Supported (records real per-response token counts) |
 | HashCerebrum | Supported (records real per-response token counts) |
 | Cline / Roo | Adapter-ready |
+| Qwen desktop, Antigravity, Gemini CLI | Not supported (usage is in opaque/absent local storage — see [notes](#supported-tools)) |
 | Cursor, Copilot, Windsurf | Not supported (usage is server-side; no local data to read) |
 
 > Adding a tool is one Rust file — the architecture is a pluggable source adapter. PRs welcome.
