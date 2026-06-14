@@ -7,6 +7,7 @@
 use crate::model::Snapshot;
 use serde::Serialize;
 use std::collections::{HashMap, HashSet};
+use chrono::Datelike;
 
 const PROCESSED_FLOOR: u64 = 50_000;
 
@@ -49,27 +50,30 @@ pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
         };
     }
 
-    let base = pick_base(&stats);
-    let modifier = pick_modifier(&stats);
+    let base_key = pick_base(&stats);
+    let modifier_key = pick_modifier(&stats);
+    let seed = rotation_seed(snap);
+    let base = base_label(base_key, seed);
+    let modifier = modifier_label(modifier_key, seed);
     let subtitle = pick_subtitle(stats.processed);
     let title = format!("{} \u{00b7} {}", base, modifier);
 
     let mut traits = Vec::new();
     traits.push(Trait {
-        label: base.to_string(),
-        why: base_why(&stats, &base),
+        label: base.clone(),
+        why: base_why(&stats, base_key),
     });
     traits.push(Trait {
-        label: modifier.to_string(),
-        why: modifier_why(&stats, &modifier),
+        label: modifier.clone(),
+        why: modifier_why(&stats, modifier_key),
     });
     traits.push(Trait {
-        label: "Volume".to_string(),
+        label: rotate(&["Volume", "Token Mileage", "Raw Throughput", "Total Output"], seed),
         why: format!("{} processed tokens", human(stats.processed)),
     });
     if stats.tools_used >= 2 {
         traits.push(Trait {
-            label: "Multi-Tool".to_string(),
+            label: rotate(&["Multi-Tool", "Tool Spread", "Stack Breadth", "Cross-Tool"], seed),
             why: format!("{} tools with usage", stats.tools_used),
         });
     }
@@ -83,7 +87,7 @@ pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
     }
     .to_string();
 
-    let desc = build_description(name, &stats, &base, &modifier, &subtitle);
+    let desc = build_description(name, &stats, &base, modifier_key, &subtitle);
 
     Persona {
         title,
@@ -216,31 +220,46 @@ fn parse_date(s: &str) -> chrono::NaiveDate {
     chrono::NaiveDate::parse_from_str(s, "%Y-%m-%d").unwrap_or(chrono::NaiveDate::MIN)
 }
 
-fn pick_base(stats: &Stats) -> String {
+// Day-of-year of the snapshot (0-based) — the seed that rotates each trait's
+// cool display name through its synonym pool, so the titles change daily while
+// staying stable within a day. The snapshot's generated_at is fixed in tests
+// (Jan 1 -> seed 0), so they deterministically get index 0 (the canonical name).
+fn rotation_seed(snap: &Snapshot) -> u64 {
+    chrono::DateTime::parse_from_rfc3339(&snap.generated_at)
+        .map(|d| d.ordinal() as u64)
+        .unwrap_or(1)
+        .saturating_sub(1)
+}
+
+fn rotate(options: &[&str], seed: u64) -> String {
+    options[(seed as usize) % options.len()].to_string()
+}
+
+fn pick_base(stats: &Stats) -> &'static str {
     let input = stats.new_in + stats.write;
     let out_ratio = stats.out as f64 / input.max(1) as f64;
     let in_ratio = input as f64 / stats.out.max(1) as f64;
 
     // Generation-heavy: the model writes far more than it's fed.
     if stats.out > 0 && out_ratio >= 2.5 {
-        return "Output Engine".to_string();
+        return "output_engine";
     }
     if stats.out > 0 && out_ratio >= 1.3 {
-        return "Generator".to_string();
+        return "generator";
     }
     // Context-heavy: huge prompts, lean replies.
     if input > 0 && in_ratio >= 4.0 {
-        return "Context Hoarder".to_string();
+        return "context_hoarder";
     }
     if input > 0 && in_ratio >= 2.5 {
-        return "Context Maximalist".to_string();
+        return "context_maximalist";
     }
     // Tool breadth.
     if stats.tools_used >= 5 {
-        return "Full-Stack Operator".to_string();
+        return "full_stack_operator";
     }
     if stats.tools_used >= 3 {
-        return "Multi-Tool Operator".to_string();
+        return "multi_tool_operator";
     }
     // Model affinity is measured against total billed tokens (the same basis
     // model_share is keyed on), so numerator and denominator share a unit.
@@ -248,48 +267,81 @@ fn pick_base(stats: &Stats) -> String {
     let opus = stats.model_share.get("claude-opus-4-8").copied().unwrap_or(0)
         + stats.model_share.get("claude-opus-4-7").copied().unwrap_or(0);
     if billed_total > 0 && opus as f64 / billed_total as f64 >= 0.55 {
-        return "Deep Thinker".to_string();
+        return "deep_thinker";
     }
     let sonnet = stats.model_share.get("claude-sonnet-4-6").copied().unwrap_or(0);
     if billed_total > 0 && sonnet as f64 / billed_total as f64 >= 0.55 {
-        return "Workhorse".to_string();
+        return "workhorse";
     }
     let haiku = stats.model_share.get("claude-haiku-4-5-20251001").copied().unwrap_or(0)
         + stats.model_share.get("claude-haiku-4-5").copied().unwrap_or(0);
     if billed_total > 0 && haiku as f64 / billed_total as f64 >= 0.55 {
-        return "Speed Runner".to_string();
+        return "speed_runner";
     }
-    "AI Engineer".to_string()
+    "ai_engineer"
 }
 
-fn pick_modifier(stats: &Stats) -> String {
+// Rotating cool display name for a base category. Index 0 is the canonical name
+// (what the tests assert); the rest are synonyms cycled daily via the seed.
+fn base_label(key: &str, seed: u64) -> String {
+    let pool: &[&str] = match key {
+        "output_engine" => &["Output Engine", "Token Foundry", "Generation Reactor", "Prose Furnace"],
+        "generator" => &["Generator", "Prolific Producer", "Draft Machine", "Idea Forge"],
+        "context_hoarder" => &["Context Hoarder", "Context Glutton", "Prompt Packrat", "Context Vacuum"],
+        "context_maximalist" => &["Context Maximalist", "Prompt Maximalist", "Context Stacker", "Big-Context Builder"],
+        "full_stack_operator" => &["Full-Stack Operator", "Omni-Tool Pilot", "Everything Engineer", "Polyglot Operator"],
+        "multi_tool_operator" => &["Multi-Tool Operator", "Toolbelt Tactician", "Cross-Tool Operator", "Switch-Hitter"],
+        "deep_thinker" => &["Deep Thinker", "Opus Devotee", "Heavyweight Reasoner", "Big-Brain Operator"],
+        "workhorse" => &["Workhorse", "Steady Hand", "Sonnet Specialist", "Reliable Engine"],
+        "speed_runner" => &["Speed Runner", "Velocity Coder", "Quickdraw", "Fast-Twitch Builder"],
+        _ => &["AI Engineer", "All-Rounder", "Code Conductor", "Balanced Builder"],
+    };
+    rotate(pool, seed)
+}
+
+fn pick_modifier(stats: &Stats) -> &'static str {
     let avg_focus = stats.total_focus_sec.checked_div(stats.active_days).unwrap_or(0);
     // Ordered most-impressive first, so the brag-worthiest signal wins.
     if stats.current_streak >= 30 {
-        return "Iron-Willed".to_string();
+        return "iron_willed";
     }
     if stats.max_day_processed >= 10_000_000 {
-        return "Heavy Lifter".to_string();
+        return "heavy_lifter";
     }
     if stats.peak_hour < 5 {
-        return "Night-Shift Shipper".to_string();
+        return "night_shift";
     }
     if stats.max_day_processed >= 1_000_000 {
-        return "Marathoner".to_string();
+        return "marathoner";
     }
     if stats.current_streak >= 7 {
-        return "Daily Driver".to_string();
+        return "daily_driver";
     }
     if avg_focus >= 3 * 3600 {
-        return "Locked-In".to_string();
+        return "locked_in";
     }
     if stats.peak_hour >= 22 {
-        return "Midnight Tinkerer".to_string();
+        return "midnight_tinkerer";
     }
     if (5..8).contains(&stats.peak_hour) {
-        return "Dawn Patroller".to_string();
+        return "dawn_patroller";
     }
-    "Builder".to_string()
+    "builder"
+}
+
+fn modifier_label(key: &str, seed: u64) -> String {
+    let pool: &[&str] = match key {
+        "iron_willed" => &["Iron-Willed", "Unbreakable", "Relentless", "Unstoppable"],
+        "heavy_lifter" => &["Heavy Lifter", "Powerlifter", "Token Titan", "Max-Day Monster"],
+        "night_shift" => &["Night-Shift Shipper", "Nocturnal Coder", "After-Hours Ace", "Moonlight Shipper"],
+        "marathoner" => &["Marathoner", "Long-Hauler", "Endurance Coder", "Distance Runner"],
+        "daily_driver" => &["Daily Driver", "Everyday Operator", "Streak Keeper", "Clockwork Coder"],
+        "locked_in" => &["Locked-In", "Deep-Focus Diver", "Flow-State Fixture", "In the Zone"],
+        "midnight_tinkerer" => &["Midnight Tinkerer", "Late-Night Hacker", "Witching-Hour Builder", "Owl-Hours Operator"],
+        "dawn_patroller" => &["Dawn Patroller", "Early Riser", "Sunrise Shipper", "First-Light Builder"],
+        _ => &["Builder", "Steady Builder", "Craftsperson", "Maker"],
+    };
+    rotate(pool, seed)
 }
 
 fn pick_subtitle(processed: u64) -> String {
@@ -316,39 +368,39 @@ fn article(word: &str) -> &'static str {
     }
 }
 
-fn base_why(stats: &Stats, base: &str) -> String {
+fn base_why(stats: &Stats, key: &str) -> String {
     let input = stats.new_in + stats.write;
-    match base {
-        "Output Engine" | "Generator" => format!(
+    match key {
+        "output_engine" | "generator" => format!(
             "out {:.1}\u{00d7} input ({} out / {} in)",
             stats.out as f64 / input.max(1) as f64,
             human(stats.out),
             human(input)
         ),
-        "Context Hoarder" | "Context Maximalist" => format!(
+        "context_hoarder" | "context_maximalist" => format!(
             "input {:.1}\u{00d7} output ({} in / {} out)",
             input as f64 / stats.out.max(1) as f64,
             human(input),
             human(stats.out)
         ),
-        "Full-Stack Operator" | "Multi-Tool Operator" => format!("{} tools with usage", stats.tools_used),
-        "Deep Thinker" => "Opus >= 55% of billed tokens".to_string(),
-        "Workhorse" => "Sonnet >= 55% of billed tokens".to_string(),
-        "Speed Runner" => "Haiku/small >= 55% of billed tokens".to_string(),
+        "full_stack_operator" | "multi_tool_operator" => format!("{} tools with usage", stats.tools_used),
+        "deep_thinker" => "Opus >= 55% of billed tokens".to_string(),
+        "workhorse" => "Sonnet >= 55% of billed tokens".to_string(),
+        "speed_runner" => "Haiku/small >= 55% of billed tokens".to_string(),
         _ => "Balanced input/output ratio".to_string(),
     }
 }
 
-fn modifier_why(stats: &Stats, modifier: &str) -> String {
-    match modifier {
-        "Night-Shift Shipper" | "Midnight Tinkerer" | "Dawn Patroller" => {
+fn modifier_why(stats: &Stats, key: &str) -> String {
+    match key {
+        "night_shift" | "midnight_tinkerer" | "dawn_patroller" => {
             format!("peak hour {}:00", stats.peak_hour)
         }
-        "Iron-Willed" | "Daily Driver" => format!("{}-day streak", stats.current_streak),
-        "Heavy Lifter" | "Marathoner" => {
+        "iron_willed" | "daily_driver" => format!("{}-day streak", stats.current_streak),
+        "heavy_lifter" | "marathoner" => {
             format!("max day {} processed", human(stats.max_day_processed))
         }
-        "Locked-In" => {
+        "locked_in" => {
             let avg = stats.total_focus_sec.checked_div(stats.active_days).unwrap_or(0);
             format!("avg {} focus/day", duration(avg))
         }
@@ -360,7 +412,7 @@ fn build_description(
     name: &str,
     stats: &Stats,
     base: &str,
-    modifier: &str,
+    modifier_key: &str,
     subtitle: &str,
 ) -> String {
     let peak_label = if stats.peak_hour < 12 {
@@ -376,15 +428,15 @@ fn build_description(
         .map(|(k, _)| k.clone())
         .unwrap_or_else(|| "unknown".to_string());
 
-    let modifier_explain = match modifier {
-        "Night-Shift Shipper" => "ships code after midnight",
-        "Midnight Tinkerer" => "ships late into the night",
-        "Dawn Patroller" => "starts before the world wakes",
-        "Iron-Willed" => "never lets the streak break",
-        "Daily Driver" => "codes with AI every single day",
-        "Heavy Lifter" => "moves huge volume in a single day",
-        "Marathoner" => "has marathon sessions",
-        "Locked-In" => "stays locked in for hours",
+    let modifier_explain = match modifier_key {
+        "night_shift" => "ships code after midnight",
+        "midnight_tinkerer" => "ships late into the night",
+        "dawn_patroller" => "starts before the world wakes",
+        "iron_willed" => "never lets the streak break",
+        "daily_driver" => "codes with AI every single day",
+        "heavy_lifter" => "moves huge volume in a single day",
+        "marathoner" => "has marathon sessions",
+        "locked_in" => "stays locked in for hours",
         _ => "builds steadily",
     };
 
