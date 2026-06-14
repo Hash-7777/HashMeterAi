@@ -20,10 +20,12 @@ async function loadSettings() {
     g("set-sync").value = String(prefs.auto_sync_secs ?? 60);
     g("set-range").value = prefs.default_range || "all";
 
-    // Personalized hero.
+    // Personalized hero. Use the dashboard's rotating greeting (calligraphy) so
+    // Settings shows the same changing statement; the avatar is now the app logo.
     const name = (p.name || "").trim();
-    g("set-hello").textContent = name ? "Hi, " + name : "Welcome";
-    g("set-avatar").textContent = name ? name.charAt(0).toUpperCase() : "?";
+    g("set-hello").textContent = (typeof greet === "function")
+      ? greet(name)
+      : (name ? "Hi, " + name : "Welcome");
     g("set-since").textContent = p.created_at
       ? "Using HashMeterAi since " + String(p.created_at).slice(0, 10)
       : "";
@@ -154,8 +156,7 @@ g("set-save-name").onclick = async function () {
   await setName(display);
   window.USER_NAME = display;
   g("set-name").value = display;
-  g("set-hello").textContent = "Hi, " + display;
-  g("set-avatar").textContent = display.charAt(0).toUpperCase();
+  g("set-hello").textContent = (typeof greet === "function") ? greet(display) : "Hi, " + display;
   if (typeof render === "function") render(); // refresh greeting
   g("set-save-name").textContent = "Saved";
   setTimeout(() => g("set-save-name").textContent = "Save", 1500);
