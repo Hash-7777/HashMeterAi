@@ -3,9 +3,18 @@ let CURRENT_SCREEN = "loading";
 
 async function boot() {
   try {
-    const profile = await getProfile();
+    // Fetch profile + build id together so the (briefly blank, dark) loading
+    // screen resolves as fast as possible. Both screens start hidden, so we
+    // never flash the onboarding prompt before deciding which to show.
+    const [profile, buildId] = await Promise.all([
+      getProfile(),
+      getBuildId().catch(() => ""),
+    ]);
     applyProfile(profile);
-    if (!profile.name) {
+    // Re-prompt for the name when there's no name yet, or when this exact build
+    // hasn't been onboarded (a freshly compiled/installed app).
+    const onboardedThisBuild = !!profile.name && !!buildId && profile.build_id === buildId;
+    if (!onboardedThisBuild) {
       CURRENT_SCREEN = "onboarding";
       initOnboarding();
     } else {

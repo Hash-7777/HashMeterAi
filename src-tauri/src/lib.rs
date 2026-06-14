@@ -18,6 +18,27 @@ use tauri::Manager;
 use tauri_plugin_opener::OpenerExt;
 use tauri_plugin_store::StoreExt;
 
+/// Trophy-metric version. Bump this whenever the rule that decides whether a
+/// trophy is unlocked changes meaning, so stale persisted unlocks are cleared
+/// once and every trophy recomputes honestly. v1 = real-work tokens (earlier
+/// builds briefly counted the full billed footprint, which over-awarded the
+/// big token clubs).
+const ACH_VERSION: u32 = 1;
+
+/// A stable id for the currently-running build: the executable's modification
+/// time. A freshly compiled or installed app gets a new binary (new mtime), so
+/// comparing this against the value stored at onboarding lets us re-show the
+/// name prompt for every new build while staying silent across normal launches.
+fn current_build_id() -> String {
+    std::env::current_exe()
+        .ok()
+        .and_then(|p| fs::metadata(p).ok())
+        .and_then(|m| m.modified().ok())
+        .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+        .map(|d| d.as_secs().to_string())
+        .unwrap_or_default()
+}
+
 #[tauri::command]
 fn scan_usage() -> Snapshot {
     // Explicit sync / poll: refresh unless a scan finished in the last couple
@@ -43,6 +64,13 @@ fn get_profile(app: tauri::AppHandle) -> store::Profile {
     store::Profile::default()
 }
 
+/// The current build's id, so the frontend can tell whether onboarding was
+/// completed on this exact build (and re-prompt for the name if not).
+#[tauri::command]
+fn get_build_id() -> String {
+    current_build_id()
+}
+
 #[tauri::command]
 fn set_name(name: String, app: tauri::AppHandle) {
     if let Ok(store) = app.store("profile.json") {
@@ -54,6 +82,9 @@ fn set_name(name: String, app: tauri::AppHandle) {
         if p.created_at.is_none() {
             p.created_at = Some(chrono::Local::now().to_rfc3339());
         }
+        // Stamp the build that completed onboarding so the prompt stays hidden
+        // on normal relaunches but returns for the next compiled build.
+        p.build_id = Some(current_build_id());
         store.set("profile", serde_json::to_value(&p).unwrap_or_default());
         let _ = store.save();
     }
@@ -71,7 +102,18 @@ fn get_persona(app: tauri::AppHandle) -> persona::Persona {
 #[tauri::command]
 fn get_achievements(app: tauri::AppHandle) -> Vec<achievements::Achievement> {
     let snap = scan::cached(90);
-    let profile = get_profile(app.clone());
+    let mut profile = get_profile(app.clone());
+    // One-time migration: older builds briefly unlocked the token trophies on
+    // the full billed footprint (cache reads included), which over-awarded the
+    // big "B Club" tiers. The metric is now real-work tokens, so clear the
+    // stale persisted unlocks once and let every trophy recompute honestly from
+    // current data — otherwise a 5B unlock would stick even though the smaller
+    // 2.5B tier (added later, on the real-work metric) reads as locked.
+    if profile.ach_version < ACH_VERSION {
+        profile.achievements.clear();
+        profile.achievement_dates.clear();
+        profile.ach_version = ACH_VERSION;
+    }
     let list = achievements::compute_with_dates(
         &snap,
         &profile.achievements,
@@ -246,6 +288,7 @@ pub fn run() {
             scan_usage,
             get_diagnostics,
             get_profile,
+            get_build_id,
             set_name,
             get_persona,
             get_achievements,

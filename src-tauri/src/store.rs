@@ -20,6 +20,14 @@ pub struct Profile {
     /// Achievements view shows the real earn date rather than "today".
     #[serde(default)]
     pub achievement_dates: HashMap<String, String>,
+    /// Bumped when the trophy-unlock metric changes, so stale persisted unlocks
+    /// from an older metric are cleared once instead of sticking forever.
+    #[serde(default)]
+    pub ach_version: u32,
+    /// Build id (executable mtime) of the app that last completed onboarding, so
+    /// a freshly compiled/installed build re-shows the name prompt.
+    #[serde(default)]
+    pub build_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

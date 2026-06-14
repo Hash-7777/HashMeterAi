@@ -4,14 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>HashMeterAi</title>
+<!-- Paint the dark app background on the very first frame so the webview never
+     flashes white while the stylesheets and boot data load. -->
+<style>html,body{margin:0;background:#05090d}</style>
 <link rel="stylesheet" href="styles/theme.css">
 <link rel="stylesheet" href="styles/layout.css">
 <link rel="stylesheet" href="styles/components.css">
 </head>
 <body>
 
-<!-- ONBOARDING -->
-<div class="onboarding-wrap" id="onboarding">
+<!-- ONBOARDING (hidden until boot decides which screen to show, so it never
+     flashes for a returning user) -->
+<div class="onboarding-wrap hidden" id="onboarding">
   <div class="onboarding-card">
     <img src="assets/logo.png" class="onboarding-logo" alt="">
     <h1>Welcome to HashMeter<b>Ai</b></h1>
@@ -310,14 +314,13 @@
           <button class="share-btn primary" id="share-copy">Copy image</button>
           <button class="share-btn" id="share-save">Save PNG</button>
         </div>
-        <p class="share-note">What is shown: your persona, processed tokens, top-percent standing, estimated cost, best streak, tools unified, and your rarest trophy. Nothing else leaves your device.</p>
+        <p class="share-note">What is shown: your persona, processed (real-work) tokens, top-percent standing, estimated cost, best streak, tools unified, and your three rarest trophies. Nothing else leaves your device.</p>
       </div>
     </div>
 
   </div>
 </div>
 
-<div class="tip" id="tip"></div>
 <div class="day-pop" id="day-pop"></div>
 
 <script src="js/format.js"></script>

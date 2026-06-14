@@ -25,6 +25,15 @@ async function setName(name) {
   }
 }
 
+// Id of the running build (executable mtime). Used to re-show onboarding for a
+// freshly compiled/installed build.
+async function getBuildId() {
+  if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
+    return await window.__TAURI__.core.invoke("get_build_id");
+  }
+  return "";
+}
+
 async function getPersona() {
   if (window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke) {
     return await window.__TAURI__.core.invoke("get_persona");

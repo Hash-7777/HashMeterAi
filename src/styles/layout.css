@@ -90,20 +90,6 @@ body::before{
 .spacer{flex:1}
 .bars{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:22px}
 .hidden{display:none !important}
-.tip{
-  position:fixed;
-  pointer-events:none;
-  background:var(--ch-d);
-  border:1px solid var(--line-pk);
-  color:var(--txt);
-  font-size:11px;
-  padding:6px 9px;
-  border-radius:8px;
-  opacity:0;
-  transition:.1s;
-  z-index:10;
-  font-family:var(--mono);
-}
 
 .content{
   flex:1 1 auto;
