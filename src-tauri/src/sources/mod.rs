@@ -13,6 +13,7 @@ pub mod codex;
 pub mod hashcerebrum;
 pub mod hashcortx;
 pub mod kimi;
+pub mod qwen;
 pub mod usage_log;
 
 pub struct ScanCtx<'a> {
@@ -39,6 +40,7 @@ pub fn registry() -> Vec<Box<dyn Source>> {
         Box::new(kimi::Kimi),
         Box::new(hashcortx::HashCortx),
         Box::new(hashcerebrum::HashCerebrum),
+        Box::new(qwen::Qwen),
         Box::new(cline::Cline),
     ]
 }

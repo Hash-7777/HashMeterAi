@@ -109,6 +109,15 @@ pub fn default_rate(source: &str) -> Rate {
             cache_write: 0.0,
             cache_read: 0.0,
         },
+        // Qwen tokens are measured from logs, but we don't invent a dollar cost
+        // for them (Qwen Code / desktop may be free-tier, local, or keyed to a
+        // provider we can't see). Leave at zero until a real rate is confirmed.
+        "qwen" => Rate {
+            input: 0.0,
+            output: 0.0,
+            cache_write: 0.0,
+            cache_read: 0.0,
+        },
         _ => Rate {
             input: 1.0,
             output: 5.0,

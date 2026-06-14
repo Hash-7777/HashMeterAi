@@ -9,13 +9,14 @@ const SRC_LABEL = {
   claude: "Claude",
   codex: "Codex",
   kimi: "Kimi",
+  qwen: "Qwen",
   hashcortx: "HashCortx",
   hashcerebrum: "HashCerebrum",
   cline: "Cline",
   all: "All tools",
 };
 
-const ALL_SRCS = ["claude", "codex", "kimi", "hashcortx", "hashcerebrum", "cline"];
+const ALL_SRCS = ["claude", "codex", "kimi", "qwen", "hashcortx", "hashcerebrum", "cline"];
 
 // Sources whose token counts are estimated rather than measured. HashCortx and
 // HashCerebrum now record real per-response counts, so nothing is estimated.
