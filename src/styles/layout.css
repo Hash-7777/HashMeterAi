@@ -110,6 +110,9 @@ body::before{
   margin:0 auto;
   padding:14px 26px 16px;
 }
+/* Achievements opts into the full window width so its horizontally-scrolling
+   rows reach the window edge instead of being cut short by the centered column. */
+.content.wide{max-width:none}
 .content::-webkit-scrollbar{width:10px}
 .content::-webkit-scrollbar-thumb{
   background:rgba(255,255,255,.10);

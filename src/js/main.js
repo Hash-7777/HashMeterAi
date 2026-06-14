@@ -112,6 +112,16 @@ function showView(name) {
     const el = g(id);
     if (el) el.classList.toggle("hidden", id !== "view-" + name);
   }
+  // The content area is one shared scroll container, so a freshly-shown view
+  // would otherwise inherit the scroll position of whatever you were just
+  // viewing — that's why Persona sometimes opened scrolled down. Reset it.
+  const content = g("content");
+  if (content) {
+    content.scrollTop = 0;
+    // Achievements uses the full window width (its rows scroll horizontally and
+    // were being cut short by the centered 1280 column); other views stay narrow.
+    content.classList.toggle("wide", name === "achievements");
+  }
   if (name === "calendar") renderCalendar();
   if (name === "persona") loadPersona();
   if (name === "achievements") loadAchievements();
