@@ -1,4 +1,9 @@
 async function loadPersona() {
+  // Kick off the trophies fetch up front so its IPC + achievements compute runs
+  // in parallel with the persona fetch instead of serializing after it (the two
+  // sequential calls were the lag when opening the tab). It's self-contained and
+  // catches its own errors.
+  renderTopTrophies();
   try {
     const p = await getPersona();
     g("p-title").textContent = p.title;
@@ -17,7 +22,6 @@ async function loadPersona() {
       host.appendChild(el);
     }
     g("p-foot").style.display = p.traits.length ? "" : "none";
-    renderTopTrophies();
   } catch (e) {
     console.error("persona load error", e);
     g("p-title").textContent = "Just getting started";

@@ -92,16 +92,21 @@ fn set_name(name: String, app: tauri::AppHandle) {
 
 #[tauri::command]
 fn get_persona(app: tauri::AppHandle) -> persona::Persona {
-    // Cheap read path: reuse the recent scan so opening Persona never
-    // re-walks the disk.
-    let snap = scan::cached(90);
+    // Cheap read path: reuse the last scan so opening Persona is instant. A
+    // generous reuse window (1h) means that even when the dashboard poll is
+    // paused (window blurred) or on a long interval, opening Persona never
+    // forces a fresh full-disk walk — the explicit Sync keeps headline data
+    // fresh, and a style read tolerates slightly stale numbers.
+    let snap = scan::cached(3600);
     let profile = get_profile(app);
     persona::from_snapshot(&snap, &profile.name)
 }
 
 #[tauri::command]
 fn get_achievements(app: tauri::AppHandle) -> Vec<achievements::Achievement> {
-    let snap = scan::cached(90);
+    // Reuse the last scan (up to 1h) so opening Persona/Trophies never forces a
+    // fresh full-disk walk — same rationale as get_persona.
+    let snap = scan::cached(3600);
     let mut profile = get_profile(app.clone());
     // One-time migration: older builds briefly unlocked the token trophies on
     // the full billed footprint (cache reads included), which over-awarded the
