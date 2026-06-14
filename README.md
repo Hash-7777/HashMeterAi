@@ -5,7 +5,7 @@
 ### See how much AI you really use.
 
 **The honest, local-first usage meter for AI coding tools.**
-Claude Code, Codex, Kimi, Qwen, GLM, MiniMax, Gemini, HashCortx, HashCerebrum — unified into one clean dashboard.
+Claude Code, Codex, Kimi, Qwen CLI, HashCortx, HashCerebrum — unified into one clean dashboard.
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-FD802E)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Windows%20|%20Linux-1b323f)](#install)
@@ -48,16 +48,18 @@ The only thing that ever leaves is a brag-card image that **you** choose to expo
 
 | Tool | Status |
 |---|---|
-| Claude Code | Supported |
+| Claude Code | **Supported.** Also counts GLM (Z.ai), MiniMax, and Gemini when they're run *through* Claude Code via an Anthropic-compatible endpoint — those turns stay on the Claude tab and keep their own model name in the Models breakdown. |
 | Codex (OpenAI) | Supported |
 | Kimi | Supported (classified by model) |
-| Qwen Code | Supported (classified by model) |
-| GLM (Z.ai), MiniMax, Gemini | Supported — these run *through* Claude Code via an Anthropic-compatible endpoint, so they're read from Claude's transcripts and routed to their own tab by model family |
+| Qwen CLI | Supported — reads the Qwen Code CLI (`~/.qwen`), classified by model |
 | HashCortx | Supported (records real per-response token counts) |
 | HashCerebrum | Supported (records real per-response token counts) |
-| Cline / Roo | Adapter-ready |
-| Qwen desktop, Antigravity, Gemini CLI | Not supported (usage is in opaque/absent local storage — see [notes](#supported-tools)) |
-| Cursor, Copilot, Windsurf | Not supported (usage is server-side; no local data to read) |
+| Qwen desktop app | Not supported — chat lives in a Chromium IndexedDB (binary LevelDB); no readable per-message token data |
+| Antigravity (Google) | Not supported — conversations are stored as binary protobuf blobs with no token-count fields recorded locally |
+| Gemini CLI | Not supported — token counts are only written when telemetry logging is enabled (off by default) |
+| Cursor, Copilot, Windsurf | Not supported — usage is server-side; no local data to read |
+
+**Models.** Model names and public list-price rates are recognized for the Claude, GPT/Codex, Kimi, Qwen, GLM, MiniMax, and Gemini families — so even a non-Anthropic model run through Claude Code is named and costed correctly, never lumped under a generic label.
 
 > Adding a tool is one Rust file — the architecture is a pluggable source adapter. PRs welcome.
 
