@@ -419,6 +419,10 @@ fn pretty_model(id: &str) -> String {
         "qwen3-32b" => "Qwen3 32B".to_string(),
         "qwen3-coder" => "Qwen3 Coder".to_string(),
         "qwen-max" => "Qwen Max".to_string(),
+        "glm-4.6" => "GLM-4.6".to_string(),
+        "glm-4.7" => "GLM-4.7".to_string(),
+        "minimax-m2" => "MiniMax M2".to_string(),
+        "gemini-2.5-pro" => "Gemini 2.5 Pro".to_string(),
         "<synthetic>" => "Synthetic".to_string(),
         other => other
             .strip_prefix("claude-")

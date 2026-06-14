@@ -13,10 +13,13 @@ const SRC_LABEL = {
   hashcortx: "HashCortx",
   hashcerebrum: "HashCerebrum",
   cline: "Cline",
+  glm: "GLM",
+  minimax: "MiniMax",
+  gemini: "Gemini",
   all: "All tools",
 };
 
-const ALL_SRCS = ["claude", "codex", "kimi", "qwen", "hashcortx", "hashcerebrum", "cline"];
+const ALL_SRCS = ["claude", "codex", "kimi", "qwen", "hashcortx", "hashcerebrum", "cline", "glm", "minimax", "gemini"];
 
 // Sources whose token counts are estimated rather than measured. HashCortx and
 // HashCerebrum now record real per-response counts, so nothing is estimated.
@@ -44,6 +47,20 @@ const MODEL_NAMES = {
   "kimi-k2": "Kimi K2",
   "kimi-k2-turbo": "Kimi K2 Turbo",
   "kimi-k2-0905-preview": "Kimi K2 (0905)",
+  "glm-4.5": "GLM-4.5",
+  "glm-4.5-air": "GLM-4.5 Air",
+  "glm-4.6": "GLM-4.6",
+  "glm-4.7": "GLM-4.7",
+  "glm-5": "GLM-5",
+  "glm-5.1": "GLM-5.1",
+  "minimax-m2": "MiniMax M2",
+  "minimax-m2.1": "MiniMax M2.1",
+  "minimax-m2.5": "MiniMax M2.5",
+  "minimax-m2.7": "MiniMax M2.7",
+  "gemini-2.5-pro": "Gemini 2.5 Pro",
+  "gemini-2.5-flash": "Gemini 2.5 Flash",
+  "gemini-2.0-flash": "Gemini 2.0 Flash",
+  "gemini-3-pro": "Gemini 3 Pro",
   "hashcortx": "HashCortx",
   "<synthetic>": "Synthetic",
 };
@@ -63,10 +80,13 @@ function hashcortxModels() {
 
 function prettyModel(id) {
   if (MODEL_NAMES[id]) return MODEL_NAMES[id];
+  // Model ids vary in case across providers (e.g. "GLM-4.6") — try lowercase.
+  if (MODEL_NAMES[id.toLowerCase()]) return MODEL_NAMES[id.toLowerCase()];
   // HashCerebrum logs its full model ref "cloud:provider:model" /
   // "local:ollama:model" — show just the model name, cleaned up.
   let m = id.includes(":") ? id.split(":").pop() : id;
   if (MODEL_NAMES[m]) return MODEL_NAMES[m];
+  if (MODEL_NAMES[m.toLowerCase()]) return MODEL_NAMES[m.toLowerCase()];
   return m.replace(/^claude-/, "").split(/[-_/\s]+/).filter(Boolean)
     .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }

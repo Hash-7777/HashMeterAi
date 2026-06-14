@@ -41,15 +41,10 @@ impl Source for Qwen {
     }
 
     fn roots(&self, ctx: &ScanCtx) -> Vec<PathBuf> {
-        // Qwen Code CLI (~/.qwen) plus likely desktop-app support dirs. Both
-        // roll up under the single "Qwen" source.
-        vec![
-            ctx.home.join(".qwen"),
-            ctx.home.join(".config/qwen"),
-            ctx.home.join("Library/Application Support/Qwen"),
-            ctx.home.join("Library/Application Support/qwen"),
-            ctx.home.join("Library/Application Support/Qwen Code"),
-        ]
+        // Qwen Code CLI only — same dotdir on macOS/Linux/Windows. The Qwen
+        // desktop app stores chat in a Chromium IndexedDB LevelDB (binary) with
+        // no readable per-message token data, so it isn't scanned.
+        vec![ctx.home.join(".qwen"), ctx.home.join(".config/qwen")]
     }
 
     fn scan(&self, ctx: &ScanCtx) -> Vec<UsageEvent> {

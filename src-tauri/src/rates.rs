@@ -48,6 +48,36 @@ fn kimi(input: f64, output: f64) -> Rate {
     }
 }
 
+// GLM (Z.ai) — cache reads are ~0.11/MTok; estimated public list prices.
+fn glm(input: f64, output: f64) -> Rate {
+    Rate {
+        input,
+        output,
+        cache_write: input,
+        cache_read: 0.11,
+    }
+}
+
+// MiniMax — estimated; cache read ~0.1x input.
+fn mmx(input: f64, output: f64) -> Rate {
+    Rate {
+        input,
+        output,
+        cache_write: input,
+        cache_read: input * 0.1,
+    }
+}
+
+// Gemini — estimated; cached input ~0.25x.
+fn gem(input: f64, output: f64) -> Rate {
+    Rate {
+        input,
+        output,
+        cache_write: input,
+        cache_read: input * 0.25,
+    }
+}
+
 pub fn rate_table() -> HashMap<&'static str, Rate> {
     let mut m = HashMap::new();
 
@@ -74,6 +104,25 @@ pub fn rate_table() -> HashMap<&'static str, Rate> {
     // ===== Kimi (Moonshot) — estimate =====
     m.insert("kimi-code/kimi-for-coding", kimi(0.60, 2.50));
     m.insert("kimi-k2", kimi(0.60, 2.50));
+
+    // ===== Provider models used through Claude Code (own dashboard tabs) =====
+    // GLM (Z.ai) — estimated public list prices.
+    m.insert("glm-4.5", glm(0.6, 2.2));
+    m.insert("glm-4.5-air", glm(0.2, 1.1));
+    m.insert("glm-4.6", glm(0.6, 2.2));
+    m.insert("glm-4.7", glm(0.6, 2.2));
+    m.insert("glm-5", glm(0.6, 2.2));
+    m.insert("glm-5.1", glm(0.6, 2.2));
+    // MiniMax — estimated.
+    m.insert("minimax-m2", mmx(0.30, 1.20));
+    m.insert("minimax-m2.1", mmx(0.30, 1.20));
+    m.insert("minimax-m2.5", mmx(0.30, 1.20));
+    m.insert("minimax-m2.7", mmx(0.30, 1.20));
+    // Gemini — estimated public list prices.
+    m.insert("gemini-2.0-flash", gem(0.10, 0.40));
+    m.insert("gemini-2.5-flash", gem(0.30, 2.50));
+    m.insert("gemini-2.5-pro", gem(1.25, 10.0));
+    m.insert("gemini-3-pro", gem(2.0, 12.0));
 
     m
 }
@@ -131,7 +180,13 @@ pub fn default_rate(source: &str) -> Rate {
 pub fn event_cost(model: &str, source: &str, ni: u64, wr: u64, rd: u64, ot: u64) -> f64 {
     let table = rate_table();
     let fallback = default_rate(source);
-    let r = table.get(model).unwrap_or(&fallback);
+    // Model ids vary in case across providers (e.g. "GLM-4.6" vs "glm-4.6"), so
+    // fall back to a lowercase lookup before the per-source default.
+    let lower = model.to_ascii_lowercase();
+    let r = table
+        .get(model)
+        .or_else(|| table.get(lower.as_str()))
+        .unwrap_or(&fallback);
     let cost = (ni as f64) * r.input
         + (ot as f64) * r.output
         + (wr as f64) * r.cache_write
