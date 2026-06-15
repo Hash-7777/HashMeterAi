@@ -286,21 +286,27 @@ fn pick_base(stats: &Stats) -> &'static str {
 }
 
 // The NOUN half of the title — what they actually do with AI, derived from their
-// real input/output, tool, and model signals. Grounded job-style words, never
-// vanity or animal names. Index 0 is the canonical name (what the tests assert);
-// the rest are synonyms cycled daily via the seed.
+// real input/output, tool, and model signals, dressed in a mad-scientist / lab
+// theme (every label still maps to a real signal, never random vanity). Index 0
+// is the canonical name (what the tests assert); the rest cycle daily via seed.
 fn base_label(key: &str, seed: u64) -> String {
     let pool: &[&str] = match key {
-        "output_engine" => &["Output Engine", "Generator", "Producer", "Creator"],
-        "generator" => &["Generator", "Producer", "Maker", "Builder"],
-        "context_hoarder" => &["Researcher", "Deep Diver", "Analyst", "Investigator"],
-        "context_maximalist" => &["Analyst", "Researcher", "Close Reader", "Scholar"],
-        "full_stack_operator" => &["All-Rounder", "Power User", "Operator", "Generalist"],
-        "multi_tool_operator" => &["Multi-Tasker", "Operator", "Tool Juggler", "Switch-Hitter"],
-        "deep_thinker" => &["Strategist", "Architect", "Deep Thinker", "Planner"],
-        "workhorse" => &["Workhorse", "Builder", "Operator", "Grinder"],
-        "speed_runner" => &["Sprinter", "Speedster", "Fast Mover", "Quick Draw"],
-        _ => &["Builder", "Engineer", "Generalist", "Operator"],
+        // Model generates far more than it's fed — the lab's output reactor.
+        "output_engine" => &["Idea Reactor", "Invention Engine", "Mad Inventor", "Output Reactor"],
+        "generator" => &["Inventor", "Fabricator", "Synthesizer", "Idea Forge"],
+        // Devours context — the obsessive researcher poring over the data.
+        "context_hoarder" => &["Research Fiend", "Data Alchemist", "Mad Researcher", "Lab Analyst"],
+        "context_maximalist" => &["Lab Analyst", "Data Scholar", "Theorist", "Close Reader"],
+        // Runs many tools — the one who runs the whole laboratory.
+        "full_stack_operator" => &["Lab Director", "Mad Polymath", "Chief Experimenter", "All-Rounder"],
+        "multi_tool_operator" => &["Tool Tinkerer", "Lab Juggler", "Multi-Tasker", "Switch-Hitter"],
+        // Opus-heavy — the big brain behind the experiments.
+        "deep_thinker" => &["Mastermind", "Mad Theorist", "Grand Architect", "Evil Genius"],
+        // Steady mid-model worker — always at the bench (replaces "Workhorse").
+        "workhorse" => &["Bench Scientist", "Lab Technician", "Resident Tinkerer", "Steady Hand"],
+        // Small/fast models — rapid bench experiments.
+        "speed_runner" => &["Rapid Prototyper", "Lab Sprinter", "Quick-Draw Tinkerer", "Speed Demon"],
+        _ => &["Mad Scientist", "Experimenter", "Lab Generalist", "Tinkerer"],
     };
     rotate(pool, seed)
 }
@@ -336,19 +342,21 @@ fn pick_modifier(stats: &Stats) -> &'static str {
 }
 
 // The ADJECTIVE half of the title — their rhythm and intensity (streak, volume,
-// peak hour, focus). Chosen to read naturally in front of any base noun, e.g.
-// "Marathon Strategist". Index 0 is canonical; the rest cycle daily via the seed.
+// peak hour, focus), tuned to the mad-scientist theme so it reads naturally in
+// front of any base noun, e.g. "Nocturnal Research Fiend". Never uses "Mad" here
+// (the base pools already do), so a default+default title can't read "Mad Mad".
+// Index 0 is canonical; the rest cycle daily via the seed.
 fn modifier_label(key: &str, seed: u64) -> String {
     let pool: &[&str] = match key {
-        "iron_willed" => &["Relentless", "Unstoppable", "Iron-Willed", "Tireless"],
-        "heavy_lifter" => &["High-Volume", "Heavy-Duty", "Industrial-Scale", "Big-League"],
-        "night_shift" => &["Night-Shift", "After-Dark", "Nocturnal", "Night-Owl"],
-        "marathoner" => &["Marathon", "Long-Haul", "Endurance", "Nonstop"],
-        "daily_driver" => &["Everyday", "Daily", "Consistent", "Dependable"],
-        "locked_in" => &["Laser-Focused", "Deep-Focus", "Locked-In", "Single-Minded"],
-        "midnight_tinkerer" => &["Late-Night", "After-Hours", "Midnight", "Evening"],
-        "dawn_patroller" => &["Early-Bird", "Sunrise", "Crack-of-Dawn", "Morning"],
-        _ => &["Steady", "Dedicated", "Committed", "Diligent"],
+        "iron_willed" => &["Obsessive", "Relentless", "Unhinged", "Maniacal"],
+        "heavy_lifter" => &["High-Voltage", "Overclocked", "Reactor-Grade", "Industrial-Scale"],
+        "night_shift" => &["Nocturnal", "After-Dark", "Midnight-Lab", "Moonlit"],
+        "marathoner" => &["Caffeine-Fueled", "Marathon", "Sleepless", "Nonstop"],
+        "daily_driver" => &["Compulsive", "Daily", "Devoted", "Clockwork"],
+        "locked_in" => &["Fixated", "Laser-Focused", "Single-Minded", "Possessed"],
+        "midnight_tinkerer" => &["Lamplit", "Late-Night", "After-Hours", "Moonlighting"],
+        "dawn_patroller" => &["Pre-Dawn", "Sunrise", "Early-Bird", "First-Light"],
+        _ => &["Eccentric", "Restless", "Tinkering", "Brilliant"],
     };
     rotate(pool, seed)
 }
@@ -587,7 +595,7 @@ mod tests {
         d.hours[10] = 1;
         let snap = snap_with(vec![d], true);
         let p = from_snapshot(&snap, "Test");
-        assert!(p.title.contains("Output Engine"));
+        assert!(p.title.contains("Idea Reactor"));
     }
 
     #[test]
@@ -599,8 +607,8 @@ mod tests {
         d.hours[10] = 1;
         let snap = snap_with(vec![d], true);
         let p = from_snapshot(&snap, "Test");
-        assert!(p.title.contains("Generator"));
-        assert!(!p.title.contains("Output Engine"));
+        assert!(p.title.contains("Inventor"));
+        assert!(!p.title.contains("Idea Reactor"));
     }
 
     #[test]
@@ -613,7 +621,8 @@ mod tests {
         d.models.insert("claude-sonnet-4-6".to_string(), 100);
         let snap = snap_with(vec![d], true);
         let p = from_snapshot(&snap, "Test");
-        assert!(p.title.contains("Workhorse"));
+        // Steady mid-model worker -> "Bench Scientist" (replaced "Workhorse").
+        assert!(p.title.contains("Bench Scientist"));
     }
 
     #[test]
@@ -622,7 +631,7 @@ mod tests {
         d.hours[2] = 100;
         let snap = snap_with(vec![d], true);
         let p = from_snapshot(&snap, "Test");
-        // Single cohesive title: rhythm adjective + what they do.
-        assert_eq!(p.title, "Night-Shift Researcher");
+        // Single cohesive title: rhythm adjective + what they do (mad-sci theme).
+        assert_eq!(p.title, "Nocturnal Research Fiend");
     }
 }
