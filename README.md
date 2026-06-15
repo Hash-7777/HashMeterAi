@@ -73,15 +73,53 @@ The only thing that ever leaves is a brag-card image that **you** choose to expo
 
 ## Install
 
-Build from source:
+Download the installer for your OS from the [Releases page](https://github.com/Hash-7777/HashMeterAi/releases), or build from source (below).
+
+> **Why your OS shows a warning.** HashMeterAi is a free, open-source project and ships **unsigned** — code-signing certificates (an Apple Developer ID, a Windows EV certificate) are paid, ongoing costs. The warning means "not signed," **not** "unsafe": there's no network access, and every line of source is in this repo for you to read or build yourself. Each warning below is a one-time step.
+
+### macOS — `.dmg`
+
+1. Open the `.dmg` and drag **HashMeterAi** to **Applications**.
+2. On first launch macOS says *"HashMeterAi can't be opened because Apple cannot check it for malicious software."* Get past it once, either way:
+   - **Right-click (or Control-click) the app → Open → Open**, or
+   - **System Settings → Privacy & Security**, scroll to the HashMeterAi message → **Open Anyway**.
+3. If instead you see *"HashMeterAi is damaged and can't be opened"* (quarantine, common on Apple Silicon), clear the quarantine flag in Terminal, then reopen:
+   ```bash
+   xattr -dr com.apple.quarantine /Applications/HashMeterAi.app
+   ```
+
+### Windows — `.msi` / `.exe`
+
+1. Run the installer. Windows SmartScreen shows *"Windows protected your PC — unknown publisher."*
+2. Click **More info → Run anyway** (one time only).
+3. If your browser flags the download, choose **Keep**.
+
+### Linux — `.AppImage` or `.deb`
+
+Linux doesn't block unsigned apps the way macOS and Windows do, so there's no "unknown developer" prompt.
+
+- **AppImage** — make it executable and run:
+  ```bash
+  chmod +x HashMeterAi_*.AppImage
+  ./HashMeterAi_*.AppImage
+  ```
+  If it won't start, install FUSE: `sudo apt install libfuse2` (Debian/Ubuntu) or your distro's equivalent.
+- **.deb** (Debian/Ubuntu):
+  ```bash
+  sudo dpkg -i HashMeterAi_*.deb
+  sudo apt-get install -f   # pull in any missing dependencies
+  ```
+
+### Build from source
+
 ```bash
 git clone https://github.com/Hash-7777/HashMeterAi.git
 cd HashMeterAi
 npm install
 npm run tauri dev      # run it
-npm run tauri build    # produce a native bundle
+npm run tauri build    # produce a native bundle in src-tauri/target/release/bundle/
 ```
-Requires Rust (stable) and Node 18+.
+Requires Rust (stable) and Node 18+. Building from source skips every OS warning above — the app is local to your machine.
 
 ## <a id="tech"></a>Tech
 
