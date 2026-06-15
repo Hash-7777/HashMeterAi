@@ -5,7 +5,7 @@
 ### See how much AI you really use.
 
 **The honest, local-first usage meter for AI coding tools.**
-Claude Code, Codex, Kimi, Qwen CLI, HashCortx, HashCerebrum — unified into one clean dashboard.
+Claude Code, Codex, Kimi, Qwen CLI, HashCortx, HashCerebrum — unified into one clean dashboard with usage based trophies :)
 
 [![License](https://img.shields.io/badge/license-Apache--2.0-FD802E)](LICENSE)
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Windows%20|%20Linux-1b323f)](#install)
@@ -65,11 +65,13 @@ The only thing that ever leaves is a brag-card image that **you** choose to expo
 
 ## Screenshots
 
-Landing with v0.1 — dark, pumpkin-on-charcoal, big satisfying numbers.
+<img width="1235" height="836" alt="hashmeterai-screenshot" src="https://github.com/user-attachments/assets/57ac641a-4cb9-454f-b620-3d41be784ede" />
+<img width="2400" height="1260" alt="hashmeterai-share-card" src="https://github.com/user-attachments/assets/b7562c49-92f1-47f0-8871-3fed524394e9" />
+<img width="1081" height="487" alt="persona-screen" src="https://github.com/user-attachments/assets/9275be40-1342-4204-bf8f-7337e1c51aba" />
+<img width="1235" height="836" alt="achievements-screen" src="https://github.com/user-attachments/assets/583a21fd-8e93-494f-8516-0c70f5d4d194" />
+
 
 ## Install
-
-> **In active development.** Prebuilt installers (.dmg, .msi, .AppImage) ship with the first release.
 
 Build from source:
 ```bash
