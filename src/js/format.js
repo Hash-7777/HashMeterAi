@@ -1,3 +1,11 @@
+// Escape a string for safe insertion into innerHTML. Used for any value that
+// originates from scanned local files (model ids, resolved paths) so a crafted
+// transcript can't inject markup. Defense in depth alongside the CSP.
+function esc(s) {
+  return String(s == null ? "" : s).replace(/[&<>"']/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
 function human(n) {
   n = Math.round(n);
   if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";

@@ -58,7 +58,7 @@ async function renderDiagnostics() {
   for (const s of diag) {
     const roots = (s.roots || []).map(r =>
       '<div class="diag-root ' + (r.exists ? "ok" : "miss") + '">' +
-        '<span class="diag-rdot"></span><span class="diag-rpath">' + r.path + '</span>' +
+        '<span class="diag-rdot"></span><span class="diag-rpath">' + esc(r.path) + '</span>' +
         '<span class="diag-rstate">' + (r.exists ? "found" : "not found") + '</span></div>'
     ).join("");
     let stat, cls;
@@ -69,12 +69,12 @@ async function renderDiagnostics() {
       cls = "ok";
     } else { stat = "detected, but 0 parsed — likely a format mismatch"; cls = "warn"; }
     const sample = (s.detected && s.top_model && s.top_model !== "<synthetic>")
-      ? '<div class="diag-sample">latest top model: ' + prettyModel(s.top_model) + "</div>" : "";
+      ? '<div class="diag-sample">latest top model: ' + esc(prettyModel(s.top_model)) + "</div>" : "";
 
     const el = document.createElement("div");
     el.className = "diag-src " + cls;
     el.innerHTML =
-      '<div class="diag-head"><span class="diag-name">' + s.label + "</span>" +
+      '<div class="diag-head"><span class="diag-name">' + esc(s.label) + "</span>" +
         '<span class="diag-stat">' + stat + "</span></div>" +
       '<div class="diag-roots">' + roots + "</div>" + sample;
     host.appendChild(el);

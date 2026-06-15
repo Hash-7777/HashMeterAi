@@ -79,7 +79,7 @@ function formatDayDetail(ds, rec) {
     "<span>" + (rec.messages || 0) + " messages</span>",
   ];
   if (top) {
-    parts.push("<span>Top model: " + prettyModel(top[0]) + "</span>");
+    parts.push("<span>Top model: " + esc(prettyModel(top[0])) + "</span>");
   }
   return '<div class="day-detail-date">' + niceDate + "</div>" +
     '<div class="day-detail-stats">' + parts.join("") + "</div>";

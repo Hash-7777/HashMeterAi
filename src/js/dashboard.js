@@ -407,7 +407,7 @@ function models(a) {
     row.className = "mrow";
     row.innerHTML =
       '<div class="mname"><span class="mdot"></span>' +
-        '<span class="mname-txt">' + prettyModel(m) + '</span>' + via + '</div>' +
+        '<span class="mname-txt">' + esc(prettyModel(m)) + '</span>' + via + '</div>' +
       '<div class="mbar"><div class="mfill"></div></div>' +
       '<div class="mval">' + human(t) + ' \u00b7 ' + (100 * t / tot).toFixed(1) + '%</div>';
     // Apply the bar width + color via CSSOM, NOT an inline style="" attribute.
