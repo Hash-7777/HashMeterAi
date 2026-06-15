@@ -56,7 +56,11 @@ pub fn from_snapshot(snap: &Snapshot, name: &str) -> Persona {
     let base = base_label(base_key, seed);
     let modifier = modifier_label(modifier_key, seed);
     let subtitle = pick_subtitle(stats.processed);
-    let title = format!("{} \u{00b7} {}", base, modifier);
+    // One cohesive, usage-grounded title: a rhythm/intensity adjective in front
+    // of what they actually do with AI (e.g. "Night-Shift Researcher"). Both
+    // halves trace to a real metric (shown in the traits), and it reads as a
+    // single identity rather than two stacked vanity labels.
+    let title = format!("{} {}", modifier, base);
 
     let mut traits = Vec::new();
     traits.push(Trait {
@@ -281,20 +285,22 @@ fn pick_base(stats: &Stats) -> &'static str {
     "ai_engineer"
 }
 
-// Rotating cool display name for a base category. Index 0 is the canonical name
-// (what the tests assert); the rest are synonyms cycled daily via the seed.
+// The NOUN half of the title — what they actually do with AI, derived from their
+// real input/output, tool, and model signals. Grounded job-style words, never
+// vanity or animal names. Index 0 is the canonical name (what the tests assert);
+// the rest are synonyms cycled daily via the seed.
 fn base_label(key: &str, seed: u64) -> String {
     let pool: &[&str] = match key {
-        "output_engine" => &["Output Engine", "The Creator", "Idea Machine", "Word Wizard"],
-        "generator" => &["Generator", "Content Machine", "Big Producer", "The Maker"],
-        "context_hoarder" => &["Context Hoarder", "Deep Diver", "The Researcher", "Detail Hound"],
-        "context_maximalist" => &["Context Maximalist", "Big Reader", "Info Sponge", "Detail Lover"],
-        "full_stack_operator" => &["Power User", "Tool Master", "All-Rounder", "The Versatile"],
-        "multi_tool_operator" => &["Tool Juggler", "Multi-Tasker", "Tool Hopper", "Switch Hitter"],
-        "deep_thinker" => &["Deep Thinker", "The Strategist", "Big Brain", "Mastermind"],
-        "workhorse" => &["Workhorse", "The Reliable", "Steady Hand", "Daily Grinder"],
-        "speed_runner" => &["Speed Runner", "The Sprinter", "Quick Draw", "Fast Mover"],
-        _ => &["AI Engineer", "Code Pilot", "The Generalist", "Balanced Builder"],
+        "output_engine" => &["Output Engine", "Generator", "Producer", "Creator"],
+        "generator" => &["Generator", "Producer", "Maker", "Builder"],
+        "context_hoarder" => &["Researcher", "Deep Diver", "Analyst", "Investigator"],
+        "context_maximalist" => &["Analyst", "Researcher", "Close Reader", "Scholar"],
+        "full_stack_operator" => &["All-Rounder", "Power User", "Operator", "Generalist"],
+        "multi_tool_operator" => &["Multi-Tasker", "Operator", "Tool Juggler", "Switch-Hitter"],
+        "deep_thinker" => &["Strategist", "Architect", "Deep Thinker", "Planner"],
+        "workhorse" => &["Workhorse", "Builder", "Operator", "Grinder"],
+        "speed_runner" => &["Sprinter", "Speedster", "Fast Mover", "Quick Draw"],
+        _ => &["Builder", "Engineer", "Generalist", "Operator"],
     };
     rotate(pool, seed)
 }
@@ -329,17 +335,20 @@ fn pick_modifier(stats: &Stats) -> &'static str {
     "builder"
 }
 
+// The ADJECTIVE half of the title — their rhythm and intensity (streak, volume,
+// peak hour, focus). Chosen to read naturally in front of any base noun, e.g.
+// "Marathon Strategist". Index 0 is canonical; the rest cycle daily via the seed.
 fn modifier_label(key: &str, seed: u64) -> String {
     let pool: &[&str] = match key {
-        "iron_willed" => &["Unstoppable", "Iron-Willed", "Relentless", "The Machine"],
-        "heavy_lifter" => &["Heavy Lifter", "Powerhouse", "The Beast", "Token Titan"],
-        "night_shift" => &["Night Owl", "Midnight Coder", "Late-Night Legend", "The Nocturnal"],
-        "marathoner" => &["Marathoner", "Long Hauler", "Endurance Coder", "Distance Runner"],
-        "daily_driver" => &["Daily Driver", "Everyday Hero", "Streak Master", "The Regular"],
-        "locked_in" => &["Laser Focused", "Locked In", "In the Zone", "Deep Focus"],
-        "midnight_tinkerer" => &["Late-Night Coder", "Midnight Maker", "After Hours", "Evening Owl"],
-        "dawn_patroller" => &["Early Bird", "Sunrise Coder", "Morning Person", "Dawn Riser"],
-        _ => &["Builder", "The Steady", "The Maker", "Craftsman"],
+        "iron_willed" => &["Relentless", "Unstoppable", "Iron-Willed", "Tireless"],
+        "heavy_lifter" => &["High-Volume", "Heavy-Duty", "Industrial-Scale", "Big-League"],
+        "night_shift" => &["Night-Shift", "After-Dark", "Nocturnal", "Night-Owl"],
+        "marathoner" => &["Marathon", "Long-Haul", "Endurance", "Nonstop"],
+        "daily_driver" => &["Everyday", "Daily", "Consistent", "Dependable"],
+        "locked_in" => &["Laser-Focused", "Deep-Focus", "Locked-In", "Single-Minded"],
+        "midnight_tinkerer" => &["Late-Night", "After-Hours", "Midnight", "Evening"],
+        "dawn_patroller" => &["Early-Bird", "Sunrise", "Crack-of-Dawn", "Morning"],
+        _ => &["Steady", "Dedicated", "Committed", "Diligent"],
     };
     rotate(pool, seed)
 }
@@ -613,6 +622,7 @@ mod tests {
         d.hours[2] = 100;
         let snap = snap_with(vec![d], true);
         let p = from_snapshot(&snap, "Test");
-        assert!(p.title.contains("Night Owl"));
+        // Single cohesive title: rhythm adjective + what they do.
+        assert_eq!(p.title, "Night-Shift Researcher");
     }
 }
