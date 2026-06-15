@@ -24,7 +24,7 @@ Claude Code, Codex, Kimi, Qwen CLI, HashCortx, HashCerebrum — unified into one
 - **The money number.** Your estimated dollar value of AI compute used at public API rates — the stat everyone wants to screenshot.
 - **Processed tokens.** The truest measure of work the model actually did (not inflated by cached re-reads), with the "approximately N times The Lord of the Rings" yardstick.
 - **Average focus time.** Honest active-time-with-AI per day.
-- **Your AI persona.** For example, "Prompt Architect, Night-Shift Shipper" — generated from your real patterns, and **every claim shows the number behind it.** No vanity, no lies.
+- **Your AI persona.** For example, "Deep Diver, Night Owl" — generated from your real patterns, and **every claim shows the number behind it.** No vanity, no lies.
 - **Where you stand.** An honest "top X% of AI developers" read, computed against a documented, fully offline usage benchmark modeled from public 2025–26 figures — always shown with the number behind it, never a made-up rank.
 - **Achievements.** Sixty ranked trophies across **Volume**, **Intensity**, and **Mastery** (twenty each) — from First Steps to the Billion-token clubs, Night Owl to Whale. Every token trophy counts **processed (real-work) tokens**, not the inflated billed footprint, and shows its *true* earn date on a tier-shaped medallion. Your three rarest headline your Share card.
 - **Calendar of activity.** Your daily usage as a real calendar.
