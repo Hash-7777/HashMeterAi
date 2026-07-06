@@ -11,7 +11,6 @@ Claude Code, Codex, Kimi, Qwen CLI, HashCortx, HashCerebrum — unified into one
 [![Platform](https://img.shields.io/badge/platform-macOS%20|%20Windows%20|%20Linux-1b323f)](#install)
 [![Built with](https://img.shields.io/badge/built%20with-Tauri%20|%20Rust-1b323f)](#tech)
 [![Network](https://img.shields.io/badge/network-zero%20calls-54ffc4)](SECURITY.md)
-[![Status](https://img.shields.io/badge/status-in%20active%20development-FD802E)](#install)
 
 </div>
 
