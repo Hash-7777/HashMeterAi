@@ -186,7 +186,7 @@ function streaks(days) {
       current = 1;
     }
   }
-  const today = new Date().toISOString().slice(0, 10);
+  const today = localDateStr();
   const last = ds[ds.length - 1];
   const lastDate = new Date(last + "T00:00:00");
   const todayDate = new Date(today + "T00:00:00");

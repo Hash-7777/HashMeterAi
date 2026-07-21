@@ -6,6 +6,21 @@ function esc(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 }
 
+// The scanner tags every usage day with the LOCAL calendar date, so any
+// "what day is it" logic must derive the local date too. Never use
+// toISOString().slice(0, 10) for this — that is the UTC date, which points
+// at the wrong day for part of every day in any non-UTC timezone.
+function localDateStr(d) {
+  d = d || new Date();
+  return (
+    d.getFullYear() +
+    "-" +
+    String(d.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(d.getDate()).padStart(2, "0")
+  );
+}
+
 function human(n) {
   n = Math.round(n);
   if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";

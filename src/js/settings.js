@@ -26,8 +26,9 @@ async function loadSettings() {
     g("set-hello").textContent = (typeof greet === "function")
       ? greet(name)
       : (name ? "Hi, " + name : "Welcome");
-    g("set-since").textContent = p.created_at
-      ? "Using HashMeterAi since " + String(p.created_at).slice(0, 10)
+    const since = p.created_at ? new Date(p.created_at) : null;
+    g("set-since").textContent = since && !isNaN(since)
+      ? "Using HashMeterAi since " + localDateStr(since)
       : "";
 
     renderAccentSwatches(prefs.accent || "#FD802E");
